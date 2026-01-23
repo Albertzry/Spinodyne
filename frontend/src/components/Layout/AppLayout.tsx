@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Typography } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   LayoutGrid,
   Activity,
@@ -19,9 +18,11 @@ interface AppLayoutProps {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  console.log('AppLayout rendering...');
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  console.log('Current location:', location.pathname);
 
   // Menu items configuration
   const menuItems = [
@@ -187,7 +188,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
         </Header>
 
-        {/* Content Area with Animation */}
+        {/* Content Area */}
         <Content
           style={{
             margin: '24px',
@@ -197,15 +198,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             overflow: 'auto',
           }}
         >
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          >
+          <div key={location.pathname}>
             {children}
-          </motion.div>
+          </div>
         </Content>
       </Layout>
     </Layout>

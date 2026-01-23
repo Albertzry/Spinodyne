@@ -1,0 +1,11 @@
+{
+  "input_dir": "/root/Spinodyne/data/uploads/264e92c4-887b-4821-ba7e-544d659e53ab",
+  "output_base": "/root/Spinodyne/data/uploads/264e92c4-887b-4821-ba7e-544d659e53ab/result",
+  "total_cases": 1,
+  "results": {
+    "raw": {
+      "status": "success",
+      "output_dir": "/root/Spinodyne/data/uploads/264e92c4-887b-4821-ba7e-544d659e53ab/result/raw"
+    }
+  }
+}

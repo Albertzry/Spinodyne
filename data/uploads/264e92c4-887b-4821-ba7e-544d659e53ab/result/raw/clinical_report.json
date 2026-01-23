@@ -1,0 +1,917 @@
+{
+  "inputs": {
+    "mri_path": "/root/Spinodyne/data/uploads/264e92c4-887b-4821-ba7e-544d659e53ab/raw.nii.gz",
+    "step2_mask_path": "/root/Spinodyne/data/uploads/264e92c4-887b-4821-ba7e-544d659e53ab/infer_output/step2_output/raw.nii.gz",
+    "ldh_mask_path": "/root/Spinodyne/data/uploads/264e92c4-887b-4821-ba7e-544d659e53ab/infer_output/ldh_output/raw.nii.gz"
+  },
+  "spacing_mm": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+  },
+  "selected_slices": {
+    "mid_sagittal_x_index": 28,
+    "axial_z_index_max_ldh": 130
+  },
+  "geometry": {
+    "vertebral_height": {
+      "C1": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C2": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C3": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C4": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C5": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C6": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C7": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T1": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T2": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T3": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T4": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T5": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T6": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T7": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T8": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T9": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T10": {
+        "anterior_mm": 6.0,
+        "posterior_mm": 4.0,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "T11": {
+        "anterior_mm": 19.0,
+        "posterior_mm": 22.02271554554524,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "T12": {
+        "anterior_mm": 22.090722034374522,
+        "posterior_mm": 24.0,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "L1": {
+        "anterior_mm": 24.351591323771842,
+        "posterior_mm": 23.194827009486403,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "L2": {
+        "anterior_mm": 23.53720459187964,
+        "posterior_mm": 25.079872407968907,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "L3": {
+        "anterior_mm": 24.0,
+        "posterior_mm": 24.020824298928627,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "L4": {
+        "anterior_mm": 23.194827009486403,
+        "posterior_mm": 21.37755832643195,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "L5": {
+        "anterior_mm": 23.08679276123039,
+        "posterior_mm": 19.313207915827967,
+        "units": "mm",
+        "status": "ok",
+        "method": "four_corner_points"
+      },
+      "L6": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "L7": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "S": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "skipped_s1"
+      },
+      "sacrum": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "skipped_s1"
+      },
+      "S1": {
+        "anterior_mm": null,
+        "posterior_mm": null,
+        "units": "mm",
+        "status": "skipped_s1"
+      }
+    },
+    "vertebral_ap_diameter": {
+      "C1": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C2": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C3": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C4": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C5": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C6": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "C7": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T1": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T2": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T3": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T4": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T5": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T6": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T7": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T8": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T9": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "T10": {
+        "ap_diameter_mm": 58.0,
+        "z_index": 335,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "T11": {
+        "ap_diameter_mm": 51.0,
+        "z_index": 316,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "T12": {
+        "ap_diameter_mm": 52.0,
+        "z_index": 286,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "L1": {
+        "ap_diameter_mm": 52.0,
+        "z_index": 255,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "L2": {
+        "ap_diameter_mm": 50.0,
+        "z_index": 221,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "L3": {
+        "ap_diameter_mm": 82.0,
+        "z_index": 188,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "L4": {
+        "ap_diameter_mm": 83.0,
+        "z_index": 153,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "L5": {
+        "ap_diameter_mm": 80.0,
+        "z_index": 122,
+        "units": "mm",
+        "status": "ok",
+        "method": "axial_plane_at_geometric_center"
+      },
+      "L6": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "L7": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "missing_label"
+      },
+      "S": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "skipped_s1"
+      },
+      "sacrum": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "skipped_s1"
+      },
+      "S1": {
+        "ap_diameter_mm": null,
+        "units": "mm",
+        "status": "skipped_s1"
+      }
+    },
+    "disc_metrics": {
+      "C2-C3": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "C3-C4": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "C4-C5": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "C5-C6": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "C6-C7": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "C7-T1": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T1-T2": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T2-T3": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T3-T4": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T4-T5": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T5-T6": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T6-T7": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T7-T8": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T8-T9": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T9-T10": {
+        "dh_mm": null,
+        "hdr": null,
+        "dhi": null,
+        "units": {
+          "dh": "mm"
+        },
+        "status": "missing_label"
+      },
+      "T10-T11": {
+        "dh_mm": 3.7613747123417376,
+        "disc_ap_diameter_mm": 28.0,
+        "hdr": 0.13433481115506204,
+        "dhi": 0.2948784416606882,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 4.094297574205844,
+          "M": 4.094297574205785,
+          "A": 3.0955289886135837
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      },
+      "T11-T12": {
+        "dh_mm": 7.336680126876813,
+        "disc_ap_diameter_mm": 31.0,
+        "hdr": 0.23666710086699397,
+        "dhi": 0.3368793761649451,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 7.005073587100118,
+          "M": 8.005060237903901,
+          "A": 6.999906555626421
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      },
+      "T12-L1": {
+        "dh_mm": 5.045577767269758,
+        "disc_ap_diameter_mm": 30.0,
+        "hdr": 0.1681859255756586,
+        "dhi": 0.21553745650326783,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 5.033340724642969,
+          "M": 5.070051852523337,
+          "A": 5.033340724642967
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      },
+      "L1-L2": {
+        "dh_mm": 8.021156286528928,
+        "disc_ap_diameter_mm": 33.0,
+        "hdr": 0.2430653420160281,
+        "dhi": 0.333646619592765,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 7.9927181242061724,
+          "M": 8.035375367690303,
+          "A": 8.035375367690305
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      },
+      "L2-L3": {
+        "dh_mm": 6.337946412094403,
+        "disc_ap_diameter_mm": 35.0,
+        "hdr": 0.18108418320269723,
+        "dhi": 0.2623379161556606,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 5.999846056777888,
+          "M": 7.0069837611508285,
+          "A": 6.007009418354491
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      },
+      "L3-L4": {
+        "dh_mm": 8.49840647996107,
+        "disc_ap_diameter_mm": 36.0,
+        "hdr": 0.23606684666558525,
+        "dhi": 0.36712871336788555,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 8.166951808801047,
+          "M": 9.161315822281084,
+          "A": 8.166951808801075
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      },
+      "L4-L5": {
+        "dh_mm": 6.387537553166283,
+        "disc_ap_diameter_mm": 32.0,
+        "hdr": 0.19961054853644633,
+        "dhi": 0.29377313172542974,
+        "units": {
+          "dh": "mm",
+          "disc_ap_diameter": "mm"
+        },
+        "status": "ok",
+        "method": "linear_regression_mathematical_rotation",
+        "scan_line_heights_mm": {
+          "P": 5.0930151268028965,
+          "M": 7.519754449528015,
+          "A": 6.549843083167935
+        },
+        "formula": {
+          "hdr": "HDR = DH / Disc_AP_Diameter",
+          "dhi": "DHI = DH / mean(Upper_VH_avg, Lower_VH_avg)"
+        }
+      }
+    }
+  },
+  "angles": {
+    "disc_inclination_angle_DIA": {
+      "C2-C3": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "C3-C4": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "C4-C5": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "C5-C6": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "C6-C7": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "C7-T1": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T1-T2": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T2-T3": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T3-T4": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T4-T5": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T5-T6": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T6-T7": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T7-T8": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T8-T9": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T9-T10": {
+        "dia_deg": null,
+        "units": "deg",
+        "status": "missing_label"
+      },
+      "T10-T11": {
+        "dia_deg": 0.03605126165654849,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      },
+      "T11-T12": {
+        "dia_deg": 1.0057215608352434,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      },
+      "T12-L1": {
+        "dia_deg": 4.008421233159014,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      },
+      "L1-L2": {
+        "dia_deg": 1.799033672596634,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      },
+      "L2-L3": {
+        "dia_deg": 6.065125252335575,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      },
+      "L3-L4": {
+        "dia_deg": 14.04036316900576,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      },
+      "L4-L5": {
+        "dia_deg": 4.56951840277488,
+        "units": "deg",
+        "status": "ok",
+        "method": "angle between upper inferior and lower superior endplates"
+      }
+    },
+    "lumbar_lordosis_LL_deg": 13.747644085032167,
+    "sacral_slope_SS_deg": 26.56505117707798,
+    "lumbosacral_angle_LSA_deg": 1.5399185730274345,
+    "units": "deg",
+    "status": "ok",
+    "endplate_line_angles_deg": {
+      "L1_sup": 9.588437331573106,
+      "S1_sup": -26.56505117707799,
+      "L5_inf": -0.948607801059148
+    }
+  },
+  "herniation": {
+    "axial_z_index_max_ldh": 130,
+    "disc_level": "L4-L5",
+    "disc_label_id": 95,
+    "pd_mm": 3.0,
+    "pa_mm2": 70.0,
+    "disc_area_mm2": 198.0,
+    "par": 0.35353535353535354,
+    "disc_ap_diameter_mm": 7.0,
+    "plr": 0.42857142857142855,
+    "units": {
+      "pd": "mm",
+      "pa": "mm^2",
+      "disc_area": "mm^2",
+      "disc_ap_diameter": "mm"
+    },
+    "status": "ok"
+  },
+  "intensity": {
+    "average_gray_level_AGL": {
+      "status": "ok",
+      "by_disc": {
+        "C2-C3": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "C3-C4": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "C4-C5": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "C5-C6": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "C6-C7": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "C7-T1": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T1-T2": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T2-T3": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T3-T4": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T4-T5": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T5-T6": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T6-T7": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T7-T8": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T8-T9": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T9-T10": {
+          "agl_norm": null,
+          "status": "missing_label"
+        },
+        "T10-T11": {
+          "agl_norm": 0.4570634961128235,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "T11-T12": {
+          "agl_norm": 0.3252173364162445,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "T12-L1": {
+          "agl_norm": 0.4717637598514557,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "L1-L2": {
+          "agl_norm": 0.3871949017047882,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "L2-L3": {
+          "agl_norm": 0.5273911356925964,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "L3-L4": {
+          "agl_norm": 0.4571092128753662,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "L4-L5": {
+          "agl_norm": 0.27359622716903687,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "L5-S": {
+          "agl_norm": 0.2515091001987457,
+          "status": "ok",
+          "units": "normalized_0_1"
+        },
+        "L5-S1": {
+          "agl_norm": 0.2515091001987457,
+          "status": "ok",
+          "units": "normalized_0_1"
+        }
+      },
+      "method": "percentile(1,99) -> [0,1] then mean within disc mask"
+    }
+  },
+  "notes": [
+    "All distances are converted to mm using SimpleITK spacing; angles are in degrees.",
+    "Mid-sagittal slice is estimated from spinal canal mask centroid x index; if canal is missing, use volume center slice.",
+    "Since NIfTI orientation may not be standardized, anterior/posterior direction is heuristically estimated from 'canal relative position'.",
+    "DHI formula used here: DHI = DH / mean(upper_VH_avg, lower_VH_avg) (modify in function if strict clinical standard is needed)."
+  ]
+}

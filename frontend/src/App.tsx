@@ -5,31 +5,18 @@ import AppLayout from './components/Layout/AppLayout';
 import Login from './pages/Login';
 import Inference from './pages/Inference/Inference';
 
-// Placeholder Components
+console.log('App.tsx is loading...');
+
 const Dashboard: React.FC = () => (
-  <div className="clinical-card p-8">
-    <h1 className="clinical-heading text-2xl mb-4">Dashboard</h1>
-    <p className="clinical-text">Welcome to Spinodyne Medical AI Platform</p>
+  <div className="clinical-card p-8 bg-white rounded-xl border border-slate-200 shadow-sm">
+    <h1 className="clinical-heading text-2xl font-bold mb-4 text-slate-800">Dashboard</h1>
+    <p className="clinical-text text-slate-600">Welcome to Spinodyne Medical AI Platform</p>
   </div>
 );
 
-const Patients: React.FC = () => (
-  <div className="clinical-card p-8">
-    <h1 className="clinical-heading text-2xl mb-4">Patients</h1>
-    <p className="clinical-text">Patient management system</p>
-  </div>
-);
-
-const SettingsPage: React.FC = () => (
-  <div className="clinical-card p-8">
-    <h1 className="clinical-heading text-2xl mb-4">Settings</h1>
-    <p className="clinical-text">Configure your platform preferences</p>
-  </div>
-);
-
-// Protected Route Wrapper (Simplified)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('token');
+  console.log('ProtectedRoute check, token:', token);
   if (!token) {
     return <Navigate to="/login" replace />;
   }
@@ -37,27 +24,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const App: React.FC = () => {
+  console.log('App component rendering...');
   return (
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: '#0ea5e9', // TotalSpine Blue
-          colorInfo: '#0ea5e9',
+          colorPrimary: '#0ea5e9',
           borderRadius: 8,
-          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        },
-        components: {
-          Layout: {
-            siderBg: '#ffffff',
-            headerBg: '#ffffff',
-          },
-          Menu: {
-            itemBg: 'transparent',
-            itemSelectedBg: '#e0f2fe',
-            itemSelectedColor: '#0ea5e9',
-            itemHoverBg: '#f0f9ff',
-            itemHoverColor: '#0ea5e9',
-          },
+          fontFamily: 'Inter, system-ui, sans-serif',
         },
       }}
     >
@@ -78,17 +52,7 @@ const App: React.FC = () => {
             </ProtectedRoute>
           } />
           
-          <Route path="/patients" element={
-            <ProtectedRoute>
-              <Patients />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/settings" element={
-            <ProtectedRoute>
-              <SettingsPage />
-            </ProtectedRoute>
-          } />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

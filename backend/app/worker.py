@@ -61,11 +61,13 @@ def predict_spine(self, task_uid: str):
             os.makedirs(result_dir, exist_ok=True)
             
             # ==========================================
-            # Step A: Inference (TotalSpineSeg)
+            # Step A: Inference (infer_ldh.py)
             # ==========================================
-            # cmd: conda run -n tss totalspineseg --input-dir {task_dir} --output-dir {infer_output_dir} --device cuda
+            # cmd: conda run -n tss python scripts/infer_ldh.py --input-dir {task_dir} --output-dir {infer_output_dir} --data-dir /opt/data/private/data_sum/
             
-            cmd_inference = f"{settings.CONDA_CMD_PREFIX} totalspineseg --input-dir {task_dir} --output-dir {infer_output_dir} --device cuda"
+            infer_script = os.path.join(settings.MODEL_ROOT_DIR, "scripts/infer_ldh.py")
+            data_dir = "/opt/data/private/data_sum/"
+            cmd_inference = f"{settings.CONDA_CMD_PREFIX} python {infer_script} --input-dir {task_dir} --output-dir {infer_output_dir} --data-dir {data_dir} --overwrite --device cuda"
             logger.info(f"Running Inference: {cmd_inference}")
             
             result_inf = subprocess.run(
@@ -84,6 +86,7 @@ def predict_spine(self, task_uid: str):
             # Step B: Calculation (calculate.py)
             # ==========================================
             # cmd: conda run -n tss python /root/TotalSpineSeg-v2/calculate.py --input-dir {task_dir} --output-dir {result_dir}
+            # 注意：传递 task_dir，让 calculate.py 内部拼接 infer_output
             
             calc_script = os.path.join(settings.MODEL_ROOT_DIR, "calculate.py")
             cmd_calc = f"{settings.CONDA_CMD_PREFIX} python {calc_script} --input-dir {task_dir} --output-dir {result_dir}"
@@ -104,10 +107,10 @@ def predict_spine(self, task_uid: str):
             # ==========================================
             # Step C: Post-Processing
             # ==========================================
-            report_path = os.path.join(result_dir, "report.json")
+            report_path = os.path.join(result_dir, "raw", "clinical_report.json")
             
             if not os.path.exists(report_path):
-                raise Exception("report.json not found in result directory")
+                raise Exception("clinical_report.json not found in result/raw directory")
                 
             with open(report_path, "r") as f:
                 report_data = json.load(f)

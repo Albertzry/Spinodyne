@@ -1,0 +1,23 @@
+{
+  "input_dir": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21",
+  "output_dir": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21/infer_output",
+  "ckpt_stagea": "/opt/data/private/data_sum/nnUNet/results/Dataset105_TotalSpineSeg_LDH/ldh_twostage/checkpoints/ldh_stageA_fold_0.pth",
+  "model_folder_stageb": "/opt/data/private/data_sum/nnUNet/results/Dataset107_LDH_ROI/nnUNetTrainer__nnUNetPlans__3d_fullres",
+  "checkpoint_stageb": "checkpoint_best.pth",
+  "thresh_a": 0.5,
+  "thresh_b": 0.5,
+  "disc_labels": [
+    95,
+    100
+  ],
+  "cases": [
+    {
+      "case_id": "raw",
+      "image_iso": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21/infer_output/input/raw_0000.nii.gz",
+      "step2_iso": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21/infer_output/step2_output/raw.nii.gz",
+      "ldh_iso": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21/infer_output/ldh_stageb_iso/raw.nii.gz",
+      "stagea_json": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21/infer_output/ldh_stagea/raw.json",
+      "preview_ldh": "/root/Spinodyne/data/uploads/239d70ce-3251-4d97-a20e-66e43fc5be21/infer_output/preview/ldh/raw_sag_0.5_ldh.jpg"
+    }
+  ]
+}

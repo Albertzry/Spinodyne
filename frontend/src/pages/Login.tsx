@@ -19,14 +19,10 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-sky-500 to-indigo-600">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         <Card
           className="w-[400px] shadow-2xl border-none rounded-2xl overflow-hidden"
-          bodyStyle={{ padding: '40px' }}
+          styles={{ body: { padding: '40px' } }}
         >
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mb-4">
@@ -85,7 +81,7 @@ const Login: React.FC = () => {
             </Text>
           </div>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 };

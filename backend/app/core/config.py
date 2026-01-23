@@ -7,9 +7,12 @@ class Settings(BaseSettings):
     # 数据库配置
     DATABASE_URL: str = "postgresql://spinodyne_user:TotalSpine2026@localhost/spinodyne_db"
     
-    # Redis 配置 (Celery Broker & Backend)
-    REDIS_URL: str = "redis://localhost:6379/0"
+    # Redis 配置 (Internal Localhost only on Port 25698)
+    REDIS_URL: str = "redis://127.0.0.1:25698/0"
     
+    # CORS Origins (Allow Public Frontend)
+    BACKEND_CORS_ORIGINS: list = ["http://10.1.3.100:25320", "http://localhost:25320"]
+
     # 文件路径配置
     BASE_UPLOAD_DIR: str = "/root/Spinodyne/data/uploads"
     MODEL_ROOT_DIR: str = "/root/TotalSpineSeg-v2"
