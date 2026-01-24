@@ -1,21 +1,59 @@
-import React from 'react';
-import { Tabs, Table, Tag, Typography, Image, Empty, Descriptions } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Tabs, Table, Tag, Typography, Image, Empty, Spin, message } from 'antd';
 import { FileBarChart, Ruler, Activity, Brain } from 'lucide-react';
 import { get } from 'lodash';
+import api from '../../services/api';
 
 const { Text, Title, Paragraph } = Typography;
 
 interface ResultPanelProps {
-  data: any; // The full result object from backend
+  taskUid: string | null;
 }
 
-const ResultPanel: React.FC<ResultPanelProps> = ({ data }) => {
-  if (!data) return <Empty description="No analysis data available" className="mt-20" />;
+const ResultPanel: React.FC<ResultPanelProps> = ({ taskUid }) => {
+  const [loading, setLoading] = useState(false);
+  const [reportData, setReportData] = useState<any>(null);
 
-  const { analysis_images, report_data } = data;
+  const getImageUrl = (category: string, subcategory?: string, itemId?: string) => {
+    if (!taskUid) return '';
+    const params = new URLSearchParams();
+    params.append('category', category);
+    if (subcategory) params.append('subcategory', subcategory);
+    if (itemId) params.append('item_id', itemId);
+    // Use the same /api prefix as other requests
+    return `/api/result/image/${taskUid}?${params.toString()}`;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!taskUid) return;
+
+      setLoading(true);
+      try {
+        // Fetch report data only
+        const reportRes = await api.get(`/result/report/${taskUid}`);
+        setReportData(reportRes.data);
+      } catch (error) {
+        console.error('Failed to load result data:', error);
+        message.error('Failed to load analysis results');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [taskUid]);
+
+  if (!taskUid) return <Empty description="No task selected" className="mt-20" />;
+  if (loading) return (
+    <div className="h-full flex items-center justify-center">
+      <Spin tip="Loading analysis results..." />
+    </div>
+  );
+  if (!reportData) return <Empty description="No analysis data available" className="mt-20" />;
 
   // Helper to get nested report data safely
-  const report = report_data || {};
+  const report = reportData || {};
 
   // --- Tab 1: Pathology (Herniation) ---
   const renderPathology = () => {
@@ -41,23 +79,13 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ data }) => {
         </div>
 
         <div>
-          <Title level={5}>Herniation Analysis Maps</Title>
-          <div className="grid grid-cols-1 gap-4">
-            <Image.PreviewGroup>
-              {analysis_images?.herniation?.map((src: string, idx: number) => (
-                <div key={idx} className="border border-slate-200 rounded-lg p-2 bg-slate-50">
-                  <Image 
-                    src={src} 
-                    alt={`Herniation Map ${idx}`}
-                    className="object-contain max-h-[300px] w-full"
-                  />
-                  <Text type="secondary" className="text-xs text-center block mt-2">Segmentation & Heatmap</Text>
-                </div>
-              ))}
-            </Image.PreviewGroup>
-            {(!analysis_images?.herniation || analysis_images.herniation.length === 0) && (
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No images generated" />
-            )}
+          <Title level={5}>Herniation Analysis Map</Title>
+          <div className="flex justify-center border border-slate-200 rounded-lg p-4 bg-slate-50">
+             <Image 
+               src={getImageUrl('herniation')} 
+               alt="Herniation Analysis"
+               className="object-contain max-h-[400px]"
+             />
           </div>
         </div>
       </div>
@@ -66,55 +94,116 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ data }) => {
 
   // --- Tab 2: Geometry & Angles ---
   const renderGeometry = () => {
-    // Convert report data to table source
-    // Assuming report structure: { metrics: { l4: { height: ... }, ... } }
-    // This is a generic adapter, adjust key access based on actual JSON
-    
-    const vertebral_metrics = get(report, 'vertebrae', []);
-    const disc_metrics = get(report, 'discs', []);
+    const vertebral_metrics = get(report, 'geometry.vertebral_height', {});
+    const disc_metrics = get(report, 'geometry.disc_metrics', {});
+    const angles = get(report, 'angles', {});
+
+    // Convert objects to arrays for Table
+    const v_data = Object.entries(vertebral_metrics)
+      .filter(([_, val]: any) => val.status === 'ok')
+      .map(([level, val]: any) => ({
+        level,
+        height: `${val.anterior_mm?.toFixed(1)} / ${val.posterior_mm?.toFixed(1)}`,
+        width: '-' // AP diameter is in another object, keep it simple for now
+      }));
+
+    const d_data = Object.entries(disc_metrics)
+      .filter(([_, val]: any) => val.status === 'ok')
+      .map(([level, val]: any) => ({
+        level,
+        height: val.dh_mm?.toFixed(1),
+        angle: get(report, `angles.disc_inclination_angle_DIA.${level}.dia_deg`, 0)?.toFixed(1)
+      }));
 
     const v_columns = [
       { title: 'Level', dataIndex: 'level', key: 'level', render: (t: string) => <Tag color="blue">{t}</Tag> },
-      { title: 'Height (mm)', dataIndex: 'height', key: 'height' },
-      { title: 'Width (mm)', dataIndex: 'width', key: 'width' },
+      { title: 'H (Ant/Post)', dataIndex: 'height', key: 'height' },
+      { 
+        title: 'Visuals', 
+        key: 'visuals',
+        render: (_: any, record: any) => (
+          <div className="flex gap-2">
+            <Image 
+               src={getImageUrl('geometry', 'vertebral_height', record.level)}
+               width={30}
+               height={30}
+               className="rounded object-cover border border-slate-200 cursor-pointer hover:opacity-80"
+               preview={{ src: getImageUrl('geometry', 'vertebral_height', record.level) }}
+               alt="Height"
+            />
+          </div>
+        )
+      },
     ];
 
     const d_columns = [
         { title: 'Level', dataIndex: 'level', key: 'level', render: (t: string) => <Tag color="cyan">{t}</Tag> },
-        { title: 'Height (mm)', dataIndex: 'height', key: 'height' },
+        { title: 'H (mm)', dataIndex: 'height', key: 'height' },
         { title: 'Angle (°)', dataIndex: 'angle', key: 'angle' },
+        { 
+            title: 'Visuals', 
+            key: 'visuals',
+            render: (_: any, record: any) => (
+              <div className="flex gap-2">
+                <Image 
+                   src={getImageUrl('geometry', 'disc_metrics', record.level)}
+                   width={30}
+                   height={30}
+                   className="rounded object-cover border border-slate-200 cursor-pointer hover:opacity-80"
+                   preview={{ src: getImageUrl('geometry', 'disc_metrics', record.level) }}
+                   alt="Metrics"
+                />
+                <Image 
+                   src={getImageUrl('angles', 'disc_inclination', record.level)}
+                   width={30}
+                   height={30}
+                   className="rounded object-cover border border-slate-200 cursor-pointer hover:opacity-80"
+                   preview={{ src: getImageUrl('angles', 'disc_inclination', record.level) }}
+                   alt="Angle"
+                />
+              </div>
+            )
+        },
     ];
 
     return (
       <div className="space-y-8">
-        {/* Images */}
-        <div>
-           <Title level={5} className="flex items-center gap-2">
-             <Ruler size={16} /> Measurement Visualizations
-           </Title>
-           <div className="grid grid-cols-2 gap-4">
-             <Image.PreviewGroup>
-                {[...(analysis_images?.geometry || []), ...(analysis_images?.angles || [])].map((src: string, idx: number) => (
-                  <div key={idx} className="border border-slate-200 rounded-lg p-1">
-                    <Image src={src} className="rounded" />
-                  </div>
-                ))}
-             </Image.PreviewGroup>
-           </div>
+        {/* Cobb Angles Summary */}
+        <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+             <Title level={5} className="flex items-center gap-2 mb-4">
+                <Ruler size={16} /> Global Spinal Parameters
+             </Title>
+             <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                    <Text type="secondary" className="block text-xs mb-1">Lumbar Lordosis (LL)</Text>
+                    <div className="font-semibold text-lg mb-2">{angles.lumbar_lordosis_LL_deg?.toFixed(1)}°</div>
+                    <Image src={getImageUrl('angles', 'cobb', 'LL')} height={100} className="object-contain rounded border border-slate-200 bg-white" />
+                </div>
+                <div className="text-center">
+                    <Text type="secondary" className="block text-xs mb-1">Sacral Slope (SS)</Text>
+                    <div className="font-semibold text-lg mb-2">{angles.sacral_slope_SS_deg?.toFixed(1)}°</div>
+                    <Image src={getImageUrl('angles', 'cobb', 'SS')} height={100} className="object-contain rounded border border-slate-200 bg-white" />
+                </div>
+                <div className="text-center">
+                    <Text type="secondary" className="block text-xs mb-1">Lumbosacral Angle (LSA)</Text>
+                    <div className="font-semibold text-lg mb-2">{angles.lumbosacral_angle_LSA_deg?.toFixed(1)}°</div>
+                    <Image src={getImageUrl('angles', 'cobb', 'LSA')} height={100} className="object-contain rounded border border-slate-200 bg-white" />
+                </div>
+             </div>
         </div>
 
         {/* Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
                 <Text strong className="block mb-2">Vertebral Metrics</Text>
-                {vertebral_metrics.length > 0 ? (
-                    <Table dataSource={vertebral_metrics} columns={v_columns} pagination={false} size="small" rowKey="level" />
+                {v_data.length > 0 ? (
+                    <Table dataSource={v_data} columns={v_columns} pagination={false} size="small" rowKey="level" />
                 ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
             </div>
             <div>
                 <Text strong className="block mb-2">Disc Metrics</Text>
-                {disc_metrics.length > 0 ? (
-                    <Table dataSource={disc_metrics} columns={d_columns} pagination={false} size="small" rowKey="level" />
+                {d_data.length > 0 ? (
+                    <Table dataSource={d_data} columns={d_columns} pagination={false} size="small" rowKey="level" />
                 ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
             </div>
         </div>
@@ -134,11 +223,12 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ data }) => {
       </div>
       
       <div className="flex justify-center border border-slate-200 rounded-xl p-4">
-         <Image.PreviewGroup>
-            {analysis_images?.intensity?.map((src: string, idx: number) => (
-               <Image key={idx} src={src} width="100%" style={{ maxWidth: '400px'}} />
-            ))}
-         </Image.PreviewGroup>
+         <Image 
+            src={getImageUrl('intensity')} 
+            alt="Intensity Analysis"
+            width="100%" 
+            style={{ maxWidth: '500px'}} 
+         />
       </div>
     </div>
   );
@@ -166,7 +256,7 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ data }) => {
       <div className="p-4 border-b border-slate-100 bg-slate-50/50">
         <Title level={4} className="clinical-heading !mb-0">Analysis Report</Title>
         <Text type="secondary" className="text-xs">
-           ID: <span className="font-mono">{data.uid?.substring(0, 8)}...</span>
+           ID: <span className="font-mono">{taskUid?.substring(0, 8)}...</span>
         </Text>
       </div>
       

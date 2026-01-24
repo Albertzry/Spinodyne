@@ -14,6 +14,7 @@ interface NiivueViewerProps {
 const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nvRef = useRef<Niivue | null>(null);
+  const [nvReady, setNvReady] = useState(false);
   
   // Layer visibility state
   const [layers, setLayers] = useState({
@@ -24,20 +25,30 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
 
   useEffect(() => {
     if (canvasRef.current && !nvRef.current) {
-      const nv = new Niivue({
-        backColor: [0, 0, 0, 1], // Black background
-        show3Dcrosshair: true,
-        isSliceMM: true,
-      });
-      
-      nv.attachToCanvas(canvasRef.current);
-      nvRef.current = nv;
-      nv.setSliceType(nv.sliceTypeMultiplanar); // Default to MPR view
+      try {
+        const nv = new Niivue({
+          backColor: [0, 0, 0, 1], // Black background
+          show3Dcrosshair: true,
+          isSliceMM: true,
+          trustCalMinMax: false, // Force recalculation of intensity range
+        });
+        
+        nv.attachToCanvas(canvasRef.current);
+        nvRef.current = nv;
+        // nv.setSliceType(nv.sliceTypeMultiplanar); // Default to MPR view
+        nv.setSliceType(nv.sliceTypeRender); // Set to 3D Render mode
+        console.log('NiivueViewer: Niivue initialized and attached');
+        setNvReady(true);
+      } catch (err) {
+        console.error('NiivueViewer: Failed to initialize Niivue', err);
+      }
     }
   }, []);
 
   useEffect(() => {
-    if (nvRef.current && volumes?.base) {
+    console.log('NiivueViewer: volumes or readiness changed', { volumes, nvReady });
+    if (nvReady && nvRef.current && volumes?.base) {
+      console.log('NiivueViewer: loading volumes', volumes);
       const volumeList = [];
 
       // 1. Base MRI (Gray)
@@ -69,9 +80,14 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
       }
 
       // Load all volumes
-      nvRef.current.loadVolumes(volumeList);
+      console.log('NiivueViewer: calling loadVolumes with', volumeList);
+      nvRef.current.loadVolumes(volumeList).then(() => {
+        console.log('NiivueViewer: loadVolumes completed');
+      }).catch(err => {
+        console.error('NiivueViewer: loadVolumes failed', err);
+      });
     }
-  }, [volumes]); // Reload when volumes URL changes
+  }, [volumes, nvReady]); // Reload when volumes URL changes or Niivue is ready
 
   // Handle visibility toggle without reloading
   useEffect(() => {

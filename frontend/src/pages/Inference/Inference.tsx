@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, message, Spin, Typography, Space, Button } from 'antd';
+import { Upload, message, Spin, Typography, Button } from 'antd';
 import { Inbox, FileText, Activity, RefreshCw } from 'lucide-react';
 import NiivueViewer from '../../components/Medical/NiivueViewer';
 import ResultPanel from '../../components/Charts/ResultPanel';
@@ -10,8 +10,7 @@ const { Title, Text } = Typography;
 
 const Inference: React.FC = () => {
   const [step, setStep] = useState<0 | 1 | 2>(0);
-  // const [imageUrl, setImageUrl] = useState<string | null>(null); // Deprecated
-  const [analysisResult, setAnalysisResult] = useState<any>(null); // Contains both result data and vis paths
+  const [vis3dData, setVis3dData] = useState<any>(null);
   const [taskUid, setTaskUid] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,11 +20,19 @@ const Inference: React.FC = () => {
       intervalId = setInterval(async () => {
         try {
           const response = await api.get(`/status/${taskUid}`);
-          const { status, result } = response.data;
+          const { status } = response.data;
 
           if (status === 'success') {
-            setAnalysisResult(result);
-            // setImageUrl(`/static/uploads/${taskUid}/raw.nii.gz`); // 废弃旧的单一字符串逻辑
+            console.log('Inference: task success, setting vis3dData', taskUid);
+            // Task completed, use direct file stream endpoints
+            const newVis3dData = {
+              base: `/api/result/nifti/${taskUid}/base.nii.gz`,
+              mask_structure: `/api/result/nifti/${taskUid}/structure.nii.gz`,
+              mask_ldh: `/api/result/nifti/${taskUid}/ldh.nii.gz`
+            };
+            console.log('Inference: newVis3dData', newVis3dData);
+            setVis3dData(newVis3dData);
+            
             setStep(2);
             message.success('AI Inference completed successfully.');
             clearInterval(intervalId);
@@ -75,8 +82,7 @@ const Inference: React.FC = () => {
 
   const reset = () => {
     setStep(0);
-    setImageUrl(null);
-    setAnalysisResult(null);
+    setVis3dData(null);
     setTaskUid(null);
   };
 
@@ -128,7 +134,7 @@ const Inference: React.FC = () => {
                 </div>
               </div>
             )}
-            <NiivueViewer volumes={analysisResult?.vis_3d} />
+            <NiivueViewer volumes={vis3dData} />
           </div>
 
           <div className="col-span-4 flex flex-col gap-4">
@@ -141,7 +147,7 @@ const Inference: React.FC = () => {
                 <Text className="text-slate-300 text-sm mt-1">Status: {taskUid ? 'In Queue' : 'Uploading'}</Text>
               </div>
             ) : (
-              <ResultPanel data={analysisResult} />
+              <ResultPanel taskUid={taskUid} />
             )}
             
             {step === 2 && (

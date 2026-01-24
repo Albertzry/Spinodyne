@@ -4,6 +4,7 @@ import glob
 import shutil
 from typing import Optional, List
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel, Session, create_engine, select
@@ -97,14 +98,14 @@ def find_file_url(base_dir: str, pattern: str, url_prefix: str) -> Optional[str]
     return None
 
 def find_images_urls(base_dir: str, url_prefix: str) -> List[str]:
-    """Helper to find all images in a directory"""
+    """Helper to find all images in a directory (recursively)"""
     if not os.path.exists(base_dir):
         return []
     
     images = []
-    # Match common image formats
-    for ext in ['*.png', '*.jpg', '*.jpeg']:
-        files = glob.glob(os.path.join(base_dir, ext))
+    # Match common image formats recursively
+    for ext in ['**/*.png', '**/*.jpg', '**/*.jpeg']:
+        files = glob.glob(os.path.join(base_dir, ext), recursive=True)
         for f in files:
             rel_path = os.path.relpath(f, settings.BASE_UPLOAD_DIR)
             images.append(f"{url_prefix}/{rel_path}")
@@ -113,7 +114,7 @@ def find_images_urls(base_dir: str, url_prefix: str) -> List[str]:
 @app.get("/api/status/{task_uid}")
 async def get_task_status(task_uid: str, session: Session = Depends(get_session)):
     """
-    查询任务状态和结果
+    查询任务状态 (仅状态)
     """
     statement = select(Task).where(Task.uid == task_uid)
     task = session.exec(statement).first()
@@ -121,52 +122,165 @@ async def get_task_status(task_uid: str, session: Session = Depends(get_session)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
         
-    response = {
+    return {
         "uid": task.uid,
         "status": task.status,
         "created_at": task.created_at,
         "finished_at": task.finished_at,
     }
+
+@app.get("/api/result/3d/{task_uid}")
+async def get_task_3d_volumes(task_uid: str, session: Session = Depends(get_session)):
+    """
+    获取 3D 可视化文件 (NIfTI)
+    """
+    statement = select(Task).where(Task.uid == task_uid)
+    task = session.exec(statement).first()
     
-    # 如果任务成功，构建完整的结果 JSON 结构
-    if task.status == "success":
-        task_dir = os.path.dirname(task.input_file_path)
-        url_prefix = "/static/uploads"
+    if not task or task.status != "success":
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+
+    task_dir = os.path.dirname(task.input_file_path)
+    url_prefix = "/static/uploads"
+    
+    # 返回 URL 列表，前端 Niivue 会去请求这些 URL
+    return {
+        "base": f"{url_prefix}/{task_uid}/raw.nii.gz",
+        "mask_structure": find_file_url(os.path.join(task_dir, "infer_output/step2_output"), "raw.nii.gz", url_prefix),
+        "mask_ldh": find_file_url(os.path.join(task_dir, "infer_output/ldh_output"), "raw.nii.gz", url_prefix)
+    }
+
+@app.get("/api/result/nifti/{task_uid}/{type}")
+@app.get("/api/result/nifti/{task_uid}/{type}.nii.gz")
+async def get_nifti_file(task_uid: str, type: str, session: Session = Depends(get_session)):
+    """
+    直接返回 NIfTI 文件流
+    type: base, structure, ldh
+    """
+    statement = select(Task).where(Task.uid == task_uid)
+    task = session.exec(statement).first()
+    
+    if not task or task.status != "success":
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    task_dir = os.path.dirname(task.input_file_path)
+    # task.input_file_path 是 /root/Spinodyne/data/uploads/{uid}/raw.nii.gz
+    # task_dir 是 /root/Spinodyne/data/uploads/{uid}
+    
+    file_path = None
+    if type == "base":
+        file_path = os.path.join(task_dir, "raw.nii.gz")
+    elif type == "structure":
+        file_path = os.path.join(task_dir, "infer_output", "step2_output", "raw.nii.gz")
+    elif type == "ldh":
+        file_path = os.path.join(task_dir, "infer_output", "ldh_output", "raw.nii.gz")
         
-        # 1. 3D Visualization Files
-        vis_3d = {
-            "base": f"{url_prefix}/{task_uid}/raw.nii.gz",
-            "mask_structure": find_file_url(os.path.join(task_dir, "infer_output/step2_output"), "*.nii.gz", url_prefix),
-            "mask_ldh": find_file_url(os.path.join(task_dir, "infer_output/ldh_output"), "*.nii.gz", url_prefix)
-        }
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="NIfTI file not found")
         
-        # 2. 2D Fallback Previews
-        vis_2d_fallback = {
+    return FileResponse(
+        file_path, 
+        media_type="application/gzip",
+        filename=os.path.basename(file_path)
+    )
+
+@app.get("/api/result/report/{task_uid}")
+async def get_task_report(task_uid: str, session: Session = Depends(get_session)):
+    """
+    获取临床报告数据 (JSON)
+    """
+    statement = select(Task).where(Task.uid == task_uid)
+    task = session.exec(statement).first()
+    
+    if not task or task.status != "success":
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+        
+    return task.result_json
+
+@app.get("/api/result/images/{task_uid}")
+async def get_task_images(task_uid: str, session: Session = Depends(get_session)):
+    """
+    获取分析图片路径
+    """
+    statement = select(Task).where(Task.uid == task_uid)
+    task = session.exec(statement).first()
+    
+    if not task or task.status != "success":
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+
+    task_dir = os.path.dirname(task.input_file_path)
+    url_prefix = "/static/uploads"
+    result_preview_dir = os.path.join(task_dir, "result/raw/preview")
+    
+    return {
+        "vis_2d_fallback": {
             "step2": find_file_url(os.path.join(task_dir, "infer_output/preview/step2"), "*.jpg", url_prefix),
             "ldh": find_file_url(os.path.join(task_dir, "infer_output/preview/ldh"), "*.jpg", url_prefix)
-        }
-        
-        # 3. Analysis Images
-        result_preview_dir = os.path.join(task_dir, "result/raw/preview")
-        analysis_images = {
+        },
+        "analysis_images": {
             "angles": find_images_urls(os.path.join(result_preview_dir, "angles"), url_prefix),
             "geometry": find_images_urls(os.path.join(result_preview_dir, "geometry"), url_prefix),
             "herniation": find_images_urls(os.path.join(result_preview_dir, "herniation"), url_prefix),
             "intensity": find_images_urls(os.path.join(result_preview_dir, "intensity"), url_prefix)
         }
+    }
+
+@app.get("/api/result/image/{task_uid}")
+async def get_task_image(
+    task_uid: str, 
+    category: str, 
+    subcategory: Optional[str] = None, 
+    item_id: Optional[str] = None,
+    session: Session = Depends(get_session)
+):
+    """
+    按需获取特定的分析图片
+    category: angles, geometry, herniation, intensity
+    subcategory: cobb, disc_inclination, disc_metrics, vertebral_ap_diameter, vertebral_height (optional)
+    item_id: L1, L1-L2, LL, etc. (optional)
+    """
+    statement = select(Task).where(Task.uid == task_uid)
+    task = session.exec(statement).first()
+    
+    if not task or task.status != "success":
+        raise HTTPException(status_code=404, detail="Task not found or not completed")
+
+    task_dir = os.path.dirname(task.input_file_path)
+    preview_dir = os.path.join(task_dir, "result/raw/preview")
+    
+    # Construct file path based on parameters
+    file_path = None
+    
+    if category == "herniation":
+        file_path = os.path.join(preview_dir, "herniation", "ldh_PD_PA_PAR_PLR.png")
         
-        response["result"] = {
-            "status": "success",
-            "vis_3d": vis_3d,
-            "vis_2d_fallback": vis_2d_fallback,
-            "analysis_images": analysis_images,
-            "report_data": task.result_json  # 数据库中已存储的 clinical_report.json 内容
-        }
+    elif category == "intensity":
+        file_path = os.path.join(preview_dir, "intensity", "agl_discs.png")
         
-    elif task.status == "failed":
-        response["result"] = {"status": "failed", "error": "Task processing failed"}
+    elif category == "angles":
+        if subcategory == "cobb":
+            if not item_id: raise HTTPException(status_code=400, detail="item_id required for cobb angles")
+            file_path = os.path.join(preview_dir, "angles", "cobb", f"angle_{item_id}.png")
+        elif subcategory == "disc_inclination":
+            if not item_id: raise HTTPException(status_code=400, detail="item_id required for disc_inclination")
+            file_path = os.path.join(preview_dir, "angles", "disc_inclination", f"dia_{item_id}.png")
+            
+    elif category == "geometry":
+        if not item_id: raise HTTPException(status_code=400, detail="item_id required for geometry metrics")
         
-    return response
+        if subcategory == "disc_metrics":
+            file_path = os.path.join(preview_dir, "geometry", "disc_metrics", f"disc_metrics_{item_id}.png")
+        elif subcategory == "vertebral_ap_diameter":
+            file_path = os.path.join(preview_dir, "geometry", "vertebral_ap_diameter", f"vertebra_ap_{item_id}.png")
+        elif subcategory == "vertebral_height":
+            file_path = os.path.join(preview_dir, "geometry", "vertebral_height", f"vh_{item_id}.png")
+            
+    if not file_path or not os.path.exists(file_path):
+        # Return a placeholder or 404. For now 404.
+        # Frontend should handle 404 gracefully (e.g. show "No Image")
+        raise HTTPException(status_code=404, detail="Image not found")
+        
+    return FileResponse(file_path)
 
 @app.get("/")
 def read_root():
