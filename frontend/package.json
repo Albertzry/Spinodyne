@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
-    "@niivue/niivue": "^0.40.0",
+    "@niivue/niivue": "^0.67.0",
     "@types/lodash": "^4.17.23",
     "antd": "^5.13.0",
     "axios": "^1.6.5",

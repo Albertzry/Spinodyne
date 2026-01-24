@@ -55,7 +55,7 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
       volumeList.push({
         url: volumes.base,
         colorMap: 'gray',
-        opacity: 1,
+        opacity: 0.2,
         visible: layers.base,
       });
 
@@ -63,9 +63,11 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
       if (volumes.mask_structure) {
         volumeList.push({
           url: volumes.mask_structure,
-          colorMap: 'blue',
-          opacity: 0.5,
+          colorMap: 'batlow',
+          opacity: 0.2,
           visible: layers.structure,
+          cal_min: 1,
+          cal_max: 100 
         });
       }
 
@@ -74,7 +76,7 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
         volumeList.push({
           url: volumes.mask_ldh,
           colorMap: 'red',
-          opacity: 0.6,
+          opacity: 0.2,
           visible: layers.ldh,
         });
       }
