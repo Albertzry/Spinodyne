@@ -55,8 +55,8 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
       volumeList.push({
         url: volumes.base,
         colorMap: 'gray',
-        opacity: 0.2,
-        visible: layers.base,
+        opacity: 0.5,
+        visible: true,
       });
 
       // 2. Spine Structure Mask (Blue)
@@ -64,8 +64,8 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
         volumeList.push({
           url: volumes.mask_structure,
           colorMap: 'batlow',
-          opacity: 0.2,
-          visible: layers.structure,
+          opacity: 0.5,
+          visible: true,
           cal_min: 1,
           cal_max: 100 
         });
@@ -76,10 +76,17 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
         volumeList.push({
           url: volumes.mask_ldh,
           colorMap: 'red',
-          opacity: 0.2,
-          visible: layers.ldh,
+          opacity: 0.5,
+          visible: true,
         });
       }
+
+      // Reset layers state to all true when new volumes are loaded
+      setLayers({
+        base: true,
+        structure: true,
+        ldh: true,
+      });
 
       // Load all volumes
       console.log('NiivueViewer: calling loadVolumes with', volumeList);
@@ -94,28 +101,29 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
   // Handle visibility toggle without reloading
   useEffect(() => {
     if (nvRef.current && nvRef.current.volumes.length > 0) {
-      // Assuming the load order is maintained: 0=Base, 1=Structure, 2=LDH
-      // This logic depends on the loadVolumes order above.
-      
       // Update Base
       if (nvRef.current.volumes[0]) {
-        nvRef.current.setOpacity(0, layers.base ? 1.0 : 0);
+        nvRef.current.setOpacity(0, layers.base ? 0.5 : 0);
       }
       
-      // We need to find volumes by their URL or maintain ID, 
-      // but simple index mapping works if order is static.
-      let idx = 1;
+      // The order in nvRef.current.volumes depends on what was actually loaded
+      let currentIdx = 1;
       if (volumes?.mask_structure) {
-         if (nvRef.current.volumes[idx]) nvRef.current.setOpacity(idx, layers.structure ? 0.5 : 0);
-         idx++;
+        if (nvRef.current.volumes[currentIdx]) {
+          nvRef.current.setOpacity(currentIdx, layers.structure ? 0.5 : 0);
+        }
+        currentIdx++;
       }
+      
       if (volumes?.mask_ldh) {
-         if (nvRef.current.volumes[idx]) nvRef.current.setOpacity(idx, layers.ldh ? 0.6 : 0);
+        if (nvRef.current.volumes[currentIdx]) {
+          nvRef.current.setOpacity(currentIdx, layers.ldh ? 0.5 : 0);
+        }
       }
       
       nvRef.current.updateGLVolume();
     }
-  }, [layers]);
+  }, [layers, volumes]); // Added volumes to dependency array
 
   return (
     <div className="w-full h-full relative bg-black rounded-lg overflow-hidden border border-slate-800 group">

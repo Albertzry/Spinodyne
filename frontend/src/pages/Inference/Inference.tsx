@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, message, Spin, Typography, Button } from 'antd';
-import { Inbox, FileText, Activity, RefreshCw } from 'lucide-react';
+import { Upload, message, Spin, Typography, Button, Form, Input, DatePicker, Row, Col, Space, Card } from 'antd';
+import { Inbox, FileText, Activity, RefreshCw, ArrowLeft } from 'lucide-react';
+import dayjs from 'dayjs';
 import NiivueViewer from '../../components/Medical/NiivueViewer';
 import ResultPanel from '../../components/Charts/ResultPanel';
 import api from '../../services/api';
@@ -11,28 +12,22 @@ const { Title, Text } = Typography;
 const Inference: React.FC = () => {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [vis3dData, setVis3dData] = useState<any>(null);
-  const [taskUid, setTaskUid] = useState<string | null>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [form] = Form.useForm();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     let intervalId: any;
 
-    if (step === 1 && taskUid) {
+    if (step === 1 && taskId) {
       intervalId = setInterval(async () => {
         try {
-          const response = await api.get(`/status/${taskUid}`);
+          const response = await api.get(`/status/${taskId}`);
           const { status } = response.data;
 
           if (status === 'success') {
-            console.log('Inference: task success, setting vis3dData', taskUid);
-            // Task completed, use direct file stream endpoints
-            const newVis3dData = {
-              base: `/api/result/nifti/${taskUid}/base.nii.gz`,
-              mask_structure: `/api/result/nifti/${taskUid}/structure.nii.gz`,
-              mask_ldh: `/api/result/nifti/${taskUid}/ldh.nii.gz`
-            };
-            console.log('Inference: newVis3dData', newVis3dData);
-            setVis3dData(newVis3dData);
-            
+            const volumes3dResponse = await api.get(`/result/3d/${taskId}`);
+            setVis3dData(volumes3dResponse.data);
             setStep(2);
             message.success('AI Inference completed successfully.');
             clearInterval(intervalId);
@@ -50,32 +45,40 @@ const Inference: React.FC = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [step, taskUid]);
+  }, [step, taskId]);
 
-  const handleCustomRequest = async (options: any) => {
-    const { file, onSuccess, onError, onProgress } = options;
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    return false;
+  };
 
-    const formData = new FormData();
-    formData.append('file', file);
+  const handleSubmit = async () => {
+    if (!selectedFile) {
+      message.error('Please select a file first.');
+      return;
+    }
 
     try {
+      const values = await form.validateFields();
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('patient_name', values.patient_name);
+      formData.append('patient_id', values.patient_id);
+      
+      if (values.study_date) {
+        formData.append('study_date', values.study_date.format('YYYY-MM-DD'));
+      }
+
       setStep(1);
       const response = await api.post('/predict', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (event) => {
-          const percent = Math.floor((event.loaded / (event.total || 1)) * 100);
-          onProgress({ percent });
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setTaskUid(response.data.task_uid);
-      onSuccess(response.data);
+      setTaskId(response.data.task_id);
+      message.success('Task created successfully. Processing...');
     } catch (error: any) {
       console.error('Upload failed:', error);
-      onError(error);
-      message.error('Upload failed. Please check backend connectivity.');
+      message.error(error.errorFields ? 'Please fill in all required fields.' : 'Upload failed.');
       setStep(0);
     }
   };
@@ -83,85 +86,120 @@ const Inference: React.FC = () => {
   const reset = () => {
     setStep(0);
     setVis3dData(null);
-    setTaskUid(null);
+    setTaskId(null);
+    setSelectedFile(null);
+    form.resetFields();
+  };
+
+  // Main Layout Content
+  const renderContent = () => {
+    if (step === 0) {
+      return (
+        <div className="h-full flex items-center justify-center p-4 md:p-8">
+          <Card className="max-w-2xl w-full shadow-lg rounded-2xl border-slate-100" bodyStyle={{ padding: '24px' }}>
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-sky-50 rounded-full flex items-center justify-center mb-4 mx-auto">
+                <Inbox size={24} className="text-sky-500" />
+              </div>
+              <Title level={3} className="!mb-1">Upload Imaging</Title>
+              <Text className="text-slate-400 text-sm">NIfTI format (.nii.gz, .nii). Max 500MB.</Text>
+            </div>
+            
+            <Form form={form} layout="vertical" initialValues={{ study_date: dayjs() }}>
+              <Row gutter={16}>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Patient Name" name="patient_name" rules={[{ required: true }]}>
+                    <Input placeholder="Name" size="large" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Patient ID" name="patient_id" rules={[{ required: true }]}>
+                    <Input placeholder="ID" size="large" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item label="Study Date" name="study_date">
+                <DatePicker size="large" className="w-full" />
+              </Form.Item>
+
+              <Form.Item label="Medical Image File">
+                <Dragger
+                  multiple={false}
+                  beforeUpload={handleFileSelect}
+                  maxCount={1}
+                  className="bg-slate-50/50"
+                >
+                  <div className="py-4">
+                    <FileText size={32} className="text-sky-400 mx-auto mb-2" />
+                    <p className="text-sm font-medium">Click or drag file</p>
+                  </div>
+                </Dragger>
+              </Form.Item>
+
+              <Button type="primary" size="large" block onClick={handleSubmit} disabled={!selectedFile} className="h-12 rounded-xl mt-2">
+                Start AI Inference
+              </Button>
+            </Form>
+          </Card>
+        </div>
+      );
+    }
+
+    return (
+      <div className="h-full flex flex-col p-2 md:p-4 gap-4 overflow-hidden">
+        {/* Header with Back Button */}
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur-md p-3 rounded-xl border border-slate-200 shadow-sm">
+          <Space>
+            <Button icon={<ArrowLeft size={16} />} onClick={reset} type="text">Back</Button>
+            <div className="h-4 w-px bg-slate-200 mx-1" />
+            <Title level={5} className="!mb-0">
+              {step === 1 ? 'Processing Analysis' : 'Analysis Result'}
+            </Title>
+          </Space>
+          {step === 2 && (
+            <Button icon={<RefreshCw size={14} />} onClick={reset} size="small">New Task</Button>
+          )}
+        </div>
+
+        {/* Main Adaptive Grid */}
+        <Row gutter={[16, 16]} className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+          {/* 3D Viewer Column */}
+          <Col xs={24} lg={12} xl={13} className="h-[50vh] lg:h-full">
+            <div className="relative h-full rounded-2xl overflow-hidden bg-black shadow-inner border border-slate-800">
+              {step === 1 && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm text-white">
+                  <Spin size="large" />
+                  <div className="mt-6 flex flex-col items-center">
+                    <Activity className="animate-pulse text-sky-400 mb-2" size={32} />
+                    <Text className="text-white font-medium">AI Model Inferencing...</Text>
+                  </div>
+                </div>
+              )}
+              <NiivueViewer volumes={vis3dData} />
+            </div>
+          </Col>
+
+          {/* Results Column */}
+          <Col xs={24} lg={12} xl={11} className="h-auto lg:h-full overflow-y-auto lg:overflow-hidden">
+            {step === 1 ? (
+              <Card className="h-full flex flex-col items-center justify-center text-center border-slate-100">
+                <RefreshCw className="text-sky-400 animate-spin mb-4" size={32} />
+                <Text className="text-slate-500 block">Analyzing vertebral structures...</Text>
+                <Text className="text-slate-300 text-xs mt-2 font-mono">TASK: {taskId?.substring(0, 8)}</Text>
+              </Card>
+            ) : (
+              <ResultPanel taskUid={taskId} />
+            )}
+          </Col>
+        </Row>
+      </div>
+    );
   };
 
   return (
-    <div className="h-[calc(100vh-140px)]">
-      {step === 0 && (
-        <div className="h-full flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <div className="max-w-xl w-full text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-sky-50 rounded-full flex items-center justify-center mb-6">
-              <Inbox size={32} className="text-sky-500" />
-            </div>
-            <Title level={3} className="clinical-heading !mb-2">Upload Medical Imaging</Title>
-            <Text className="text-slate-400 block mb-8">
-              Support for .nii.gz, .nii, and DICOM series. Max file size: 500MB.
-            </Text>
-            
-            <div className="w-full px-4">
-              <Dragger
-                name="file"
-                multiple={false}
-                showUploadList={false}
-                customRequest={handleCustomRequest}
-                style={{ borderRadius: '12px' }}
-                className="bg-slate-50/50 hover:bg-slate-50 transition-all border-sky-200 hover:border-sky-400"
-              >
-                <div className="py-10">
-                  <p className="ant-upload-drag-icon flex justify-center !mb-4">
-                    <FileText size={40} className="text-sky-400" />
-                  </p>
-                  <p className="text-base font-medium text-slate-700">Click or drag file to this area</p>
-                  <p className="text-slate-400 text-sm">TotalSpineSeg AI will automatically begin segmentation</p>
-                </div>
-              </Dragger>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {(step === 1 || step === 2) && (
-        <div className="grid grid-cols-12 gap-6 h-full">
-          <div className="col-span-8 relative rounded-2xl overflow-hidden bg-black shadow-lg">
-            {step === 1 && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm text-white">
-                <Spin size="large" />
-                <div className="mt-6 flex flex-col items-center">
-                  <Activity className="animate-pulse text-sky-400 mb-2" size={32} />
-                  <Title level={4} style={{ color: 'white', margin: 0 }}>AI Model Inferencing...</Title>
-                  <Text className="text-slate-400">Analyzing vertebral structures and pathology</Text>
-                </div>
-              </div>
-            )}
-            <NiivueViewer volumes={vis3dData} />
-          </div>
-
-          <div className="col-span-4 flex flex-col gap-4">
-            {step === 1 ? (
-              <div className="bg-white rounded-xl p-8 border border-slate-100 flex-1 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                  <RefreshCw className="text-slate-300 animate-spin" size={24} />
-                </div>
-                <Text className="text-slate-400 text-lg font-medium">Processing Task...</Text>
-                <Text className="text-slate-300 text-sm mt-1">Status: {taskUid ? 'In Queue' : 'Uploading'}</Text>
-              </div>
-            ) : (
-              <ResultPanel taskUid={taskUid} />
-            )}
-            
-            {step === 2 && (
-              <Button 
-                icon={<RefreshCw size={16} />} 
-                onClick={reset}
-                className="h-12 rounded-xl flex items-center justify-center gap-2 text-slate-500 border-slate-200 hover:text-sky-500 hover:border-sky-500 transition-all"
-              >
-                New Inference
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+    <div className="h-[calc(100vh-64px)] bg-slate-50/30">
+      {renderContent()}
     </div>
   );
 };
