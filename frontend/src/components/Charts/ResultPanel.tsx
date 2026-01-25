@@ -68,6 +68,9 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ taskUid }) => {
   // Angles Tab 的状态
   const [selectedDiscLevel, setSelectedDiscLevel] = useState<string | null>(null);
 
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<string>('herniation');
+
   useEffect(() => {
     const fetchData = async () => {
       if (!taskUid) return;
@@ -343,13 +346,61 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ taskUid }) => {
       
       <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
         {renderGlobalSummary()}
-        <Tabs 
-          defaultActiveKey="herniation" 
-          items={tabItems} 
-          size="small"
-          type="card"
-          className="clinical-tabs-compact"
-        />
+        
+        <div className="flex flex-col gap-3">
+          <Segmented
+            block
+            value={activeTab}
+            onChange={(v) => setActiveTab(v as string)}
+            options={[
+              { 
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <Activity size={14}/>
+                    <span>突出</span>
+                  </div>
+                ), 
+                value: 'herniation' 
+              },
+              { 
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <Ruler size={14}/>
+                    <span>形态</span>
+                  </div>
+                ), 
+                value: 'geometry' 
+              },
+              { 
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <TrendingUp size={14}/>
+                    <span>角度</span>
+                  </div>
+                ), 
+                value: 'angles' 
+              },
+            ]}
+            className="bg-slate-100 p-1 rounded-lg shadow-inner"
+            size="large"
+          />
+          
+          <div className="mt-1">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === 'herniation' && renderHerniationTab()}
+                {activeTab === 'geometry' && renderGeometryTab()}
+                {activeTab === 'angles' && renderAnglesTab()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );

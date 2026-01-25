@@ -55,7 +55,7 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
       volumeList.push({
         url: volumes.base,
         colorMap: 'gray',
-        opacity: 0.5,
+        opacity: 1,
         visible: true,
       });
 
@@ -103,7 +103,7 @@ const NiivueViewer: React.FC<NiivueViewerProps> = ({ volumes }) => {
     if (nvRef.current && nvRef.current.volumes.length > 0) {
       // Update Base
       if (nvRef.current.volumes[0]) {
-        nvRef.current.setOpacity(0, layers.base ? 0.5 : 0);
+        nvRef.current.setOpacity(0, layers.base ? 1 : 0);
       }
       
       // The order in nvRef.current.volumes depends on what was actually loaded
