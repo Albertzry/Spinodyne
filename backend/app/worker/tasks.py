@@ -1,81 +1,82 @@
+import os
+import shutil
 import subprocess
-import logging
-from pathlib import Path
-from sqlmodel import Session, select
-from app.db.session import engine
-from app.models.task import Task
-from app.core import storage
-from app.core.celery_app import celery_app
-from app.services.ingestion import process_and_ingest_results
+import uuid
+from celery.utils.log import get_task_logger
+from .celery_app import celery_app
+from ..core import storage
+from ..models.task import Task
+from ..db.session import Session, engine
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
-@celery_app.task
-def run_full_inference(task_id: str):
+def ingest_task_results(task_id: str):
     """
-    Celery task to run the full inference pipeline for a given task.
+    Placeholder for ingesting results.
+    This will be implemented in the next step.
     """
-    with Session(engine) as session:
-        task = session.exec(select(Task).where(Task.id == task_id)).first()
-        if not task:
-            logger.error(f"Task {task_id} not found")
-            return
+    logger.info(f"Ingesting results for task {task_id}")
+    # Implementation details to follow
+    pass
 
-        # Update status to processing
-        task.status = "processing"
-        session.add(task)
-        session.commit()
-        session.refresh(task)
+from ..services.ingestion import process_and_ingest_results
 
-        try:
-            # 1. Local Setup
-            work_dir = Path(f"/tmp/spinodyne/{task_id}")
-            # Ensure the directory exists (storage.download_file creates parent, but explicit is fine)
-            work_dir.mkdir(parents=True, exist_ok=True)
+@celery_app.task(name="app.worker.tasks.run_inference", bind=True)
+def run_inference(self, task_id: str):
+    """
+    Main inference task for AI processing.
+    """
+    # Create a dedicated temp directory for this task
+    base_temp_dir = "/root/Spinodyne/backend/data/uploads"
+    task_temp_dir = os.path.join(base_temp_dir, str(task_id))
+    os.makedirs(task_temp_dir, exist_ok=True)
+    
+    raw_file_path = os.path.join(task_temp_dir, "raw.nii.gz")
+    
+    try:
+        # Step 0: Get task info from DB to find raw_scan_key
+        with Session(engine) as session:
+            task = session.get(Task, uuid.UUID(task_id))
+            if not task:
+                raise ValueError(f"Task {task_id} not found")
+            raw_scan_key = task.raw_scan_key
             
-            raw_nii_path = work_dir / "raw.nii.gz"
-            logger.info(f"Downloading {task.raw_scan_key} to {raw_nii_path}")
-            storage.download_file(task.raw_scan_key, raw_nii_path)
-
-            # 2. Execution Sequence
-            # a. Run infer_ldh.py
-            logger.info("Running infer_ldh.py")
-            cmd_infer = [
-                "conda", "run", "-n", "tss", "python",
-                "/root/TotalSpineSeg-v2/scripts/infer_ldh.py",
-                str(work_dir)
-            ]
-            subprocess.run(cmd_infer, check=True, capture_output=True, text=True)
-
-            # b. Run calculate.py
-            logger.info("Running calculate.py")
-            cmd_calc = [
-                "conda", "run", "-n", "tss", "python",
-                "/root/TotalSpineSeg-v2/calculate.py",
-                str(work_dir)
-            ]
-            subprocess.run(cmd_calc, check=True, capture_output=True, text=True)
-            
-            # Verify outputs
-            infer_output = work_dir / "infer_output"
-            result_output = work_dir / "result"
-            
-            if not infer_output.exists() or not result_output.exists():
-                raise RuntimeError("Expected output directories (infer_output, result) were not generated.")
-
-            logger.info(f"Inference successful for task {task_id}")
-            
-            # 4. Next Step Trigger
-            process_and_ingest_results(task_id)
-
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Subprocess failed for task {task_id}. Command: {e.cmd}. Stderr: {e.stderr}")
-            task.status = "failed"
+            # Update status to processing
+            task.status = "processing"
             session.add(task)
             session.commit()
-            # We don't re-raise to avoid Celery retrying immediately if logic assumes fatal error
-        except Exception as e:
-            logger.error(f"Unexpected error in task {task_id}: {str(e)}")
-            task.status = "failed"
-            session.add(task)
-            session.commit()
+
+        # Step 1: Download from MinIO
+        logger.info(f"Downloading {raw_scan_key} for task {task_id}")
+        storage.download_to_temp(raw_scan_key, custom_path=raw_file_path)
+
+        # Step 2: Execute AI inference commands
+        logger.info(f"Starting AI inference for task {task_id}")
+        
+        # [Placeholder for real subprocess calls]
+        # In actual deployment, these will generate:
+        # {task_temp_dir}/result/report.json
+        # {task_temp_dir}/infer_output/step2_output/*.nii.gz
+        # {task_temp_dir}/infer_output/ldh_output/*.nii.gz
+        # {task_temp_dir}/result/previews/*
+        
+        subprocess.run(["echo", "Running AI Pipeline..."], check=True)
+
+        # Step 3: Ingest results
+        process_and_ingest_results(task_id, task_temp_dir)
+
+    except Exception as e:
+        logger.error(f"Task {task_id} failed: {e}")
+        # Update task status to failed in DB
+        with Session(engine) as session:
+            task = session.get(Task, uuid.UUID(task_id))
+            if task:
+                task.status = "failed"
+                session.add(task)
+                session.commit()
+        raise e
+    finally:
+        # Clean up temporary directory
+        if os.path.exists(task_temp_dir):
+            logger.info(f"Cleaning up temp dir: {task_temp_dir}")
+            shutil.rmtree(task_temp_dir)

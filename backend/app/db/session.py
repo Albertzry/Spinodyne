@@ -1,14 +1,8 @@
-from typing import Generator
-
 from sqlmodel import Session, create_engine
+from ..core.config import settings
 
-from app.core.config import get_settings
+engine = create_engine(settings.POSTGRES_URL, echo=True)
 
-settings = get_settings()
-
-engine = create_engine(settings.POSTGRES_URL, echo=False)
-
-
-def get_session() -> Generator[Session, None, None]:
+def get_session():
     with Session(engine) as session:
         yield session

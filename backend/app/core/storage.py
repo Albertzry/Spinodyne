@@ -1,138 +1,97 @@
-from __future__ import annotations
-
 import io
 import os
 import tempfile
 from datetime import timedelta
-from pathlib import Path
-from typing import BinaryIO, Union, cast
-
 from minio import Minio
 from minio.error import S3Error
+from .config import settings
 
-from .config import get_settings
+# Initialize MinIO client
+minio_client = Minio(
+    settings.MINIO_ENDPOINT,
+    access_key=settings.MINIO_ACCESS_KEY,
+    secret_key=settings.MINIO_SECRET_KEY,
+    secure=False
+)
 
+def init_storage():
+    """Ensure the bucket exists."""
+    try:
+        if not minio_client.bucket_exists(settings.MINIO_BUCKET):
+            minio_client.make_bucket(settings.MINIO_BUCKET)
+            print(f"Bucket '{settings.MINIO_BUCKET}' created successfully.")
+        else:
+            print(f"Bucket '{settings.MINIO_BUCKET}' already exists.")
+    except S3Error as e:
+        print(f"Error initializing storage: {e}")
 
-def _get_client() -> Minio:
-	settings = get_settings()
-	return Minio(
-		settings.MINIO_ENDPOINT,
-		access_key=settings.MINIO_ACCESS_KEY,
-		secret_key=settings.MINIO_SECRET_KEY,
-		secure=False,
-	)
+def upload_file(file_data, object_name: str, content_type: str = "application/octet-stream"):
+    """
+    Upload bytes or stream to MinIO.
+    
+    :param file_data: bytes or file-like object
+    :param object_name: Destination object name in the bucket
+    :param content_type: Content type of the file
+    """
+    try:
+        if isinstance(file_data, bytes):
+            data_stream = io.BytesIO(file_data)
+            length = len(file_data)
+        else:
+            data_stream = file_data
+            # Try to get length
+            file_data.seek(0, os.SEEK_END)
+            length = file_data.tell()
+            file_data.seek(0)
 
+        minio_client.put_object(
+            settings.MINIO_BUCKET,
+            object_name,
+            data_stream,
+            length,
+            content_type=content_type
+        )
+        return True
+    except S3Error as e:
+        print(f"Error uploading file: {e}")
+        raise e
 
-def init_storage() -> None:
-	"""Ensure the configured bucket exists."""
+def get_presigned_url(object_name: str, expires: timedelta = timedelta(hours=1)):
+    """Generate a presigned URL for GET request."""
+    try:
+        return minio_client.presigned_get_object(
+            settings.MINIO_BUCKET,
+            object_name,
+            expires=expires
+        )
+    except S3Error as e:
+        print(f"Error generating presigned URL: {e}")
+        return None
 
-	settings = get_settings()
-	client = _get_client()
+def download_to_temp(object_name: str, custom_path: str = None) -> str:
+    """
+    Download object to a local temp file.
+    
+    :param object_name: Name of the object to download
+    :param custom_path: Optional custom path to save the file
+    :return: Path to the file
+    """
+    try:
+        if custom_path:
+            os.makedirs(os.path.dirname(custom_path), exist_ok=True)
+            temp_path = custom_path
+        else:
+            fd, temp_path = tempfile.mkstemp()
+            os.close(fd)
 
-	try:
-		exists = client.bucket_exists(settings.MINIO_BUCKET)
-		if not exists:
-			client.make_bucket(settings.MINIO_BUCKET)
-	except S3Error as exc:
-		raise RuntimeError(f"Failed to initialize MinIO bucket '{settings.MINIO_BUCKET}': {exc}") from exc
-
-
-FileData = Union[bytes, bytearray, memoryview, BinaryIO, "UploadFile"]
-
-
-def _normalize_file_data(file_data: FileData) -> tuple[BinaryIO, int]:
-	"""Return a (stream, length) tuple for MinIO put_object."""
-
-	# Avoid importing FastAPI at module import time.
-	upload_file = getattr(file_data, "file", None)
-	if upload_file is not None:
-		file_data = cast(BinaryIO, upload_file)
-
-	if isinstance(file_data, (bytes, bytearray, memoryview)):
-		raw = bytes(file_data)
-		return io.BytesIO(raw), len(raw)
-
-	stream = cast(BinaryIO, file_data)
-
-	# Try to get length without buffering.
-	try:
-		current = stream.tell()
-		stream.seek(0, os.SEEK_END)
-		end = stream.tell()
-		stream.seek(current, os.SEEK_SET)
-		return stream, end - current
-	except Exception:
-		# Fallback: buffer into memory.
-		raw = stream.read()
-		return io.BytesIO(raw), len(raw)
-
-
-def upload_file(file_data: FileData, object_name: str) -> str:
-	"""Upload data to MinIO and return the object name."""
-
-	settings = get_settings()
-	client = _get_client()
-
-	stream, length = _normalize_file_data(file_data)
-
-	try:
-		client.put_object(
-			settings.MINIO_BUCKET,
-			object_name,
-			data=stream,
-			length=length,
-		)
-	except S3Error as exc:
-		raise RuntimeError(f"Failed to upload '{object_name}' to MinIO: {exc}") from exc
-
-	return object_name
-
-
-def get_presigned_url(object_name: str) -> str:
-	"""Generate a presigned GET URL valid for 1 hour."""
-
-	settings = get_settings()
-	client = _get_client()
-
-	try:
-		return client.presigned_get_object(
-			settings.MINIO_BUCKET,
-			object_name,
-			expires=timedelta(hours=1),
-		)
-	except S3Error as exc:
-		raise RuntimeError(f"Failed to create presigned URL for '{object_name}': {exc}") from exc
-
-
-def download_to_temp(object_name: str) -> Path:
-	"""Download an object to a local temp file for further processing."""
-
-	settings = get_settings()
-	client = _get_client()
-
-	suffix = Path(object_name).suffix
-	tmp_dir = Path(tempfile.mkdtemp(prefix="spinodyne-"))
-	tmp_path = tmp_dir / f"object{suffix}"
-
-	try:
-		client.fget_object(settings.MINIO_BUCKET, object_name, str(tmp_path))
-	except S3Error as exc:
-		raise RuntimeError(f"Failed to download '{object_name}' from MinIO: {exc}") from exc
-
-	return tmp_path
-
-
-def download_file(object_name: str, destination: Path) -> None:
-	"""Download an object to a specific destination path."""
-
-	settings = get_settings()
-	client = _get_client()
-
-	# Ensure parent directory exists
-	destination.parent.mkdir(parents=True, exist_ok=True)
-
-	try:
-		client.fget_object(settings.MINIO_BUCKET, object_name, str(destination))
-	except S3Error as exc:
-		raise RuntimeError(f"Failed to download '{object_name}' from MinIO: {exc}") from exc
-
+        minio_client.fget_object(
+            settings.MINIO_BUCKET,
+            object_name,
+            temp_path
+        )
+        return temp_path
+    except S3Error as e:
+        print(f"Error downloading file: {e}")
+        if not custom_path and 'temp_path' in locals() and os.path.exists(temp_path):
+            os.remove(temp_path)
+        raise e

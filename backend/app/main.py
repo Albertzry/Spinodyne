@@ -1,27 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.tasks_router import router as tasks_router
+from .api.tasks_router import router as tasks_router
+from .core.config import settings
 
-app = FastAPI(title="Spinodyne API")
-
-# Configure CORS
-origins = [
-    "http://localhost:25320",
-    "http://localhost",  # Just in case
-]
+app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:25320"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register routers
-app.include_router(tasks_router, prefix="/api/tasks", tags=["tasks"])
-
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
+app.include_router(tasks_router, prefix="/api")

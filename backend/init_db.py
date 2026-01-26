@@ -1,44 +1,28 @@
 import sys
 import os
 
-# Ensure the app module is found if running from backend/ directly
+# Add the backend directory to sys.path so we can import 'app'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from sqlmodel import SQLModel
-
-# Import all models to register them with metadata
-from app.models.patient import Patient
-from app.models.task import Task, VertebraResult, DiscResult, GlobalMetric
 from app.db.session import engine
 from app.core.storage import init_storage
 
+# Import models to register them with SQLModel.metadata
+from app.models.patient import Patient
+from app.models.task import Task # This also imports VertebraResult, DiscResult, GlobalMetric
 
 def init_db():
-    print("Initializing database and storage...")
-
-    # Initialize MinIO
-    try:
-        init_storage()
-        print("✅ MinIO bucket ensured.")
-    except Exception as e:
-        print(f"❌ MinIO initialization failed: {e}")
-        sys.exit(1)
-
-    # Initialize Postgres
-    try:
-        print("🔄 Dropping existing tables...")
-        SQLModel.metadata.drop_all(engine)
-        
-        print("🔨 Creating new tables...")
-        SQLModel.metadata.create_all(engine)
-        print("✅ Database tables created successfully.")
-        
-    except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
-        sys.exit(1)
-
-    print("🚀 Spinodyne system initialized successfully.")
-
+    print("Dropping existing tables...")
+    SQLModel.metadata.drop_all(engine)
+    
+    print("Creating tables...")
+    SQLModel.metadata.create_all(engine)
+    
+    print("Initializing MinIO storage...")
+    init_storage()
+    
+    print("Environment initialization complete. System is ready.")
 
 if __name__ == "__main__":
     init_db()
