@@ -10,16 +10,36 @@ from ..db.session import Session, engine
 
 logger = get_task_logger(__name__)
 
-def ingest_task_results(task_id: str):
-    """
-    Placeholder for ingesting results.
-    This will be implemented in the next step.
-    """
-    logger.info(f"Ingesting results for task {task_id}")
-    # Implementation details to follow
-    pass
-
 from ..services.ingestion import process_and_ingest_results
+
+def _run_conda_command(cmd: list, task_id: str, step_name: str, env: dict):
+    logger.info(f"[{task_id}] RUN {step_name}: {' '.join(cmd)}")
+    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    if result.returncode != 0:
+        logger.error(f"[{task_id}] {step_name} FAILED (code {result.returncode})")
+        raise RuntimeError(f"{step_name} failed")
+    logger.info(f"[{task_id}] {step_name} SUCCESS")
+
+def run_inference_pipeline(task_id: str, task_temp_dir: str):
+    """
+    Execute the two-stage AI inference pipeline inside the tss conda environment.
+    """
+    env = os.environ.copy()
+    env["TOTALSPINESEG_DATA"] = "/opt/data/private/data_sum"
+
+    cmd_infer = [
+        "conda", "run", "-n", "tss", "python",
+        "/root/TotalSpineSeg-v2/scripts/infer_ldh.py",
+        task_temp_dir,
+    ]
+    _run_conda_command(cmd_infer, task_id, "infer_ldh", env)
+
+    cmd_calc = [
+        "conda", "run", "-n", "tss", "python",
+        "/root/TotalSpineSeg-v2/calculate.py",
+        task_temp_dir,
+    ]
+    _run_conda_command(cmd_calc, task_id, "calculate", env)
 
 @celery_app.task(name="app.worker.tasks.run_inference", bind=True)
 def run_inference(self, task_id: str):
@@ -47,22 +67,14 @@ def run_inference(self, task_id: str):
             session.commit()
 
         # Step 1: Download from MinIO
-        logger.info(f"Downloading {raw_scan_key} for task {task_id}")
+        logger.debug(f"Downloading {raw_scan_key} for task {task_id}")
         storage.download_to_temp(raw_scan_key, custom_path=raw_file_path)
 
         # Step 2: Execute AI inference commands
-        logger.info(f"Starting AI inference for task {task_id}")
-        
-        # [Placeholder for real subprocess calls]
-        # In actual deployment, these will generate:
-        # {task_temp_dir}/result/report.json
-        # {task_temp_dir}/infer_output/step2_output/*.nii.gz
-        # {task_temp_dir}/infer_output/ldh_output/*.nii.gz
-        # {task_temp_dir}/result/previews/*
-        
-        subprocess.run(["echo", "Running AI Pipeline..."], check=True)
+        logger.debug(f"Starting AI inference for task {task_id}")
+        run_inference_pipeline(task_id, task_temp_dir)
 
-        # Step 3: Ingest results
+        # Step 3: Ingest results and upload assets
         process_and_ingest_results(task_id, task_temp_dir)
 
     except Exception as e:
@@ -78,5 +90,5 @@ def run_inference(self, task_id: str):
     finally:
         # Clean up temporary directory
         if os.path.exists(task_temp_dir):
-            logger.info(f"Cleaning up temp dir: {task_temp_dir}")
+            logger.debug(f"Cleaning up temp dir: {task_temp_dir}")
             shutil.rmtree(task_temp_dir)

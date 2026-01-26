@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .patient import Patient
 
+# Ensure Patient model is registered with SQLAlchemy mapper
+from .patient import Patient  # noqa: F401
+
 class Task(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     patient_id: uuid.UUID = Field(foreign_key="patient.id")
@@ -50,6 +53,11 @@ class DiscResult(SQLModel, table=True):
     dia: float = Field(description="Disc Inclusion Angle")
     agl: float = Field(description="Angular parameters")
     status: str = Field(description="Analysis status for this disc")
+
+    # Detailed height metrics
+    scan_height_a: Optional[float] = Field(default=None, description="Anterior Scan Height")
+    scan_height_m: Optional[float] = Field(default=None, description="Middle Scan Height")
+    scan_height_p: Optional[float] = Field(default=None, description="Posterior Scan Height")
 
     task: Optional[Task] = Relationship(back_populates="disc_results")
 

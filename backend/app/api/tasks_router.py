@@ -1,93 +1,181 @@
 import os
 import uuid
 from datetime import date
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 
 from ..core import storage
 from ..db.session import get_session
 from ..models.patient import Patient
 from ..models.task import DiscResult, GlobalMetric, Task, VertebraResult
+from ..worker.tasks import run_inference
+from .schemas import TaskResultResponse, VertebraResultResponse, DiscResultResponse, GlobalMetricResponse, ThreeDFilesResponse, TaskInfoResponse
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
 
 
-@router.get("/{task_id}/result")
+@router.get("")
+def list_tasks(session: Session = Depends(get_session)):
+    tasks = session.exec(select(Task)).all()
+    return [
+        {
+            "id": str(task.id),
+            "status": task.status,
+            "patient_id": task.patient.external_id if task.patient else str(task.patient_id),
+            "patient_name": task.patient.name if task.patient else None,
+            "study_date": task.study_date,
+            "created_at": task.created_at,
+        }
+        for task in tasks
+    ]
+
+
+@router.get("/{task_id}")
+def get_task(task_id: uuid.UUID, session: Session = Depends(get_session)):
+    task = session.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return {
+        "id": str(task.id),
+        "status": task.status,
+        "patient_id": task.patient.external_id if task.patient else str(task.patient_id),
+        "patient_name": task.patient.name if task.patient else None,
+        "study_date": task.study_date,
+        "created_at": task.created_at,
+    }
+
+
+@router.get("/{task_id}/result", response_model=TaskResultResponse)
 def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session)):
     task = session.get(Task, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
     if task.status != "success":
-        return {
-            "task_id": str(task.id),
-            "status": task.status,
-            "message": "Task is not completed yet",
-        }
+        raise HTTPException(status_code=400, detail=f"Task is in {task.status} state")
+
+    # Helper to get presigned URL only if file exists in result_files
+    def get_url_if_exists(key: str) -> Optional[str]:
+        if key in task.result_files:
+            return storage.get_presigned_url(key)
+        return None
 
     # Generate presigned URLs for 3D files
-    # We use deterministic paths as defined in ingestion.py
     raw_url = storage.get_presigned_url(task.raw_scan_key)
-    struct_mask_key = f"tasks/{task_id}/3d/structure_mask.nii.gz"
-    ldh_mask_key = f"tasks/{task_id}/3d/ldh_mask.nii.gz"
+    struct_key = f"tasks/{task_id}/3d/structure.nii.gz"
+    ldh_key = f"tasks/{task_id}/3d/ldh.nii.gz"
     
-    struct_mask_url = storage.get_presigned_url(struct_mask_key)
-    ldh_mask_url = storage.get_presigned_url(ldh_mask_key)
+    struct_url = storage.get_presigned_url(struct_key)
+    ldh_url = storage.get_presigned_url(ldh_key)
 
-    # Generate presigned URLs for all preview images
-    previews = {}
-    for key in task.result_files:
-        # key format: tasks/{task_id}/previews/{filename}
-        filename = os.path.basename(key)
-        url = storage.get_presigned_url(key)
-        previews[filename] = url
-
-    # Map results and attach URLs
+    # 1. Map Vertebrae
     vertebrae = []
     for v in task.vertebra_results:
-        v_data = v.model_dump()
-        # Find matching preview if any (e.g., L1_preview.png)
-        # Assuming the AI naming convention matches the level
-        v_data["preview_url"] = previews.get(f"{v.level}.png") or previews.get(f"{v.level}_preview.png")
-        vertebrae.append(v_data)
+        key_vh = f"tasks/{task_id}/previews/vertebrae/vert_{v.level}_vh.png"
+        key_ap = f"tasks/{task_id}/previews/vertebrae/vert_{v.level}_ap.png"
+        
+        vertebrae.append(VertebraResultResponse(
+            level=v.level,
+            vh_anterior=v.vh_anterior,
+            vh_posterior=v.vh_posterior,
+            ap_diameter=v.ap_diameter,
+            status=v.status,
+            preview_url_vh=get_url_if_exists(key_vh),
+            preview_url_ap=get_url_if_exists(key_ap)
+        ))
 
+    # 2. Map Discs with new scan height fields
     discs = []
     for d in task.disc_results:
-        d_data = d.model_dump()
-        # Find matching preview if any (e.g., L1-L2_preview.png)
-        d_data["preview_url"] = previews.get(f"{d.level}.png") or previews.get(f"{d.level}_preview.png")
-        discs.append(d_data)
+        key_dm = f"tasks/{task_id}/previews/discs/disc_{d.level}_dm.png"
+        key_dia = f"tasks/{task_id}/previews/discs/disc_{d.level}_dia.png"
+        
+        discs.append(DiscResultResponse(
+            level=d.level,
+            dh=d.dh,
+            dhi=d.dhi,
+            hdr=d.hdr,
+            dia=d.dia,
+            status=d.status,
+            scan_height_a=d.scan_height_a,
+            scan_height_m=d.scan_height_m,
+            scan_height_p=d.scan_height_p,
+            preview_url_dm=get_url_if_exists(key_dm),
+            preview_url_dia=get_url_if_exists(key_dia)
+        ))
 
-    global_metrics = [g.model_dump() for g in task.global_metrics]
+    # 3. Map Global Metrics
+    global_res = None
+    if task.global_metrics:
+        g = task.global_metrics[0]
+        key_ll = f"tasks/{task_id}/previews/global/global_cobb_ll.png"
+        key_ss = f"tasks/{task_id}/previews/global/global_cobb_ss.png"
+        key_lsa = f"tasks/{task_id}/previews/global/global_cobb_lsa.png"
+        
+        global_res = GlobalMetricResponse(
+            ll=g.ll,
+            ss=g.ss,
+            lsa=g.lsa,
+            preview_url_ll=get_url_if_exists(key_ll),
+            preview_url_ss=get_url_if_exists(key_ss),
+            preview_url_lsa=get_url_if_exists(key_lsa)
+        )
 
-    return {
-        "task_id": str(task.id),
-        "status": task.status,
-        "patient_id": str(task.patient_id),
-        "study_date": task.study_date,
-        "three_d": {
-            "raw_url": raw_url,
-            "structure_mask_url": struct_mask_url,
-            "ldh_mask_url": ldh_mask_url,
-        },
-        "vertebrae": vertebrae,
-        "discs": discs,
-        "global_metrics": global_metrics[0] if global_metrics else None,
-        "all_previews": previews
-    }
+    # For backward compatibility
+    all_previews = {}
+    for key in task.result_files:
+        if "previews/" in key:
+            all_previews[os.path.basename(key)] = storage.get_presigned_url(key)
+
+    # Construct Task Info
+    task_info = TaskInfoResponse(
+        id=task.id,
+        patient_name=task.patient.name if task.patient else "Unknown",
+        patient_id_external=task.patient.external_id if task.patient else str(task.patient_id),
+        study_date=task.study_date
+    )
+
+    return TaskResultResponse(
+        task_id=task.id,
+        status=task.status,
+        task_info=task_info,
+        three_d=ThreeDFilesResponse(
+            raw_url=raw_url,
+            structure_mask_url=struct_url,
+            ldh_mask_url=ldh_url
+        ),
+        vertebrae=vertebrae,
+        discs=discs,
+        global_metrics=global_res,
+        all_previews=all_previews
+    )
 
 
 @router.post("/upload")
 def upload_task(
-    file: UploadFile = File(...),
-    patient_name: str = Form(...),
-    patient_id_external: str = Form(...),
-    study_date: date | None = Form(None),
+    file: Optional[UploadFile] = File(None),
+    upload: Optional[UploadFile] = File(None),
+    patient_name: Optional[str] = Form(None),
+    name: Optional[str] = Form(None),
+    patient_id_external: Optional[str] = Form(None),
+    patient_id: Optional[str] = Form(None),
+    study_date: Optional[date] = Form(None),
     session: Session = Depends(get_session),
 ):
+    file = file or upload
+    patient_name = patient_name or name
+    patient_id_external = patient_id_external or patient_id
+
+    if not file:
+        raise HTTPException(status_code=400, detail="Missing file upload.")
+    if not patient_name or not patient_id_external:
+        raise HTTPException(status_code=400, detail="Missing patient_name or patient_id_external.")
+
     if not file.filename or not file.filename.endswith(".nii.gz"):
         raise HTTPException(status_code=400, detail="Only .nii.gz files are allowed.")
 
@@ -131,9 +219,35 @@ def upload_task(
     session.commit()
     session.refresh(task)
 
+    run_inference.delay(str(task.id))
+
     return {
         "task_id": str(task.id),
         "patient_id": str(patient.id),
         "raw_scan_key": task.raw_scan_key,
         "status": task.status,
     }
+
+
+def _delete_task(task_id: uuid.UUID, session: Session):
+    task = session.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    session.exec(delete(VertebraResult).where(VertebraResult.task_id == task_id))
+    session.exec(delete(DiscResult).where(DiscResult.task_id == task_id))
+    session.exec(delete(GlobalMetric).where(GlobalMetric.task_id == task_id))
+    session.delete(task)
+    session.commit()
+
+    return {"status": "deleted", "task_id": str(task_id)}
+
+
+@router.delete("/{task_id}")
+def delete_task(task_id: uuid.UUID, session: Session = Depends(get_session)):
+    return _delete_task(task_id, session)
+
+
+@router.post("/{task_id}/delete")
+def delete_task_via_post(task_id: uuid.UUID, session: Session = Depends(get_session)):
+    return _delete_task(task_id, session)
