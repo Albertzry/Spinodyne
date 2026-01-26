@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Table, Tag, Space, Button, Popconfirm, message, Tooltip, Card } from 'antd';
-import { Eye, Trash2, Loader2, RefreshCw, FileText } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Typography, Table, Tag, Space, Button, Popconfirm, message, Tooltip, Card, Input } from 'antd';
+import { Eye, Trash2, Loader2, RefreshCw, FileText, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
@@ -18,6 +18,7 @@ interface Task {
 const Records: React.FC = () => {
   const [data, setData] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -96,7 +97,7 @@ const Records: React.FC = () => {
 
         switch (status) {
           case 'success':
-            color = 'processing';
+            color = 'success';
             text = 'COMPLETED';
             break;
           case 'processing':
@@ -156,6 +157,19 @@ const Records: React.FC = () => {
     },
   ];
 
+  // Filter data based on search text
+  const filteredData = useMemo(() => {
+    if (!searchText.trim()) {
+      return data;
+    }
+    const searchLower = searchText.toLowerCase().trim();
+    return data.filter((task) => {
+      const nameMatch = (task.patient_name || '').toLowerCase().includes(searchLower);
+      const idMatch = (task.patient_id || '').toLowerCase().includes(searchLower);
+      return nameMatch || idMatch;
+    });
+  }, [data, searchText]);
+
   return (
     <PageTransition>
       <div className="glass-panel" style={{ padding: '40px', background: 'rgba(255, 255, 255, 0.8)', minHeight: 'calc(100vh - 128px)' }}>
@@ -166,20 +180,33 @@ const Records: React.FC = () => {
                 </div>
                 <Title level={2} style={{ margin: 0 }}>Patient Records</Title>
             </Space>
-            <Button 
-                icon={<RefreshCw size={16} />} 
-                onClick={fetchTasks} 
-                loading={loading}
-                className="ant-btn-primary" // Apply brand gradient
-                type="primary"
-            >
-                Sync Data
-            </Button>
+            <Space size={12}>
+                <Input
+                    placeholder="Search by name or ID..."
+                    prefix={<Search size={16} style={{ color: '#94a3b8' }} />}
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    allowClear
+                    style={{ 
+                        width: 280,
+                        borderRadius: 8
+                    }}
+                />
+                <Button 
+                    icon={<RefreshCw size={16} />} 
+                    onClick={fetchTasks} 
+                    loading={loading}
+                    className="ant-btn-primary" // Apply brand gradient
+                    type="primary"
+                >
+                    Sync Data
+                </Button>
+            </Space>
         </div>
         
         <Table 
             columns={columns} 
-            dataSource={data} 
+            dataSource={filteredData} 
             rowKey="id"
             loading={loading}
             pagination={{ 

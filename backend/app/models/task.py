@@ -67,5 +67,11 @@ class GlobalMetric(SQLModel, table=True):
     ll: float = Field(description="Lumbar Lordosis")
     ss: float = Field(description="Sacral Slope")
     lsa: float = Field(description="Lumbar Sacral Angle")
+    
+    # Herniation severity metrics
+    pd: Optional[float] = Field(default=None, description="Protrusion Distance (mm)")
+    pa: Optional[float] = Field(default=None, description="Protrusion Area (mm²)")
+    par: Optional[float] = Field(default=None, description="Protrusion Area Ratio")
+    plr: Optional[float] = Field(default=None, description="Protrusion Length Ratio")
 
     task: Optional[Task] = Relationship(back_populates="global_metrics")

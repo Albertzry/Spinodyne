@@ -34,9 +34,14 @@ export interface GlobalMetric {
   ll: number;
   ss: number;
   lsa: number;
+  pd?: number;
+  pa?: number;
+  par?: number;
+  plr?: number;
   preview_url_ll?: string;
   preview_url_ss?: string;
   preview_url_lsa?: string;
+  preview_url_herniation?: string;
 }
 
 interface DataPanelProps {
@@ -237,57 +242,185 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
   const renderGlobal = () => {
     if (!globalMetrics) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
     
-    const metricItems = [
-        { label: 'Lumbar Lordosis', key: 'll', value: globalMetrics.ll, url: globalMetrics.preview_url_ll },
-        { label: 'Sacral Slope', key: 'ss', value: globalMetrics.ss, url: globalMetrics.preview_url_ss },
-        { label: 'Lumbosacral Angle', key: 'lsa', value: globalMetrics.lsa, url: globalMetrics.preview_url_lsa },
+    const herniationMetrics = [
+      { label: 'PD', fullName: 'Protrusion Distance', value: globalMetrics.pd, unit: 'mm' },
+      { label: 'PA', fullName: 'Protrusion Area', value: globalMetrics.pa, unit: 'mm²' },
+      { label: 'PAR', fullName: 'Protrusion Area Ratio', value: globalMetrics.par, unit: '' },
+      { label: 'PLR', fullName: 'Protrusion Length Ratio', value: globalMetrics.plr, unit: '' },
+    ];
+
+    const spinalMetrics = [
+      { label: 'Lumbar Lordosis', key: 'll', value: globalMetrics.ll, url: globalMetrics.preview_url_ll },
+      { label: 'Sacral Slope', key: 'ss', value: globalMetrics.ss, url: globalMetrics.preview_url_ss },
+      { label: 'Lumbosacral Angle', key: 'lsa', value: globalMetrics.lsa, url: globalMetrics.preview_url_lsa },
     ];
 
     return (
-      <div style={{ padding: '16px 0' }}>
-        <Row gutter={[16, 16]}>
-          {metricItems.map((m) => (
-            <Col span={8} key={m.key}>
-              <Card 
-                size="small" 
-                variant="borderless" 
-                style={{ background: '#f8fafc', borderRadius: 16, height: '100%' }}
-                bodyStyle={{ padding: 16, display: 'flex', flexDirection: 'column', height: '100%' }}
-              >
-                {/* Aligned Title Area */}
-                <div style={{ minHeight: 48, display: 'flex', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '8px 0' }}>
+        
+        {/* Top Section: Herniation Severity */}
+        <div>
+          <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
+            Herniation Severity Index
+          </Title>
+          
+          <Card 
+            variant="borderless" 
+            style={{ background: '#f8fafc', borderRadius: 16 }}
+            bodyStyle={{ padding: 12 }}
+          >
+            <Row gutter={12} style={{ height: '100%', minHeight: 240 }}>
+              {/* Left: Metrics Grid (2x2) - 占据更多空间 */}
+              <Col span={16}>
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Row gutter={[8, 8]} style={{ flex: 1, height: '100%' }}>
+                    {herniationMetrics.map((m) => (
+                      <Col span={12} key={m.label} style={{ display: 'flex' }}>
+                        <Card 
+                          size="small"
+                          style={{ 
+                            background: 'white', 
+                            borderRadius: 12, 
+                            border: '1px solid #e2e8f0',
+                            width: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                          bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', flex: 1, textAlign: 'center' }}
+                        >
+                          <Tooltip title={m.fullName}>
+                            <Text type="secondary" style={{ fontSize: 11, fontWeight: 600, display: 'block', marginBottom: 8, textAlign: 'center', width: '100%' }}>
+                              {m.label}
+                            </Text>
+                          </Tooltip>
+                          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                            <Statistic 
+                              value={m.value ?? '-'} 
+                              precision={m.value !== null && m.value !== undefined ? 2 : 0}
+                              suffix={m.value !== null && m.value !== undefined ? m.unit : ''}
+                              valueStyle={{ 
+                                color: '#0f172a', 
+                                fontWeight: 700, 
+                                fontSize: 22,
+                                lineHeight: 1.2,
+                                textAlign: 'center'
+                              }} 
+                            />
+                          </div>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+              </Col>
+
+              {/* Right: Vertical Image - 缩小宽度 */}
+              <Col span={8}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  minHeight: 240
+                }}>
+                  <div style={{ 
+                    height: '100%',
+                    maxHeight: 240,
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'white',
+                    borderRadius: 12,
+                    border: '1px solid #e2e8f0',
+                    overflow: 'hidden'
+                  }}>
+                    {globalMetrics.preview_url_herniation ? (
+                      <Image
+                        src={globalMetrics.preview_url_herniation}
+                        style={{ 
+                          height: '100%',
+                          maxHeight: 240,
+                          width: '100%',
+                          objectFit: 'contain' 
+                        }}
+                        preview={{
+                          mask: <div style={{ fontSize: 12 }}>View Full Size</div>,
+                        }}
+                      />
+                    ) : (
+                      <div style={{ padding: 40, textAlign: 'center' }}>
+                        <Text type="secondary">No herniation summary available</Text>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+        </div>
+
+        {/* Bottom Section: Spinal Alignment */}
+        <div>
+          <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
+            Spinal Alignment
+          </Title>
+          
+          <Row gutter={[12, 12]}>
+            {spinalMetrics.map((m) => (
+              <Col span={8} key={m.key}>
+                <Card 
+                  size="small" 
+                  variant="borderless" 
+                  style={{ background: '#f8fafc', borderRadius: 16, height: '100%' }}
+                  bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', height: '100%' }}
+                >
+                  {/* Aligned Title Area */}
+                  <div style={{ minHeight: 40, display: 'flex', alignItems: 'flex-start' }}>
                     <Text type="secondary" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.2 }}>
-                        {m.label}
+                      {m.label}
                     </Text>
-                </div>
+                  </div>
 
-                {/* Aligned Value Area */}
-                <div style={{ margin: '12px 0' }}>
+                  {/* Aligned Value Area */}
+                  <div style={{ margin: '8px 0' }}>
                     <Statistic 
-                        value={m.value} 
-                        precision={1} 
-                        suffix="°" 
-                        valueStyle={{ color: '#0f172a', fontWeight: 700, fontSize: 24 }} 
+                      value={m.value} 
+                      precision={1} 
+                      suffix="°" 
+                      valueStyle={{ color: '#0f172a', fontWeight: 700, fontSize: 24 }} 
                     />
-                </div>
+                  </div>
 
-                {/* Aligned Image Area */}
-                <div style={{ flex: 1, marginTop: 'auto' }}>
+                  {/* Aligned Image Area */}
+                  <div style={{ flex: 1, marginTop: 'auto' }}>
                     <PreviewThumbnail 
-                        url={m.url} 
-                        label={`${m.label} View`} 
-                        height={120} 
+                      url={m.url} 
+                      label={`${m.label} View`} 
+                      height={100} 
                     />
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
       </div>
     );
   };
 
   const tabItems = [
+    {
+      key: 'global',
+      label: (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Activity size={16} /> Global
+        </span>
+      ),
+      children: renderGlobal(),
+    },
     {
       key: 'vertebrae',
       label: (
@@ -306,24 +439,15 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
       ),
       children: renderDiscs(),
     },
-    {
-      key: 'global',
-      label: (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Activity size={16} /> Global
-        </span>
-      ),
-      children: renderGlobal(),
-    },
   ];
 
   return (
     <div className="glass-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 16, overflow: 'hidden' }}>
       <Tabs 
-        defaultActiveKey="vertebrae" 
+        defaultActiveKey="global" 
         items={tabItems} 
         type="card"
-        tabBarStyle={{ margin: 0, background: 'rgba(255,255,255,0.5)', padding: '8px 8px 0 8px' }}
+        tabBarStyle={{ margin: 0, background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(10px)', padding: '8px 8px 0 8px' }}
         style={{ flex: 1, overflow: 'hidden' }}
         className="custom-tabs"
       />
@@ -333,15 +457,70 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
             flex: 1;
             overflow-y: auto;
             padding: 16px;
+            position: relative;
+        }
+        .custom-tabs .ant-tabs-content-holder {
+            position: relative;
+        }
+        .custom-tabs .ant-tabs-tabpane {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .custom-tabs .ant-tabs-nav {
+            margin: 0 !important;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.3) !important;
+        }
+        .custom-tabs .ant-tabs-nav-list {
+            width: 100%;
+            display: flex;
         }
         .custom-tabs .ant-tabs-nav .ant-tabs-tab {
             border-radius: 8px 8px 0 0;
             border: none;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .custom-tabs .ant-tabs-nav .ant-tabs-tab:hover {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(12px);
         }
         .custom-tabs .ant-tabs-nav .ant-tabs-tab-active {
-            background: #fff !important;
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(15px);
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .custom-tabs .ant-tabs-nav .ant-tabs-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        .custom-tabs .ant-tabs-nav .ant-tabs-tab:hover::before {
+            left: 100%;
+        }
+        .custom-tabs .ant-tabs-ink-bar {
+            display: none;
         }
       `}</style>
     </div>

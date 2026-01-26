@@ -13,8 +13,8 @@ interface NiivuePanelProps {
 const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldhMaskUrl }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nvRef = useRef<Niivue | null>(null);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // State for toggles
   const [showRaw, setShowRaw] = useState(true);
   const [showStructure, setShowStructure] = useState(true);
@@ -38,6 +38,10 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
     });
 
     nv.attachToCanvas(canvasRef.current);
+    
+    // Immediately set to 3D render mode to prevent 2D slice view from showing
+    nv.setSliceType(nv.sliceTypeRender);
+    
     nvRef.current = nv;
 
     // Prepare volumes list
@@ -70,12 +74,33 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
 
     // Load volumes and set to 3D Render Mode
     nv.loadVolumes(volumes).then(() => {
+      // Wait a bit to ensure volumes are fully initialized
+      setTimeout(() => {
+        if (nv.volumes && nv.volumes.length > 0) {
+          // Ensure we're in 3D render mode
+          nv.setSliceType(nv.sliceTypeRender);
+          setIsLoaded(true);
+        }
+      }, 100);
+    }).catch((error) => {
+      console.error('Error loading volumes:', error);
+      // Still set loaded to true to prevent infinite loading state
       setIsLoaded(true);
-      nv.setSliceType(nv.sliceTypeRender); // Enable 3D Volume Rendering
     });
 
     return () => {
-        // Cleanup if needed by specific niivue version
+        // Cleanup Niivue instance
+        if (nvRef.current) {
+          try {
+            // Clear volumes and detach canvas
+            if (nvRef.current.volumes) {
+              nvRef.current.volumes = [];
+            }
+            nvRef.current = null;
+          } catch (error) {
+            console.error('Error cleaning up Niivue:', error);
+          }
+        }
     };
   }, [rawUrl, structureMaskUrl, ldhMaskUrl]);
 
@@ -84,22 +109,32 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
     const nv = nvRef.current;
     if (!nv || !isLoaded) return;
 
-    let currentIdx = 0;
-    
-    // Raw Volume
-    nv.setOpacity(currentIdx++, showRaw ? RAW_OPACITY : 0);
+    // Check if volumes are loaded
+    if (!nv.volumes || nv.volumes.length === 0) return;
 
-    // Structure Volume
-    if (structureMaskUrl) {
-      nv.setOpacity(currentIdx++, showStructure ? STRUCTURE_OPACITY : 0);
-    }
+    try {
+      let currentIdx = 0;
+      
+      // Raw Volume
+      if (nv.volumes[currentIdx]) {
+        nv.setOpacity(currentIdx++, showRaw ? RAW_OPACITY : 0);
+      }
 
-    // LDH Volume
-    if (ldhMaskUrl) {
-      nv.setOpacity(currentIdx++, showLDH ? LDH_OPACITY : 0);
+      // Structure Volume
+      if (structureMaskUrl && nv.volumes[currentIdx]) {
+        nv.setOpacity(currentIdx++, showStructure ? STRUCTURE_OPACITY : 0);
+      }
+
+      // LDH Volume
+      if (ldhMaskUrl && nv.volumes[currentIdx]) {
+        nv.setOpacity(currentIdx++, showLDH ? LDH_OPACITY : 0);
+      }
+      
+      nv.drawScene();
+    } catch (error) {
+      console.error('Error setting opacity:', error);
+      // Don't throw, just log the error to prevent page crash
     }
-    
-    nv.drawScene();
   }, [showRaw, showStructure, showLDH, isLoaded, structureMaskUrl, ldhMaskUrl]);
 
   // Handle mouse hover to show/hide controls
@@ -141,6 +176,28 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
         ref={canvasRef} 
         style={{ width: '100%', height: '100%', outline: 'none' }}
       />
+      
+      {/* 加载遮罩 - 确保在加载完成前保持黑屏 */}
+      {!isLoaded && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: '#000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 5
+          }}
+        >
+          <Text style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 14 }}>
+            Loading 3D Volume...
+          </Text>
+        </div>
+      )}
       
       {/* 右上角触发区域 */}
       {isLoaded && (

@@ -49,16 +49,27 @@ def ingest_task_results(task_id: str, result_dir: Path):
             # Ingest Global Metrics
             gm = report_data.get("global_metrics", {})
             if gm and gm.get("status") == "ok":
+                
                 ll = gm.get("ll_deg")
                 ss = gm.get("ss_deg")
                 lsa = gm.get("lsa_deg")
                 
-                # Check if this task already has global metrics to avoid duplicates
+                # Extract herniation severity metrics
+                pd = gm.get("pd_mm")
+                pa = gm.get("pa_mm2")
+                par = gm.get("par")
+                plr = gm.get("plr")
+                
+                # Create new GlobalMetric with proper None handling
                 g_metric = GlobalMetric(
                     task_id=task_uuid,
                     ll=ll if ll is not None else 0.0,
                     ss=ss if ss is not None else 0.0,
                     lsa=lsa if lsa is not None else 0.0,
+                    pd=pd if pd is not None else 0.0,
+                    pa=pa if pa is not None else 0.0,
+                    par=par if par is not None else 0.0,
+                    plr=plr if plr is not None else 0.0,
                 )
                 session.add(g_metric)
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Skeleton, Result, Button, Row, Col, Steps, Card, Spin, Descriptions, Divider } from 'antd';
 import { LoadingOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { Brain, FileText } from 'lucide-react';
+import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
 import NiivuePanel from '../components/Result/NiivuePanel';
 import DataPanel, { VertebraResult, DiscResult, GlobalMetric } from '../components/Result/DataPanel';
@@ -149,7 +150,7 @@ const ResultDashboard: React.FC = () => {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchTaskStatus = async () => {
     if (!id) return;
@@ -228,9 +229,38 @@ const ResultDashboard: React.FC = () => {
      );
   }
 
+  // Get task info for header
+  const taskInfo = task ? {
+    id: task.id,
+    patient_name: task.patient_name || 'Unknown',
+    patient_id_external: task.patient_id || 'N/A',
+    study_date: task.study_date || task.created_at ? dayjs(task.created_at).format('YYYY-MM-DD') : 'N/A'
+  } : null;
+
   return (
     <PageTransition>
         <div style={{ minHeight: 'calc(100vh - 120px)' }}>
+            {/* Header Section */}
+            {taskInfo && (
+              <>
+                <div style={{ marginBottom: 24 }}>
+                  <Title level={3} style={{ marginBottom: 16, color: '#0f172a' }}>Clinical Analysis Result</Title>
+                  <Descriptions 
+                    bordered 
+                    size="small" 
+                    items={[
+                        { label: 'Patient Name', children: taskInfo.patient_name },
+                        { label: 'Patient ID', children: taskInfo.patient_id_external },
+                        { label: 'Study Date', children: taskInfo.study_date },
+                        { label: 'Task ID', children: <Text copyable style={{ fontSize: 12 }}>{taskInfo.id}</Text> },
+                    ]}
+                    style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 8, overflow: 'hidden' }}
+                  />
+                </div>
+                <Divider style={{ margin: '24px 0' }} />
+              </>
+            )}
+            
             {/* Split Screen Layout (Processing State) */}
             <Row gutter={[24, 24]} style={{ height: '100%' }}>
                 
@@ -239,38 +269,65 @@ const ResultDashboard: React.FC = () => {
                     <div className="glass-panel" style={{ 
                         flex: 1, 
                         borderRadius: 16, 
-                        padding: 0, 
+                        padding: 30, 
                         position: 'relative',
                         overflow: 'hidden',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: 'rgba(15, 23, 42, 0.02)'
+                        background: 'rgba(255, 255, 255, 0.6)',
+                        border: '1px solid rgba(15, 23, 42, 0.1)',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
                     }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ marginBottom: 32, position: 'relative', display: 'inline-block' }}>
+                        <div style={{ 
+                            textAlign: 'center', 
+                            width: '100%', 
+                            padding: '20px',
+                            boxSizing: 'border-box',
+                            overflow: 'visible'
+                        }}>
+                            <div style={{ 
+                                marginBottom: 32, 
+                                position: 'relative', 
+                                display: 'inline-block',
+                                width: 160,
+                                height: 160,
+                                overflow: 'visible'
+                            }}>
                                 <div style={{ 
-                                    width: 120, height: 120, 
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    width: 120, 
+                                    height: 120, 
                                     borderRadius: '50%', 
                                     background: 'rgba(15, 23, 42, 0.05)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    position: 'relative',
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
                                     zIndex: 1
                                 }}>
                                     <Brain size={64} color="#0f172a" style={{ opacity: 0.5 }} />
                                 </div>
                                 <div style={{
-                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    position: 'absolute', 
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    width: 120,
+                                    height: 120,
                                     borderRadius: '50%',
                                     border: '4px solid #0f172a',
                                     opacity: 0.2,
-                                    animation: 'pulse 2s infinite'
+                                    animation: 'pulse 2s infinite',
+                                    boxSizing: 'border-box'
                                 }} />
                             </div>
-                            <Title level={3} style={{ color: '#0f172a' }}>AI Analyzing Spine Data</Title>
-                            <Text type="secondary">Segmenting vertebrae and identifying anomalies...</Text>
+                            <Title level={3} style={{ color: '#0f172a', marginBottom: 8, fontSize: 20 }}>AI Analyzing Spine Data</Title>
+                            <Text type="secondary" style={{ fontSize: 14 }}>Segmenting vertebrae and identifying anomalies...</Text>
                             
-                            <div style={{ marginTop: 40, width: 300, margin: '40px auto 0' }}>
+                            <div style={{ marginTop: 32, width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
                                 <Steps
                                     current={task?.status === 'processing' ? 1 : 0}
                                     items={[
@@ -278,6 +335,8 @@ const ResultDashboard: React.FC = () => {
                                         { title: 'Processing', icon: <LoadingOutlined /> },
                                         { title: 'Result', icon: <ClockCircleOutlined /> },
                                     ]}
+                                    style={{ width: '100%' }}
+                                    size="small"
                                 />
                             </div>
                         </div>
@@ -292,25 +351,39 @@ const ResultDashboard: React.FC = () => {
                         padding: 24,
                         display: 'flex',
                         flexDirection: 'column',
-                        background: 'rgba(255, 255, 255, 0.8)'
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        overflow: 'hidden',
+                        boxSizing: 'border-box'
                     }}>
-                        <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
                             <FileText size={20} color="#0f172a" />
                             <Title level={4} style={{ margin: 0 }}>Analysis Report</Title>
                         </div>
 
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24 }}>
-                            <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)' }}>
+                        <div style={{ 
+                            flex: 1, 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: 16,
+                            overflow: 'hidden',
+                            minHeight: 0
+                        }}>
+                            <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
                                 <Skeleton active avatar paragraph={{ rows: 1 }} />
                             </Card>
-                            <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)' }}>
-                                <Skeleton active title={false} paragraph={{ rows: 3 }} />
+                            <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                                <Skeleton active title={false} paragraph={{ rows: 2 }} />
                             </Card>
-                            <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)' }}>
-                                <Skeleton active title={false} paragraph={{ rows: 3 }} />
+                            <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                                <Skeleton active title={false} paragraph={{ rows: 2 }} />
                             </Card>
-                             <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flex: 1 }}>
-                                <Skeleton active title={false} paragraph={{ rows: 4 }} />
+                            <Card variant="borderless" style={{ 
+                                background: 'rgba(255,255,255,0.5)', 
+                                flex: 1,
+                                minHeight: 0,
+                                overflow: 'hidden'
+                            }}>
+                                <Skeleton active title={false} paragraph={{ rows: 3 }} />
                             </Card>
                         </div>
                     </div>
@@ -319,9 +392,9 @@ const ResultDashboard: React.FC = () => {
             
             <style>{`
                 @keyframes pulse {
-                    0% { transform: scale(1); opacity: 0.2; }
-                    50% { transform: scale(1.2); opacity: 0; }
-                    100% { transform: scale(1); opacity: 0; }
+                    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+                    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
                 }
             `}</style>
         </div>

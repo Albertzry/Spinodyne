@@ -29,9 +29,14 @@ class GlobalMetricResponse(BaseModel):
     ll: float
     ss: float
     lsa: float
+    pd: Optional[float] = None
+    pa: Optional[float] = None
+    par: Optional[float] = None
+    plr: Optional[float] = None
     preview_url_ll: Optional[HttpUrl] = None
     preview_url_ss: Optional[HttpUrl] = None
     preview_url_lsa: Optional[HttpUrl] = None
+    preview_url_herniation: Optional[HttpUrl] = None
 
 class ThreeDFilesResponse(BaseModel):
     raw_url: HttpUrl

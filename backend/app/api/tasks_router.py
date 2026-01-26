@@ -116,14 +116,20 @@ def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session))
         key_ll = f"tasks/{task_id}/previews/global/global_cobb_ll.png"
         key_ss = f"tasks/{task_id}/previews/global/global_cobb_ss.png"
         key_lsa = f"tasks/{task_id}/previews/global/global_cobb_lsa.png"
+        key_herniation = f"tasks/{task_id}/previews/global/global_herniation_summary.png"
         
         global_res = GlobalMetricResponse(
             ll=g.ll,
             ss=g.ss,
             lsa=g.lsa,
+            pd=g.pd,
+            pa=g.pa,
+            par=g.par,
+            plr=g.plr,
             preview_url_ll=get_url_if_exists(key_ll),
             preview_url_ss=get_url_if_exists(key_ss),
-            preview_url_lsa=get_url_if_exists(key_lsa)
+            preview_url_lsa=get_url_if_exists(key_lsa),
+            preview_url_herniation=get_url_if_exists(key_herniation)
         )
 
     # For backward compatibility
