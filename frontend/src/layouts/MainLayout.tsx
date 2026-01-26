@@ -21,52 +21,51 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         collapsible
         collapsed={collapsed}
         theme="light"
+        width={240}
+        collapsedWidth={80}
+        className="ant-layout-sider" // Handled by global CSS for Glassmorphism
         style={{
-          borderRight: '1px solid rgba(0,0,0,0.05)',
-          background: 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'blur(10px)',
           position: 'fixed',
           left: 0,
           top: 0,
           bottom: 0,
           zIndex: 100,
         }}
-        width={240}
-        collapsedWidth={80}
       >
         <div style={{ 
           height: 64, 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center',
-          borderBottom: '1px solid rgba(0,0,0,0.05)'
+          borderBottom: '1px solid rgba(0, 106, 254, 0.05)'
         }}>
           {collapsed ? (
             <div style={{ 
-                width: 32, 
-                height: 32, 
-                background: '#0f172a', 
-                borderRadius: 8,
+                width: 36, 
+                height: 36, 
+                background: 'var(--brand-gradient)', 
+                borderRadius: 10,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0, 106, 254, 0.2)'
             }}>
-                <Activity size={18} color="white" />
+                <Activity size={20} color="white" />
             </div>
           ) : (
-             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                  <div style={{ 
-                    width: 24, 
-                    height: 24, 
-                    background: '#0f172a', 
-                    borderRadius: 6,
+                    width: 28, 
+                    height: 28, 
+                    background: 'var(--brand-gradient)', 
+                    borderRadius: 8,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <Activity size={14} color="white" />
+                    <Activity size={16} color="white" />
                 </div>
-                <span style={{ fontWeight: 600, fontSize: 18, color: '#0f172a' }}>Spinodyne</span>
+                <span style={{ fontWeight: 700, fontSize: 18, color: '#1E293B', letterSpacing: '-0.02em' }}>Spinodyne</span>
              </div>
           )}
         </div>
@@ -91,24 +90,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           ]}
         />
         
-        <div style={{ position: 'absolute', bottom: 16, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', bottom: 20, width: '100%', display: 'flex', justifyContent: 'center' }}>
             <Button 
                 type="text" 
-                icon={collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />} 
+                icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />} 
                 onClick={() => setCollapsed(!collapsed)}
-                style={{ color: '#64748b' }}
+                style={{ color: '#94A3B8' }}
             />
         </div>
       </Sider>
       
-      <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'all 0.2s', background: 'transparent' }}>
+      <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', background: 'transparent' }}>
         <Content style={{ 
-            padding: '24px', 
+            padding: '32px', 
             margin: 0, 
-            minHeight: 280, 
+            minHeight: '100vh', 
             display: 'flex',
             flexDirection: 'column',
-            maxWidth: 1920, // 2k/4k optimization cap
+            maxWidth: 1600, 
             width: '100%',
             alignSelf: 'center'
         }}>

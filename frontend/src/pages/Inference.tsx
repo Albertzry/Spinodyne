@@ -7,16 +7,17 @@ import {
   Upload, 
   Typography, 
   message, 
-  ConfigProvider, 
-  theme 
+  theme,
+  Row,
+  Col
 } from 'antd';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, FileUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
+import type { UploadProps } from 'antd/es/upload/interface';
 import PageTransition from '../components/PageTransition';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Dragger } = Upload;
 
 const Inference: React.FC = () => {
@@ -28,16 +29,15 @@ const Inference: React.FC = () => {
   const onFinish = async (values: any) => {
     const { patientName, patientId, studyDate, file } = values;
 
-    if (!file || file.fileList.length === 0) {
+    if (!file || !file.fileList || file.fileList.length === 0) {
       message.error('Please upload an MRI file.');
       return;
     }
 
     const formData = new FormData();
     formData.append('patient_name', patientName);
-    formData.append('patient_id', patientId);
+    formData.append('patient_id_external', patientId);
     formData.append('study_date', studyDate.format('YYYY-MM-DD'));
-    // Ant Design Upload puts the file in fileList[0].originFileObj
     formData.append('file', file.fileList[0].originFileObj);
 
     setLoading(true);
@@ -53,14 +53,12 @@ const Inference: React.FC = () => {
       }
 
       const data = await response.json();
-      message.success('Upload successful! Starting analysis...');
-      
-      // Fire-and-forget: Navigate immediately to result page
+      message.success('Inference task created successfully');
       navigate(`/result/${data.task_id}`);
       
     } catch (error) {
       console.error('Error uploading file:', error);
-      message.error('Failed to upload file. Please try again.');
+      message.error('Failed to create task. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -74,12 +72,9 @@ const Inference: React.FC = () => {
     beforeUpload: (file) => {
         const isNiiGz = file.name.endsWith('.nii.gz');
         if (!isNiiGz) {
-            message.error(`${file.name} is not a valid MRI file (.nii.gz)`);
+            message.error(`${file.name} is not a valid .nii.gz file`);
         }
-        return false; // Prevent auto upload
-    },
-    onDrop(e) {
-      console.log('Dropped files', e.dataTransfer.files);
+        return false;
     },
   };
 
@@ -89,23 +84,32 @@ const Inference: React.FC = () => {
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '100%',
-        padding: '20px'
+        minHeight: 'calc(100vh - 128px)',
+        padding: '24px'
       }}>
         <div className="glass-panel" style={{ 
           width: '100%', 
-          maxWidth: 600, 
-          padding: 40, 
-          borderRadius: 24,
-          background: 'rgba(255, 255, 255, 0.65)' 
+          maxWidth: 640, 
+          padding: '48px',
+          background: 'rgba(255, 255, 255, 0.8)',
         }}>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <Title level={2} style={{ marginBottom: 8, color: token.colorPrimary }}>
-              New Inference
-            </Title>
-            <Typography.Text type="secondary">
-              Upload patient MRI data for spinal analysis
-            </Typography.Text>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{ 
+                width: 64, height: 64, 
+                background: 'var(--brand-gradient)', 
+                borderRadius: 16, 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                marginBottom: 20,
+                boxShadow: '0 8px 24px rgba(0, 106, 254, 0.2)'
+            }}>
+                <FileUp size={32} color="white" />
+            </div>
+            <Title level={2} style={{ marginBottom: 8 }}>New Spine Analysis</Title>
+            <Text type="secondary" style={{ fontSize: 15 }}>
+              Enter patient details and upload MRI data (.nii.gz)
+            </Text>
           </div>
 
           <Form
@@ -119,57 +123,58 @@ const Inference: React.FC = () => {
           >
             <Form.Item
               name="patientName"
-              label="Patient Name"
-              rules={[{ required: true, message: 'Please enter patient name' }]}
+              label={<Text strong>Patient Name</Text>}
+              rules={[{ required: true, message: 'Patient name is required' }]}
             >
-              <Input placeholder="Ex: John Doe" size="large" />
+              <Input placeholder="Full Name" size="large" />
             </Form.Item>
 
-            <div style={{ display: 'flex', gap: 16 }}>
-              <Form.Item
-                name="patientId"
-                label="Patient ID"
-                style={{ flex: 1 }}
-                rules={[{ required: true, message: 'Please enter patient ID' }]}
-              >
-                <Input placeholder="Ex: P-12345" size="large" />
-              </Form.Item>
-
-              <Form.Item
-                name="studyDate"
-                label="Study Date"
-                style={{ flex: 1 }}
-                rules={[{ required: true, message: 'Please select date' }]}
-              >
-                <DatePicker style={{ width: '100%' }} size="large" format="YYYY-MM-DD" />
-              </Form.Item>
-            </div>
+            <Row gutter={24}>
+              <Col span={12}>
+                <Form.Item
+                  name="patientId"
+                  label={<Text strong>Patient ID</Text>}
+                  rules={[{ required: true, message: 'ID is required' }]}
+                >
+                  <Input placeholder="Case Number" size="large" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="studyDate"
+                  label={<Text strong>Study Date</Text>}
+                  rules={[{ required: true, message: 'Date is required' }]}
+                >
+                  <DatePicker style={{ width: '100%' }} size="large" format="YYYY-MM-DD" />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Form.Item
               name="file"
-              label="MRI Scan File"
-              rules={[{ required: true, message: 'Please upload a file' }]}
-              valuePropName="file" // Important for Upload component validation
+              label={<Text strong>MRI Data (.nii.gz)</Text>}
+              rules={[{ required: true, message: 'MRI file is required' }]}
+              valuePropName="file"
             >
               <Dragger {...uploadProps} style={{ 
-                  background: 'rgba(255,255,255,0.4)', 
-                  border: '1px dashed #94a3b8',
-                  borderRadius: 12,
-                  padding: 20
+                  background: '#F8FAFC', 
+                  border: '2px dashed #E2E8F0',
+                  borderRadius: 16,
+                  padding: '24px'
               }}>
                 <p className="ant-upload-drag-icon">
                   <UploadCloud size={48} color={token.colorPrimary} strokeWidth={1.5} />
                 </p>
-                <p className="ant-upload-text" style={{ fontSize: 16, color: '#334155' }}>
-                  Click or drag MRI file to this area
+                <p className="ant-upload-text" style={{ fontWeight: 600 }}>
+                  Click or drag file to this area to upload
                 </p>
-                <p className="ant-upload-hint" style={{ color: '#64748b' }}>
-                  Support for .nii.gz format only
+                <p className="ant-upload-hint">
+                  Support for medical NIfTI volumes (.nii.gz)
                 </p>
               </Dragger>
             </Form.Item>
 
-            <Form.Item style={{ marginTop: 32, marginBottom: 0 }}>
+            <Form.Item style={{ marginTop: 40, marginBottom: 0 }}>
               <Button 
                 type="primary" 
                 htmlType="submit" 
@@ -177,13 +182,12 @@ const Inference: React.FC = () => {
                 loading={loading}
                 block
                 style={{ 
-                    height: 48, 
+                    height: 54, 
                     fontSize: 16, 
-                    fontWeight: 500,
-                    boxShadow: '0 4px 14px 0 rgba(15, 23, 42, 0.3)'
+                    fontWeight: 600,
                 }}
               >
-                {loading ? 'Uploading & Starting...' : 'Start Analysis'}
+                {loading ? 'Processing Upload...' : 'Initialize Analysis'}
               </Button>
             </Form.Item>
           </Form>
