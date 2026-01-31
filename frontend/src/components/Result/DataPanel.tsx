@@ -132,8 +132,12 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               borderRadius: 12,
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
-              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)'
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              cursor: 'pointer'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 106, 254, 0.1)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'; }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
@@ -191,8 +195,12 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               borderRadius: 12,
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
-              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)'
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              cursor: 'pointer'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 106, 254, 0.1)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'; }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
@@ -315,8 +323,11 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            transition: 'all 0.3s ease'
+                            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            cursor: 'pointer'
                           }}
+                          onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 106, 254, 0.1)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
                           styles={{ body: { padding: '12px 8px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', flex: 1, textAlign: 'center' } }}
                         >
                           <Tooltip title={m.fullName}>
@@ -404,8 +415,12 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                     borderRadius: 16,
                     height: '100%',
                     border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.1)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    cursor: 'pointer'
                   }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 106, 254, 0.12)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.03)'; }}
                   styles={{ body: { padding: 16, display: 'flex', flexDirection: 'column', height: '100%' } }}
                 >
                   <div style={{ minHeight: 40, display: 'flex', alignItems: 'flex-start' }}>

@@ -67,48 +67,41 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 106, 254, 0.05)',
           flexShrink: 0
         }}>
-          <AnimatePresence mode="wait">
-            {collapsed ? (
-              <motion.div
-                key="mini-logo"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                style={{
-                  width: 36,
-                  height: 36,
-                  background: 'var(--brand-gradient)',
-                  borderRadius: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(0, 106, 254, 0.2)'
-                }}>
-                <Activity size={20} color="white" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="full-logo"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-              >
-                <div style={{
-                  width: 28,
-                  height: 28,
-                  background: 'var(--brand-gradient)',
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Activity size={16} color="white" />
-                </div>
-                <span style={{ fontWeight: 700, fontSize: 18, color: textColor, letterSpacing: '-0.02em' }}>Spinodyne</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 10, transition: 'gap 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+            <motion.div
+              layout
+              style={{
+                background: 'var(--brand-gradient)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: collapsed ? '0 4px 12px rgba(0, 106, 254, 0.2)' : 'none'
+              }}
+              animate={{
+                width: collapsed ? 36 : 28,
+                height: collapsed ? 36 : 28,
+                borderRadius: collapsed ? 10 : 8
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <Activity size={collapsed ? 20 : 16} color="white" style={{ transition: 'all 0.3s' }} />
+            </motion.div>
+
+            <AnimatePresence mode="popLayout">
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: 'auto' }}
+                  exit={{ opacity: 0, x: -10, width: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  style={{ fontWeight: 700, fontSize: 18, color: textColor, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden' }}
+                >
+                  Spinodyne
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         <LayoutGroup id="sidebar-menu">
@@ -136,18 +129,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       whileHover={{ color: isActive ? '#006AFE' : textColor }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, flexShrink: 0 }}>
                         {item.icon}
                       </div>
-                      {!collapsed && (
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          style={{ fontWeight: isActive ? 600 : 500, whiteSpace: 'nowrap' }}
-                        >
-                          {item.label}
-                        </motion.span>
-                      )}
+                      <AnimatePresence mode="popLayout">
+                        {!collapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, x: -10, width: 0 }}
+                            animate={{ opacity: 1, x: 0, width: 'auto', marginLeft: 12 }}
+                            exit={{ opacity: 0, x: -10, width: 0, marginLeft: 0 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25, mass: 1 }}
+                            style={{ fontWeight: isActive ? 600 : 500, whiteSpace: 'nowrap', overflow: 'hidden' }}
+                          >
+                            {item.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
 
                     {isActive && (
@@ -173,12 +170,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </LayoutGroup>
 
         <div style={{ padding: '20px 12px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, borderTop: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 106, 254, 0.05)' }}>
-          {!collapsed && (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <LanguageSwitcher />
-              <ThemeSwitcher />
-            </div>
-          )}
+          <AnimatePresence mode="popLayout">
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.9, height: 0 }}
+                animate={{ opacity: 1, y: 0, scale: 1, height: 'auto' }}
+                exit={{ opacity: 0, y: 10, scale: 0.9, height: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                style={{ display: 'flex', gap: 8, overflow: 'hidden', transformOrigin: 'bottom' }}
+              >
+                <LanguageSwitcher />
+                <ThemeSwitcher />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <Button
             type="text"
             icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}

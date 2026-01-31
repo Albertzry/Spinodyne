@@ -143,3 +143,30 @@ td,
   transition-duration: 0.5s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Global Tooltip Glassmorphism */
+.ant-tooltip-inner {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+  color: #334155 !important;
+  border-radius: 8px !important;
+}
+
+[data-theme='dark'] .ant-tooltip-inner {
+  background: rgba(30, 41, 59, 0.45) !important;
+  color: #E2E8F0 !important;
+}
+
+.ant-tooltip-arrow-content {
+  background: var(--glass-bg) !important;
+  /* Match tooltip background */
+}
+
+/* Fix arrow border/shadow blending roughly or hide it if complex */
+.ant-tooltip-arrow {
+  display: none !important;
+  /* Often cleaner to just hide arrow in glassmorphism designs */
+}
