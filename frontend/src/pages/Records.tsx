@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
+import { motion } from 'framer-motion';
 import { MotionCard, MotionButton, MotionContainer } from '../components/MotionComponents';
 
 const { Title, Text } = Typography;
@@ -233,8 +234,39 @@ const Records: React.FC = () => {
               showSizeChanger: false,
               position: ['bottomCenter']
             }}
+            onRow={(_, index) => {
+              // Pass the index as a prop to the custom row component
+              return { index } as any;
+            }}
             style={{ background: 'transparent' }}
             className="aero-table"
+            components={{
+              body: {
+                row: ({ children, index, ...props }: any) => {
+                  // Ensure we use a valid index. Default to 0 if undefined.
+                  // Use modulo 10 to reset delay for each page (pageSize is 10)
+                  const safeIndex = typeof index === 'number' ? index : 0;
+                  const delayIndex = safeIndex % 10;
+
+                  return (
+                    <motion.tr
+                      {...props}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        delay: delayIndex * 0.05, // Stagger effect resets every page
+                        duration: 0.3,
+                        ease: "easeOut"
+                      }}
+                      whileHover={{ scale: 1.005, backgroundColor: 'rgba(0, 106, 254, 0.02)', transition: { duration: 0.2 } }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {children}
+                    </motion.tr>
+                  );
+                },
+              },
+            }}
           />
 
           <style>{`
@@ -253,7 +285,15 @@ const Records: React.FC = () => {
                 font-size: 11px;
                 letter-spacing: 0.05em;
             }
+            .aero-table .ant-table-tbody > tr > td {
+              border-bottom: 1px solid rgba(0,0,0,0.02) !important;
+            }
+            .aero-table .ant-table-tbody > tr:last-child > td {
+              border-bottom: none !important;
+            }
         `}</style>
+          {/* Removing MotionContainer wrapper since we are animating rows individually now, or keeping it for header staggered entance */}
+          {/* Actually, let's keep the MotionContainer for the header part, but the table itself handles rows. */}
         </MotionContainer>
       </MotionCard>
     </PageTransition>
