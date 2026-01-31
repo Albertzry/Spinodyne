@@ -8,6 +8,8 @@ import PageTransition from '../components/PageTransition';
 import { motion } from 'framer-motion';
 import { MotionCard, MotionButton, MotionContainer } from '../components/MotionComponents';
 
+import { useTheme } from '../context/ThemeContext';
+
 const { Title, Text } = Typography;
 
 interface Task {
@@ -23,6 +25,7 @@ const Records: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -74,8 +77,8 @@ const Records: React.FC = () => {
       sorter: (a: Task, b: Task) => (a.patient_name || '').localeCompare(b.patient_name || ''),
       render: (_: any, record: Task) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ fontWeight: 600, color: '#1E293B' }}>{record.patient_name || 'N/A'}</span>
-          <span style={{ fontSize: 12, color: '#64748B' }}>{t('recordsPage.id')}: {record.patient_id}</span>
+          <span style={{ fontWeight: 600, color: isDarkMode ? '#F1F5F9' : '#1E293B' }}>{record.patient_name || 'N/A'}</span>
+          <span style={{ fontSize: 12, color: isDarkMode ? '#94A3B8' : '#64748B' }}>{t('recordsPage.id')}: {record.patient_id}</span>
         </div>
       ),
     },
@@ -86,7 +89,7 @@ const Records: React.FC = () => {
       sorter: (a: Task, b: Task) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
       defaultSortOrder: 'descend' as const,
       render: (date: string) => (
-        <Text style={{ color: '#475569' }}>{dayjs(date).format('YYYY-MM-DD HH:mm')}</Text>
+        <Text style={{ color: isDarkMode ? '#CBD5E1' : '#475569' }}>{dayjs(date).format('YYYY-MM-DD HH:mm')}</Text>
       ),
     },
     {
@@ -186,7 +189,15 @@ const Records: React.FC = () => {
         <MotionContainer>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
             <Space size={12}>
-              <div style={{ width: 40, height: 40, background: '#EFF6FF', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{
+                width: 40,
+                height: 40,
+                background: isDarkMode ? 'rgba(0, 106, 254, 0.15)' : '#EFF6FF',
+                borderRadius: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <FileText size={20} color="#006AFE" />
               </div>
               <Title level={2} style={{ margin: 0 }}>{t('recordsPage.title')}</Title>
@@ -278,8 +289,8 @@ const Records: React.FC = () => {
                 background: transparent !important;
             }
             .aero-table .ant-table-thead > tr > th {
-                background: #F8FAFC !important;
-                color: #64748B !important;
+                background: ${isDarkMode ? 'rgba(30, 41, 59, 0.6)' : '#F8FAFC'} !important;
+                color: ${isDarkMode ? '#E2E8F0' : '#64748B'} !important;
                 font-weight: 600 !important;
                 text-transform: uppercase;
                 font-size: 11px;

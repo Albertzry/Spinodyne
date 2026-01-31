@@ -79,13 +79,13 @@ const MetricValue = ({ value, unit, size = 'medium' }: { value: number | undefin
   </div>
 );
 
-const PreviewThumbnail = ({ url, label, height = 80 }: { url?: string; label: string; height?: number }) => (
+const PreviewThumbnail = ({ url, label, height = 80, isDarkMode = false }: { url?: string; label: string; height?: number; isDarkMode?: boolean }) => (
   <div style={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
     <div style={{
       height,
-      background: '#f8fafc',
+      background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : '#f8fafc',
       borderRadius: 6,
-      border: '1px solid #f1f5f9',
+      border: isDarkMode ? '1px solid #334155' : '1px solid #f1f5f9',
       overflow: 'hidden',
       display: 'flex',
       alignItems: 'center',
@@ -111,8 +111,11 @@ const PreviewThumbnail = ({ url, label, height = 80 }: { url?: string; label: st
 
 // --- Main Component ---
 
+import { useTheme } from '../../context/ThemeContext';
+
 const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }) => {
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState('global');
 
   const renderVertebrae = () => (
@@ -128,15 +131,15 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               width: '100%',
               borderRadius: 12,
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              background: 'white',
-              border: '1px solid rgba(0, 106, 254, 0.08)'
+              background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)'
             }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
                   <div style={{
-                    width: 28, height: 28, background: '#0f172a', color: 'white',
+                    width: 28, height: 28, background: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#0f172a', color: isDarkMode ? '#E2E8F0' : 'white',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: 13, marginRight: 8
                   }}>
@@ -161,8 +164,8 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               </Col>
               <Col span={14}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <PreviewThumbnail url={item.preview_url_vh} label={t('dataPanel.sagittal') + " (VH)"} />
-                  <PreviewThumbnail url={item.preview_url_ap} label={t('dataPanel.axial') + " (AP)"} />
+                  <PreviewThumbnail url={item.preview_url_vh} label={t('dataPanel.sagittal') + " (VH)"} isDarkMode={isDarkMode} />
+                  <PreviewThumbnail url={item.preview_url_ap} label={t('dataPanel.axial') + " (AP)"} isDarkMode={isDarkMode} />
                 </div>
               </Col>
             </Row>
@@ -185,15 +188,15 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               width: '100%',
               borderRadius: 12,
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              background: 'white',
-              border: '1px solid rgba(0, 106, 254, 0.08)'
+              background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)'
             }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                   <div style={{
-                    width: 50, height: 28, background: '#334155', color: 'white',
+                    width: 50, height: 28, background: isDarkMode ? 'rgba(0, 106, 254, 0.15)' : '#334155', color: isDarkMode ? '#60A5FA' : 'white',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: 11, marginRight: 8
                   }}>
@@ -247,8 +250,8 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               </Col>
               <Col span={14}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <PreviewThumbnail url={item.preview_url_dm} label={t('dataPanel.measurement') + " (DM)"} />
-                  <PreviewThumbnail url={item.preview_url_dia} label={t('dataPanel.angle') + " (DIA)"} />
+                  <PreviewThumbnail url={item.preview_url_dm} label={t('dataPanel.measurement') + " (DM)"} isDarkMode={isDarkMode} />
+                  <PreviewThumbnail url={item.preview_url_dia} label={t('dataPanel.angle') + " (DIA)"} isDarkMode={isDarkMode} />
                 </div>
               </Col>
             </Row>
@@ -277,16 +280,16 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
     return (
       <MotionContainer style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '8px 0' }}>
         <MotionItem>
-          <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
+          <Title level={5} style={{ marginBottom: 8, color: isDarkMode ? '#F1F5F9' : '#0f172a' }}>
             {t('dataPanel.herniationSeverity')}
           </Title>
 
           <Card
             variant="borderless"
             style={{
-              background: 'white',
+              background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
               borderRadius: 16,
-              border: '1px solid rgba(0, 106, 254, 0.1)',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.1)',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
             }}
             styles={{ body: { padding: 16 } }}
@@ -300,9 +303,9 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                         <Card
                           size="small"
                           style={{
-                            background: '#F8FAFC',
+                            background: isDarkMode ? 'rgba(30, 41, 59, 0.6)' : '#F8FAFC',
                             borderRadius: 12,
-                            border: '1px solid #E2E8F0',
+                            border: isDarkMode ? '1px solid #334155' : '1px solid #E2E8F0',
                             width: '100%',
                             display: 'flex',
                             flexDirection: 'column',
@@ -321,7 +324,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                               precision={m.value !== null && m.value !== undefined ? 2 : 0}
                               suffix={m.value !== null && m.value !== undefined ? m.unit : ''}
                               valueStyle={{
-                                color: '#0f172a',
+                                color: isDarkMode ? '#E2E8F0' : '#0f172a',
                                 fontWeight: 700,
                                 fontSize: 22,
                                 lineHeight: 1.2,
@@ -351,9 +354,9 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'white',
+                    background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
                     borderRadius: 12,
-                    border: '1px solid #e2e8f0',
+                    border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
                     overflow: 'hidden'
                   }}>
                     {globalMetrics.preview_url_herniation ? (
@@ -382,7 +385,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
         </MotionItem>
 
         <MotionItem>
-          <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
+          <Title level={5} style={{ marginBottom: 8, color: isDarkMode ? '#F1F5F9' : '#0f172a' }}>
             {t('dataPanel.spinalAlignment')}
           </Title>
 
@@ -393,10 +396,10 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                   size="small"
                   variant="borderless"
                   style={{
-                    background: 'white',
+                    background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'white',
                     borderRadius: 16,
                     height: '100%',
-                    border: '1px solid rgba(0, 106, 254, 0.1)',
+                    border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.1)',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
                   }}
                   styles={{ body: { padding: 16, display: 'flex', flexDirection: 'column', height: '100%' } }}
@@ -412,7 +415,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                       value={m.value}
                       precision={1}
                       suffix="°"
-                      valueStyle={{ color: '#0f172a', fontWeight: 700, fontSize: 24 }}
+                      valueStyle={{ color: isDarkMode ? '#E2E8F0' : '#0f172a', fontWeight: 700, fontSize: 24 }}
                     />
                   </div>
 
@@ -421,6 +424,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                       url={m.url}
                       label={`${m.label} ${t('dataPanel.view')}`}
                       height={100}
+                      isDarkMode={isDarkMode}
                     />
                   </div>
                 </Card>
@@ -466,10 +470,10 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
     <div className="glass-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 16, overflow: 'hidden' }}>
       {/* Custom Animated Tab Bar with Gliding Indicator */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.3)',
+        background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.3)',
         backdropFilter: 'blur(10px)',
         padding: '8px',
-        borderBottom: '1px solid rgba(0, 106, 254, 0.05)',
+        borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 106, 254, 0.05)',
         position: 'relative',
       }}>
         {/* Tab Items Container */}
@@ -482,7 +486,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               left: `calc(${activeTabIndex} * (100% + 4px) / ${tabItems.length})`,
               width: `calc((100% - ${(tabItems.length - 1) * 4}px) / ${tabItems.length})`,
               height: 40,
-              background: '#FFFFFF',
+              background: isDarkMode ? 'rgba(30, 41, 59, 0.8)' : '#FFFFFF',
               borderRadius: '8px',
               boxShadow: '0 2px 12px rgba(0, 106, 254, 0.12)',
               border: '1px solid rgba(0, 106, 254, 0.2)',

@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import ThemeSwitcher from '../components/ThemeSwitcher';
+import { useTheme } from '../context/ThemeContext';
 
 const { Content } = Layout;
 
@@ -17,6 +19,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
 
   const menuItems = [
     {
@@ -31,6 +34,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     },
   ];
 
+  const textColor = isDarkMode ? '#F8FAFC' : '#1E293B';
+  const subTextColor = isDarkMode ? '#94A3B8' : '#64748B';
+
   return (
     <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
       <motion.aside
@@ -44,11 +50,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           top: 0,
           bottom: 0,
           zIndex: 100,
-          background: 'rgba(255, 255, 255, 0.65)',
+          // background is handled by CSS class .ant-layout-sider
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(255, 255, 255, 0.6)',
-          boxShadow: '4px 0 24px rgba(0, 106, 254, 0.04)',
+          // borderRight is handled by CSS
+          boxShadow: isDarkMode ? '4px 0 24px rgba(0, 0, 0, 0.2)' : '4px 0 24px rgba(0, 106, 254, 0.04)',
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -58,7 +64,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderBottom: '1px solid rgba(0, 106, 254, 0.05)',
+          borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 106, 254, 0.05)',
           flexShrink: 0
         }}>
           <AnimatePresence mode="wait">
@@ -99,7 +105,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 }}>
                   <Activity size={16} color="white" />
                 </div>
-                <span style={{ fontWeight: 700, fontSize: 18, color: '#1E293B', letterSpacing: '-0.02em' }}>Spinodyne</span>
+                <span style={{ fontWeight: 700, fontSize: 18, color: textColor, letterSpacing: '-0.02em' }}>Spinodyne</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -120,14 +126,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                         padding: '12px',
                         borderRadius: '12px',
                         cursor: 'pointer',
-                        color: isActive ? '#006AFE' : '#64748B',
+                        color: isActive ? '#006AFE' : subTextColor,
                         transition: 'color 0.3s ease',
                         justifyContent: collapsed ? 'center' : 'flex-start',
                         gap: collapsed ? 0 : 12,
                         zIndex: 2,
                         position: 'relative'
                       }}
-                      whileHover={{ color: isActive ? '#006AFE' : '#1E293B' }}
+                      whileHover={{ color: isActive ? '#006AFE' : textColor }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24 }}>
@@ -150,9 +156,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                         style={{
                           position: 'absolute',
                           inset: 0,
-                          background: 'rgba(0, 106, 254, 0.08)',
+                          background: isDarkMode ? 'rgba(0, 106, 254, 0.15)' : 'rgba(0, 106, 254, 0.08)',
                           borderRadius: '12px',
-                          border: '1px solid rgba(0, 106, 254, 0.1)',
+                          border: isDarkMode ? '1px solid rgba(0, 106, 254, 0.2)' : '1px solid rgba(0, 106, 254, 0.1)',
                           zIndex: 1
                         }}
                         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
@@ -166,13 +172,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </nav>
         </LayoutGroup>
 
-        <div style={{ padding: '20px 12px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, borderTop: '1px solid rgba(0, 106, 254, 0.05)' }}>
-          {!collapsed && <LanguageSwitcher />}
+        <div style={{ padding: '20px 12px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, borderTop: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 106, 254, 0.05)' }}>
+          {!collapsed && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <LanguageSwitcher />
+              <ThemeSwitcher />
+            </div>
+          )}
           <Button
             type="text"
             icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             onClick={() => setCollapsed(!collapsed)}
-            style={{ color: '#94A3B8' }}
+            style={{ color: subTextColor }}
           />
         </div>
       </motion.aside>

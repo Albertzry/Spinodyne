@@ -18,6 +18,8 @@ import type { UploadProps } from 'antd/es/upload/interface';
 import PageTransition from '../components/PageTransition';
 import { MotionCard, MotionButton, MotionContainer, MotionItem } from '../components/MotionComponents';
 
+import { useTheme } from '../context/ThemeContext';
+
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
 
@@ -27,6 +29,7 @@ const Inference: React.FC = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const { token } = theme.useToken();
+  const { isDarkMode } = useTheme();
 
   const onFinish = async (values: any) => {
     const { patientName, patientId, studyDate, file } = values;
@@ -172,8 +175,8 @@ const Inference: React.FC = () => {
                   valuePropName="file"
                 >
                   <Dragger {...uploadProps} style={{
-                    background: '#F8FAFC',
-                    border: '2px dashed #E2E8F0',
+                    background: isDarkMode ? 'rgba(15, 23, 42, 0.8)' : '#F8FAFC',
+                    border: isDarkMode ? `2px dashed ${isDarkMode ? '#334155' : '#E2E8F0'}` : '2px dashed #E2E8F0',
                     borderRadius: 16,
                     padding: '24px'
                   }}>

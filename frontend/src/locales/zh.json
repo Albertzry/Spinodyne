@@ -4,6 +4,10 @@
         "inference": "推理",
         "records": "记录",
         "language": "语言",
+        "darkMode": "深色模式",
+        "lightMode": "浅色模式",
+        "switchToLightMode": "切换到浅色模式",
+        "switchToDarkMode": "切换到深色模式",
         "inferencePage": {
             "title": "新建脊柱分析",
             "subtitle": "输入患者详情并上传 MRI 数据 (.nii.gz)",

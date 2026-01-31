@@ -4,6 +4,10 @@
         "inference": "Inference",
         "records": "Records",
         "language": "Language",
+        "darkMode": "Dark Mode",
+        "lightMode": "Light Mode",
+        "switchToLightMode": "Switch to Light Mode",
+        "switchToDarkMode": "Switch to Dark Mode",
         "inferencePage": {
             "title": "New Spine Analysis",
             "subtitle": "Enter patient details and upload MRI data (.nii.gz)",

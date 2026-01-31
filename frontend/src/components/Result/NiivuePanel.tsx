@@ -3,6 +3,8 @@ import { Niivue } from '@niivue/niivue';
 import { Checkbox, Card, Typography, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+import { useTheme } from '../../context/ThemeContext';
+
 const { Text } = Typography;
 
 interface NiivuePanelProps {
@@ -13,6 +15,7 @@ interface NiivuePanelProps {
 
 const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldhMaskUrl }) => {
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nvRef = useRef<Niivue | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -229,23 +232,24 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
             top: 20,
             right: 20,
             width: 200,
-            background: 'rgba(255, 255, 255, 0.85)',
+            background: isDarkMode ? 'rgba(30, 41, 59, 0.85)' : 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(12px)',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
             zIndex: 11,
             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             opacity: showControls ? 1 : 0,
             transform: showControls ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.95)',
-            pointerEvents: showControls ? 'auto' : 'none'
+            pointerEvents: showControls ? 'auto' : 'none',
+            border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
           }}
-          title={<span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{t('niivue.controls')}</span>}
+          title={<span style={{ fontSize: 13, fontWeight: 700, color: isDarkMode ? '#F1F5F9' : '#0f172a' }}>{t('niivue.controls')}</span>}
         >
           <Space direction="vertical" style={{ width: '100%' }} size={10}>
             <Checkbox
               checked={showRaw}
               onChange={(e) => setShowRaw(e.target.checked)}
             >
-              <Text style={{ fontSize: 13 }}>{t('niivue.rawMri')}</Text>
+              <Text style={{ fontSize: 13, color: isDarkMode ? '#E2E8F0' : undefined }}>{t('niivue.rawMri')}</Text>
             </Checkbox>
 
             {structureMaskUrl && (
@@ -253,7 +257,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
                 checked={showStructure}
                 onChange={(e) => setShowStructure(e.target.checked)}
               >
-                <Text style={{ fontSize: 13 }}>{t('niivue.structure')}</Text>
+                <Text style={{ fontSize: 13, color: isDarkMode ? '#E2E8F0' : undefined }}>{t('niivue.structure')}</Text>
               </Checkbox>
             )}
 
@@ -262,12 +266,12 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
                 checked={showLDH}
                 onChange={(e) => setShowLDH(e.target.checked)}
               >
-                <Text style={{ fontSize: 13 }}>{t('niivue.herniation')}</Text>
+                <Text style={{ fontSize: 13, color: isDarkMode ? '#E2E8F0' : undefined }}>{t('niivue.herniation')}</Text>
               </Checkbox>
             )}
 
-            <div style={{ marginTop: 8, borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: 2 }}>
-              <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic' }}>
+            <div style={{ marginTop: 8, borderTop: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)', paddingTop: 2 }}>
+              <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic', color: isDarkMode ? '#94A3B8' : undefined }}>
                 {t('niivue.dragToRotate')}<br />
                 {t('niivue.scrollToZoom')}
               </Text>

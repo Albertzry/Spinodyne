@@ -5,13 +5,39 @@
   --glass-bg: rgba(255, 255, 255, 0.65);
   --glass-border: rgba(255, 255, 255, 0.6);
   --glass-highlight: rgba(255, 255, 255, 0.8);
-  --glass-shadow: 
+  --glass-shadow:
     0 4px 6px -1px rgba(0, 106, 254, 0.05),
     0 10px 15px -3px rgba(0, 106, 254, 0.05),
     0 8px 32px 0 rgba(0, 106, 254, 0.05);
   --card-shadow: 0 4px 20px -2px rgba(0, 106, 254, 0.08);
   --hover-shadow: 0 10px 25px -5px rgba(0, 106, 254, 0.12);
 }
+
+[data-theme='dark'] {
+  --brand-primary: #006AFE;
+  --app-bg: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+  --glass-bg: rgba(30, 41, 59, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+  --hover-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  color: #E2E8F0;
+}
+
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3,
+[data-theme='dark'] h4,
+[data-theme='dark'] h5 {
+  color: #F8FAFC !important;
+}
+
+[data-theme='dark'] .ant-layout-sider {
+  background: var(--glass-bg) !important;
+  border-right: 1px solid var(--glass-border) !important;
+}
+
 
 body {
   margin: 0;
@@ -22,6 +48,7 @@ body {
   color: #475569;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Glassmorphism Utility */
@@ -30,9 +57,13 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  border-top: 1px solid var(--glass-highlight); /* Top highlight simulating light */
+  border-top: 1px solid var(--glass-highlight);
+  /* Top highlight simulating light */
   box-shadow: var(--glass-shadow);
   border-radius: 16px;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom Component Overrides */
@@ -52,6 +83,7 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--glass-border) !important;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ant-menu-item-selected {
@@ -79,6 +111,35 @@ body {
 }
 
 /* Typography alignment fixes */
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   color: #1E293B !important;
+}
+
+/* Global Transition for Theme Switching */
+div,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+input,
+button,
+textarea,
+.ant-card,
+.ant-menu,
+.ant-table,
+th,
+td,
+.ant-input,
+.ant-select-selector,
+.ant-picker {
+  transition-property: background-color, background, color, border-color, box-shadow;
+  transition-duration: 0.5s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

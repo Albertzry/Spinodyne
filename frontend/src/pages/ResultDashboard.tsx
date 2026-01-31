@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Typography, Skeleton, Result, Row, Col, Steps, Card, Spin, Descriptions, Divider } from 'antd';
 import { LoadingOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { Brain, FileText } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
 import { MotionCard, MotionButton, MotionContainer, MotionItem } from '../components/MotionComponents';
@@ -49,6 +50,10 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
+
+  const textColor = isDarkMode ? '#F1F5F9' : '#0f172a';
+  const descBg = isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255,255,255,0.5)';
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -98,7 +103,7 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
     <MotionContainer style={{ paddingBottom: 40 }}>
       {/* Header Section */}
       <MotionItem style={{ marginBottom: 24 }}>
-        <Title level={3} style={{ marginBottom: 16, color: '#0f172a' }}>{t('resultPage.title')}</Title>
+        <Title level={3} style={{ marginBottom: 16, color: textColor }}>{t('resultPage.title')}</Title>
         <Descriptions
           bordered
           size="small"
@@ -108,7 +113,7 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
             { label: t('resultPage.studyDate'), children: taskInfo.study_date },
             { label: t('resultPage.taskId'), children: <Text copyable style={{ fontSize: 12 }}>{taskInfo.id}</Text> },
           ]}
-          style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 8, overflow: 'hidden' }}
+          style={{ background: descBg, borderRadius: 8, overflow: 'hidden' }}
         />
       </MotionItem>
 
@@ -159,6 +164,11 @@ const ResultDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { isDarkMode } = useTheme();
+
+  const textColor = isDarkMode ? '#F1F5F9' : '#0f172a';
+  const descBg = isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255,255,255,0.5)';
+  const iconBg = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.05)';
 
   const fetchTaskStatus = async () => {
     if (!id) return;
@@ -252,7 +262,7 @@ const ResultDashboard: React.FC = () => {
         {taskInfo && (
           <MotionContainer>
             <MotionItem style={{ marginBottom: 24 }}>
-              <Title level={3} style={{ marginBottom: 16, color: '#0f172a' }}>{t('resultPage.title')}</Title>
+              <Title level={3} style={{ marginBottom: 16, color: textColor }}>{t('resultPage.title')}</Title>
               <Descriptions
                 bordered
                 size="small"
@@ -262,7 +272,7 @@ const ResultDashboard: React.FC = () => {
                   { label: t('resultPage.studyDate'), children: taskInfo.study_date },
                   { label: t('resultPage.taskId'), children: <Text copyable style={{ fontSize: 12 }}>{taskInfo.id}</Text> },
                 ]}
-                style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 8, overflow: 'hidden' }}
+                style={{ background: descBg, borderRadius: 8, overflow: 'hidden' }}
               />
             </MotionItem>
             <Divider style={{ margin: '24px 0' }} />
@@ -308,13 +318,13 @@ const ResultDashboard: React.FC = () => {
                       width: 120,
                       height: 120,
                       borderRadius: '50%',
-                      background: 'rgba(15, 23, 42, 0.05)',
+                      background: iconBg,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       zIndex: 1
                     }}>
-                      <Brain size={64} color="#0f172a" style={{ opacity: 0.5 }} />
+                      <Brain size={64} color={textColor} style={{ opacity: 0.5 }} />
                     </div>
                     <div style={{
                       position: 'absolute',
@@ -324,13 +334,13 @@ const ResultDashboard: React.FC = () => {
                       width: 120,
                       height: 120,
                       borderRadius: '50%',
-                      border: '4px solid #0f172a',
+                      border: `4px solid ${textColor}`,
                       opacity: 0.2,
                       animation: 'pulse 2s infinite',
                       boxSizing: 'border-box'
                     }} />
                   </div>
-                  <Title level={3} style={{ color: '#0f172a', marginBottom: 8, fontSize: 20 }}>{t('resultPage.analyzingTitle')}</Title>
+                  <Title level={3} style={{ color: textColor, marginBottom: 8, fontSize: 20 }}>{t('resultPage.analyzingTitle')}</Title>
                   <Text type="secondary" style={{ fontSize: 14 }}>{t('resultPage.analyzingDesc')}</Text>
 
                   <div style={{ marginTop: 32, width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
@@ -363,7 +373,7 @@ const ResultDashboard: React.FC = () => {
                 boxSizing: 'border-box'
               }}>
                 <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                  <FileText size={20} color="#0f172a" />
+                  <FileText size={20} color={textColor} />
                   <Title level={4} style={{ margin: 0 }}>{t('resultPage.reportTitle')}</Title>
                 </div>
 
@@ -375,17 +385,17 @@ const ResultDashboard: React.FC = () => {
                   overflow: 'hidden',
                   minHeight: 0
                 }}>
-                  <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                  <Card variant="borderless" style={{ background: descBg, flexShrink: 0 }}>
                     <Skeleton active avatar paragraph={{ rows: 1 }} />
                   </Card>
-                  <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                  <Card variant="borderless" style={{ background: descBg, flexShrink: 0 }}>
                     <Skeleton active title={false} paragraph={{ rows: 2 }} />
                   </Card>
-                  <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                  <Card variant="borderless" style={{ background: descBg, flexShrink: 0 }}>
                     <Skeleton active title={false} paragraph={{ rows: 2 }} />
                   </Card>
                   <Card variant="borderless" style={{
-                    background: 'rgba(255,255,255,0.5)',
+                    background: descBg,
                     flex: 1,
                     minHeight: 0,
                     overflow: 'hidden'
