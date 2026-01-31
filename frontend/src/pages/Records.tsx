@@ -215,7 +215,7 @@ const Records: React.FC = () => {
                   borderColor: 'rgba(0, 106, 254, 0.2)',
                   borderRadius: 8,
                   fontSize: 13,
-                  padding: '4px 20px',
+                  padding: '7px 20px',
                   height: 'auto'
                 }}
               >
