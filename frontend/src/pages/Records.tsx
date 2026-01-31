@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Typography, Table, Tag, Space, Button, Popconfirm, message, Tooltip, Card, Input } from 'antd';
+import { Typography, Table, Tag, Space, Popconfirm, message, Tooltip, Input } from 'antd';
 import { Eye, Trash2, Loader2, RefreshCw, FileText, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
+import { MotionCard, MotionButton, MotionContainer } from '../components/MotionComponents';
 
 const { Title, Text } = Typography;
 
@@ -129,14 +130,17 @@ const Records: React.FC = () => {
       render: (_: any, record: Task) => (
         <Space size="small">
           <Tooltip title={t('recordsPage.viewResult')}>
-            <Link to={`/result/${record.id}`}>
-              <Button
-                type="text"
-                shape="circle"
-                icon={<Eye size={18} />}
-                style={{ color: '#006AFE' }}
-              />
-            </Link>
+            <span style={{ display: 'inline-block' }}>
+              <Link to={`/result/${record.id}`}>
+                <MotionButton
+                  type="text"
+                  shape="circle"
+                  icon={<Eye size={18} />}
+                  style={{ color: '#006AFE' }}
+                  motionProps={{ whileHover: { scale: 1.1 }, whileTap: { scale: 0.9 } }}
+                />
+              </Link>
+            </span>
           </Tooltip>
 
           <Popconfirm
@@ -147,12 +151,15 @@ const Records: React.FC = () => {
             cancelText={t('recordsPage.cancel')}
             okButtonProps={{ danger: true }}
           >
-            <Button
-              type="text"
-              shape="circle"
-              danger
-              icon={<Trash2 size={18} />}
-            />
+            <span style={{ display: 'inline-block' }}>
+              <MotionButton
+                type="text"
+                shape="circle"
+                danger
+                icon={<Trash2 size={18} />}
+                motionProps={{ whileHover: { scale: 1.1, color: '#ef4444' }, whileTap: { scale: 0.9 } }}
+              />
+            </span>
           </Popconfirm>
         </Space>
       ),
@@ -174,53 +181,63 @@ const Records: React.FC = () => {
 
   return (
     <PageTransition>
-      <div className="glass-panel" style={{ padding: '40px', background: 'rgba(255, 255, 255, 0.8)', minHeight: 'calc(100vh - 128px)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-          <Space size={12}>
-            <div style={{ width: 40, height: 40, background: '#EFF6FF', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FileText size={20} color="#006AFE" />
-            </div>
-            <Title level={2} style={{ margin: 0 }}>{t('recordsPage.title')}</Title>
-          </Space>
-          <Space size={12}>
-            <Input
-              placeholder={t('recordsPage.searchPlaceholder')}
-              prefix={<Search size={16} style={{ color: '#94a3b8' }} />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              allowClear
-              style={{
-                width: 280,
-                borderRadius: 8
-              }}
-            />
-            <Button
-              icon={<RefreshCw size={16} />}
-              onClick={fetchTasks}
-              loading={loading}
-              className="ant-btn-primary" // Apply brand gradient
-              type="primary"
-            >
-              {t('recordsPage.syncData')}
-            </Button>
-          </Space>
-        </div>
+      <MotionCard className="glass-panel" noHoverLift style={{ padding: '40px', background: 'rgba(255, 255, 255, 0.8)', minHeight: 'calc(100vh - 128px)' }}>
+        <MotionContainer>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+            <Space size={12}>
+              <div style={{ width: 40, height: 40, background: '#EFF6FF', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={20} color="#006AFE" />
+              </div>
+              <Title level={2} style={{ margin: 0 }}>{t('recordsPage.title')}</Title>
+            </Space>
+            <Space size={12}>
+              <Input
+                placeholder={t('recordsPage.searchPlaceholder')}
+                prefix={<Search size={16} style={{ color: '#94a3b8' }} />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+                style={{
+                  width: 280,
+                  borderRadius: 8
+                }}
+              />
+              <MotionButton
+                icon={<RefreshCw size={16} />}
+                onClick={fetchTasks}
+                loading={loading}
+                className="ant-btn-primary" // Apply brand gradient
+                type="primary"
+                style={{
+                  borderWidth: 2,
+                  borderStyle: 'solid',
+                  borderColor: 'rgba(0, 106, 254, 0.2)',
+                  borderRadius: 8,
+                  fontSize: 13,
+                  padding: '4px 20px',
+                  height: 'auto'
+                }}
+              >
+                {t('recordsPage.syncData')}
+              </MotionButton>
+            </Space>
+          </div>
 
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: false,
-            position: ['bottomCenter']
-          }}
-          style={{ background: 'transparent' }}
-          className="aero-table"
-        />
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: false,
+              position: ['bottomCenter']
+            }}
+            style={{ background: 'transparent' }}
+            className="aero-table"
+          />
 
-        <style>{`
+          <style>{`
             @keyframes spin {
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
@@ -237,7 +254,8 @@ const Records: React.FC = () => {
                 letter-spacing: 0.05em;
             }
         `}</style>
-      </div>
+        </MotionContainer>
+      </MotionCard>
     </PageTransition>
   );
 };

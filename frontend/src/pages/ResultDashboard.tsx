@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Typography, Skeleton, Result, Button, Row, Col, Steps, Card, Spin, Descriptions, Divider } from 'antd';
+import { Typography, Skeleton, Result, Row, Col, Steps, Card, Spin, Descriptions, Divider } from 'antd';
 import { LoadingOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { Brain, FileText } from 'lucide-react';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
+import { MotionCard, MotionButton, MotionContainer, MotionItem } from '../components/MotionComponents';
 import NiivuePanel from '../components/Result/NiivuePanel';
 import DataPanel, { VertebraResult, DiscResult, GlobalMetric } from '../components/Result/DataPanel';
 
@@ -94,9 +95,9 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
   };
 
   return (
-    <div style={{ paddingBottom: 40 }}>
+    <MotionContainer style={{ paddingBottom: 40 }}>
       {/* Header Section */}
-      <div style={{ marginBottom: 24 }}>
+      <MotionItem style={{ marginBottom: 24 }}>
         <Title level={3} style={{ marginBottom: 16, color: '#0f172a' }}>{t('resultPage.title')}</Title>
         <Descriptions
           bordered
@@ -109,7 +110,7 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
           ]}
           style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 8, overflow: 'hidden' }}
         />
-      </div>
+      </MotionItem>
 
       <Divider style={{ margin: '24px 0' }} />
 
@@ -117,32 +118,36 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
       <Row gutter={[24, 24]}>
         {/* Left Panel: Niivue 3D Viewer */}
         <Col xs={24} lg={12}>
-          <div className="glass-panel" style={{
-            height: 600,
-            borderRadius: 16,
-            overflow: 'hidden',
-            background: '#000'
-          }}>
-            <NiivuePanel
-              rawUrl={result.three_d?.raw_url}
-              structureMaskUrl={result.three_d?.structure_mask_url}
-              ldhMaskUrl={result.three_d?.ldh_mask_url}
-            />
-          </div>
+          <MotionItem>
+            <div className="glass-panel" style={{
+              height: 600,
+              borderRadius: 16,
+              overflow: 'hidden',
+              background: '#000'
+            }}>
+              <NiivuePanel
+                rawUrl={result.three_d?.raw_url}
+                structureMaskUrl={result.three_d?.structure_mask_url}
+                ldhMaskUrl={result.three_d?.ldh_mask_url}
+              />
+            </div>
+          </MotionItem>
         </Col>
 
         {/* Right Panel: Clinical Data */}
         <Col xs={24} lg={12}>
-          <div style={{ height: 600 }}>
-            <DataPanel
-              vertebrae={result.vertebrae || []}
-              discs={result.discs || []}
-              globalMetrics={result.global_metrics}
-            />
-          </div>
+          <MotionItem>
+            <div style={{ height: 600 }}>
+              <DataPanel
+                vertebrae={result.vertebrae || []}
+                discs={result.discs || []}
+                globalMetrics={result.global_metrics}
+              />
+            </div>
+          </MotionItem>
         </Col>
       </Row>
-    </div>
+    </MotionContainer>
   );
 };
 
@@ -208,12 +213,12 @@ const ResultDashboard: React.FC = () => {
             title={t('resultPage.analysisFailed')}
             subTitle={task?.error_message || error || t('resultPage.unexpectedError')}
             extra={[
-              <Button type="primary" key="retry" onClick={() => window.location.reload()}>
+              <MotionButton type="primary" key="retry" onClick={() => window.location.reload()}>
                 {t('resultPage.retry')}
-              </Button>,
-              <Button key="back" onClick={() => navigate('/inference')}>
+              </MotionButton>,
+              <MotionButton key="back" onClick={() => navigate('/inference')}>
                 {t('resultPage.backToUpload')}
-              </Button>,
+              </MotionButton>,
             ]}
           />
         </div>
@@ -245,8 +250,8 @@ const ResultDashboard: React.FC = () => {
       <div style={{ minHeight: 'calc(100vh - 120px)' }}>
         {/* Header Section */}
         {taskInfo && (
-          <>
-            <div style={{ marginBottom: 24 }}>
+          <MotionContainer>
+            <MotionItem style={{ marginBottom: 24 }}>
               <Title level={3} style={{ marginBottom: 16, color: '#0f172a' }}>{t('resultPage.title')}</Title>
               <Descriptions
                 bordered
@@ -259,9 +264,9 @@ const ResultDashboard: React.FC = () => {
                 ]}
                 style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 8, overflow: 'hidden' }}
               />
-            </div>
+            </MotionItem>
             <Divider style={{ margin: '24px 0' }} />
-          </>
+          </MotionContainer>
         )}
 
         {/* Split Screen Layout (Processing State) */}
@@ -269,127 +274,131 @@ const ResultDashboard: React.FC = () => {
 
           {/* Left Panel: Processing Animation */}
           <Col xs={24} lg={12} style={{ height: 600, display: 'flex', flexDirection: 'column' }}>
-            <div className="glass-panel" style={{
-              flex: 1,
-              borderRadius: 16,
-              padding: 30,
-              position: 'relative',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(255, 255, 255, 0.6)',
-              border: '1px solid rgba(15, 23, 42, 0.1)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-            }}>
-              <div style={{
-                textAlign: 'center',
-                width: '100%',
-                padding: '20px',
-                boxSizing: 'border-box',
-                overflow: 'visible'
+            <MotionContainer delayChildren={0.2} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <MotionCard className="glass-panel" style={{
+                flex: 1,
+                borderRadius: 16,
+                padding: 30,
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.6)',
+                border: '1px solid rgba(15, 23, 42, 0.1)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
               }}>
                 <div style={{
-                  marginBottom: 32,
-                  position: 'relative',
-                  display: 'inline-block',
-                  width: 160,
-                  height: 160,
+                  textAlign: 'center',
+                  width: '100%',
+                  padding: '20px',
+                  boxSizing: 'border-box',
                   overflow: 'visible'
                 }}>
                   <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 120,
-                    height: 120,
-                    borderRadius: '50%',
-                    background: 'rgba(15, 23, 42, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1
+                    marginBottom: 32,
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: 160,
+                    height: 160,
+                    overflow: 'visible'
                   }}>
-                    <Brain size={64} color="#0f172a" style={{ opacity: 0.5 }} />
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: 120,
+                      height: 120,
+                      borderRadius: '50%',
+                      background: 'rgba(15, 23, 42, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 1
+                    }}>
+                      <Brain size={64} color="#0f172a" style={{ opacity: 0.5 }} />
+                    </div>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: 120,
+                      height: 120,
+                      borderRadius: '50%',
+                      border: '4px solid #0f172a',
+                      opacity: 0.2,
+                      animation: 'pulse 2s infinite',
+                      boxSizing: 'border-box'
+                    }} />
                   </div>
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 120,
-                    height: 120,
-                    borderRadius: '50%',
-                    border: '4px solid #0f172a',
-                    opacity: 0.2,
-                    animation: 'pulse 2s infinite',
-                    boxSizing: 'border-box'
-                  }} />
-                </div>
-                <Title level={3} style={{ color: '#0f172a', marginBottom: 8, fontSize: 20 }}>{t('resultPage.analyzingTitle')}</Title>
-                <Text type="secondary" style={{ fontSize: 14 }}>{t('resultPage.analyzingDesc')}</Text>
+                  <Title level={3} style={{ color: '#0f172a', marginBottom: 8, fontSize: 20 }}>{t('resultPage.analyzingTitle')}</Title>
+                  <Text type="secondary" style={{ fontSize: 14 }}>{t('resultPage.analyzingDesc')}</Text>
 
-                <div style={{ marginTop: 32, width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
-                  <Steps
-                    current={task?.status === 'processing' ? 1 : 0}
-                    items={[
-                      { title: t('resultPage.stepUpload'), icon: <CheckCircleOutlined /> },
-                      { title: t('resultPage.stepProcessing'), icon: <LoadingOutlined /> },
-                      { title: t('resultPage.stepResult'), icon: <ClockCircleOutlined /> },
-                    ]}
-                    style={{ width: '100%' }}
-                    size="small"
-                  />
+                  <div style={{ marginTop: 32, width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
+                    <Steps
+                      current={task?.status === 'processing' ? 1 : 0}
+                      items={[
+                        { title: t('resultPage.stepUpload'), icon: <CheckCircleOutlined /> },
+                        { title: t('resultPage.stepProcessing'), icon: <LoadingOutlined /> },
+                        { title: t('resultPage.stepResult'), icon: <ClockCircleOutlined /> },
+                      ]}
+                      style={{ width: '100%' }}
+                      size="small"
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
+              </MotionCard>
+            </MotionContainer>
           </Col>
 
           {/* Right Panel: Skeletons */}
           <Col xs={24} lg={12} style={{ height: 600 }}>
-            <div className="glass-panel" style={{
-              height: '100%',
-              borderRadius: 16,
-              padding: 24,
-              display: 'flex',
-              flexDirection: 'column',
-              background: 'rgba(255, 255, 255, 0.8)',
-              overflow: 'hidden',
-              boxSizing: 'border-box'
-            }}>
-              <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                <FileText size={20} color="#0f172a" />
-                <Title level={4} style={{ margin: 0 }}>{t('resultPage.reportTitle')}</Title>
-              </div>
-
-              <div style={{
-                flex: 1,
+            <MotionContainer delayChildren={0.4} style={{ height: '100%' }}>
+              <MotionCard className="glass-panel" style={{
+                height: '100%',
+                borderRadius: 16,
+                padding: 24,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 16,
+                background: 'rgba(255, 255, 255, 0.8)',
                 overflow: 'hidden',
-                minHeight: 0
+                boxSizing: 'border-box'
               }}>
-                <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                  <Skeleton active avatar paragraph={{ rows: 1 }} />
-                </Card>
-                <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                  <Skeleton active title={false} paragraph={{ rows: 2 }} />
-                </Card>
-                <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                  <Skeleton active title={false} paragraph={{ rows: 2 }} />
-                </Card>
-                <Card variant="borderless" style={{
-                  background: 'rgba(255,255,255,0.5)',
+                <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                  <FileText size={20} color="#0f172a" />
+                  <Title level={4} style={{ margin: 0 }}>{t('resultPage.reportTitle')}</Title>
+                </div>
+
+                <div style={{
                   flex: 1,
-                  minHeight: 0,
-                  overflow: 'hidden'
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                  overflow: 'hidden',
+                  minHeight: 0
                 }}>
-                  <Skeleton active title={false} paragraph={{ rows: 3 }} />
-                </Card>
-              </div>
-            </div>
+                  <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                    <Skeleton active avatar paragraph={{ rows: 1 }} />
+                  </Card>
+                  <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                    <Skeleton active title={false} paragraph={{ rows: 2 }} />
+                  </Card>
+                  <Card variant="borderless" style={{ background: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                    <Skeleton active title={false} paragraph={{ rows: 2 }} />
+                  </Card>
+                  <Card variant="borderless" style={{
+                    background: 'rgba(255,255,255,0.5)',
+                    flex: 1,
+                    minHeight: 0,
+                    overflow: 'hidden'
+                  }}>
+                    <Skeleton active title={false} paragraph={{ rows: 3 }} />
+                  </Card>
+                </div>
+              </MotionCard>
+            </MotionContainer>
           </Col>
         </Row>
 

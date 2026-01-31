@@ -1,7 +1,9 @@
-import React from 'react';
-import { Tabs, Card, List, Typography, Row, Col, Image, Tooltip, Empty, Statistic, Space, Divider } from 'antd';
+import React, { useState } from 'react';
+import { Card, List, Typography, Row, Col, Image, Tooltip, Empty, Statistic, Space, Divider } from 'antd';
 import { AlignVerticalJustifyCenter, Ruler, Activity, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+// Note: Using CSS transitions instead of framer-motion for tab animations to avoid page navigation conflicts
+import { MotionContainer, MotionItem } from '../MotionComponents';
 
 const { Text, Title } = Typography;
 
@@ -56,11 +58,13 @@ interface DataPanelProps {
 const MetricLabel = ({ label, tooltip }: { label: string; tooltip?: string }) => (
   <Space size={4} style={{ display: 'flex' }}>
     <Text type="secondary" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{label}</Text>
-    {tooltip && (
+    {tooltip ? (
       <Tooltip title={tooltip}>
-        <Info size={10} style={{ color: '#94a3b8', cursor: 'help' }} />
+        <span>
+          <Info size={10} style={{ color: '#94a3b8', cursor: 'help' }} />
+        </span>
       </Tooltip>
-    )}
+    ) : null}
   </Space>
 );
 
@@ -109,17 +113,24 @@ const PreviewThumbnail = ({ url, label, height = 80 }: { url?: string; label: st
 
 const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('global');
 
   const renderVertebrae = () => (
     <List
       dataSource={vertebrae}
-      renderItem={(item) => (
-        <List.Item style={{ padding: '8px 0' }}>
+      renderItem={(item, index) => (
+        <MotionItem key={`${item.level}-${index}`} style={{ padding: '8px 0' }}>
           <Card
             size="small"
             variant="borderless"
             hoverable
-            style={{ width: '100%', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+            style={{
+              width: '100%',
+              borderRadius: 12,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              background: 'white',
+              border: '1px solid rgba(0, 106, 254, 0.08)'
+            }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
@@ -156,7 +167,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               </Col>
             </Row>
           </Card>
-        </List.Item>
+        </MotionItem>
       )}
     />
   );
@@ -164,13 +175,19 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
   const renderDiscs = () => (
     <List
       dataSource={discs}
-      renderItem={(item) => (
-        <List.Item style={{ padding: '8px 0' }}>
+      renderItem={(item, index) => (
+        <MotionItem key={`${item.level}-${index}`} style={{ padding: '8px 0' }}>
           <Card
             size="small"
             variant="borderless"
             hoverable
-            style={{ width: '100%', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+            style={{
+              width: '100%',
+              borderRadius: 12,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              background: 'white',
+              border: '1px solid rgba(0, 106, 254, 0.08)'
+            }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
@@ -236,7 +253,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               </Col>
             </Row>
           </Card>
-        </List.Item>
+        </MotionItem>
       )}
     />
   );
@@ -258,21 +275,23 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
     ];
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '8px 0' }}>
-
-        {/* Top Section: Herniation Severity */}
-        <div>
+      <MotionContainer style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '8px 0' }}>
+        <MotionItem>
           <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
             {t('dataPanel.herniationSeverity')}
           </Title>
 
           <Card
             variant="borderless"
-            style={{ background: '#f8fafc', borderRadius: 16 }}
-            bodyStyle={{ padding: 12 }}
+            style={{
+              background: 'white',
+              borderRadius: 16,
+              border: '1px solid rgba(0, 106, 254, 0.1)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
+            }}
+            styles={{ body: { padding: 16 } }}
           >
             <Row gutter={12} style={{ height: '100%', minHeight: 240 }}>
-              {/* Left: Metrics Grid (2x2) - 占据更多空间 */}
               <Col span={16}>
                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <Row gutter={[8, 8]} style={{ flex: 1, height: '100%' }}>
@@ -281,23 +300,22 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                         <Card
                           size="small"
                           style={{
-                            background: 'white',
+                            background: '#F8FAFC',
                             borderRadius: 12,
-                            border: '1px solid #e2e8f0',
+                            border: '1px solid #E2E8F0',
                             width: '100%',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            transition: 'all 0.3s ease'
                           }}
-                          bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', flex: 1, textAlign: 'center' }}
+                          styles={{ body: { padding: '12px 8px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', flex: 1, textAlign: 'center' } }}
                         >
                           <Tooltip title={m.fullName}>
-                            <Text type="secondary" style={{ fontSize: 11, fontWeight: 600, display: 'block', marginBottom: 8, textAlign: 'center', width: '100%' }}>
-                              {m.label}
-                            </Text>
+                            <MetricLabel label={m.label} tooltip={m.fullName} />
                           </Tooltip>
-                          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 8 }}>
                             <Statistic
                               value={m.value ?? '-'}
                               precision={m.value !== null && m.value !== undefined ? 2 : 0}
@@ -318,7 +336,6 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                 </div>
               </Col>
 
-              {/* Right: Vertical Image - 缩小宽度 */}
               <Col span={8}>
                 <div style={{
                   display: 'flex',
@@ -362,10 +379,9 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               </Col>
             </Row>
           </Card>
-        </div>
+        </MotionItem>
 
-        {/* Bottom Section: Spinal Alignment */}
-        <div>
+        <MotionItem>
           <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
             {t('dataPanel.spinalAlignment')}
           </Title>
@@ -376,17 +392,21 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                 <Card
                   size="small"
                   variant="borderless"
-                  style={{ background: '#f8fafc', borderRadius: 16, height: '100%' }}
-                  bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', height: '100%' }}
+                  style={{
+                    background: 'white',
+                    borderRadius: 16,
+                    height: '100%',
+                    border: '1px solid rgba(0, 106, 254, 0.1)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
+                  }}
+                  styles={{ body: { padding: 16, display: 'flex', flexDirection: 'column', height: '100%' } }}
                 >
-                  {/* Aligned Title Area */}
                   <div style={{ minHeight: 40, display: 'flex', alignItems: 'flex-start' }}>
                     <Text type="secondary" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.2 }}>
                       {m.label}
                     </Text>
                   </div>
 
-                  {/* Aligned Value Area */}
                   <div style={{ margin: '8px 0' }}>
                     <Statistic
                       value={m.value}
@@ -396,7 +416,6 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                     />
                   </div>
 
-                  {/* Aligned Image Area */}
                   <div style={{ flex: 1, marginTop: 'auto' }}>
                     <PreviewThumbnail
                       url={m.url}
@@ -408,8 +427,8 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               </Col>
             ))}
           </Row>
-        </div>
-      </div>
+        </MotionItem>
+      </MotionContainer>
     );
   };
 
@@ -421,7 +440,6 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
           <Activity size={16} /> {t('dataPanel.tabs.global')}
         </span>
       ),
-      children: renderGlobal(),
     },
     {
       key: 'vertebrae',
@@ -430,7 +448,6 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
           <AlignVerticalJustifyCenter size={16} /> {t('dataPanel.tabs.vertebrae')}
         </span>
       ),
-      children: renderVertebrae(),
     },
     {
       key: 'discs',
@@ -439,90 +456,126 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
           <Ruler size={16} /> {t('dataPanel.tabs.discs')}
         </span>
       ),
-      children: renderDiscs(),
     },
   ];
 
+  // Calculate active tab index for the sliding indicator
+  const activeTabIndex = tabItems.findIndex(item => item.key === activeTab);
+
   return (
     <div className="glass-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 16, overflow: 'hidden' }}>
-      <Tabs
-        defaultActiveKey="global"
-        items={tabItems}
-        type="card"
-        tabBarStyle={{ margin: 0, background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(10px)', padding: '8px 8px 0 8px' }}
-        style={{ flex: 1, overflow: 'hidden' }}
-        className="custom-tabs"
-      />
+      {/* Custom Animated Tab Bar with Gliding Indicator */}
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.3)',
+        backdropFilter: 'blur(10px)',
+        padding: '8px',
+        borderBottom: '1px solid rgba(0, 106, 254, 0.05)',
+        position: 'relative',
+      }}>
+        {/* Tab Items Container */}
+        <div style={{ display: 'flex', gap: 4, position: 'relative' }}>
+          {/* Gliding Indicator - Positioned relative to the flex container for simpler math */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: `calc(${activeTabIndex} * (100% + 4px) / ${tabItems.length})`,
+              width: `calc((100% - ${(tabItems.length - 1) * 4}px) / ${tabItems.length})`,
+              height: 40,
+              background: '#FFFFFF',
+              borderRadius: '8px',
+              boxShadow: '0 2px 12px rgba(0, 106, 254, 0.12)',
+              border: '1px solid rgba(0, 106, 254, 0.2)',
+              transition: 'left 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+              zIndex: 1,
+              pointerEvents: 'none', // Ensure it doesn't block clicks
+              boxSizing: 'border-box'
+            }}
+          />
+
+          {tabItems.map((item) => {
+            const isActive = activeTab === item.key;
+            return (
+              <div
+                key={item.key}
+                onClick={() => setActiveTab(item.key)}
+                style={{
+                  flex: 1,
+                  height: 40,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isActive ? '#006AFE' : '#64748B',
+                  fontWeight: isActive ? 600 : 500,
+                  transition: 'color 0.3s ease, transform 0.2s ease',
+                  borderRadius: '8px',
+                  zIndex: 2,
+                  position: 'relative',
+                }}
+                onMouseDown={(e) => {
+                  const target = e.currentTarget;
+                  target.style.transform = 'scale(0.96)';
+                }}
+                onMouseUp={(e) => {
+                  const target = e.currentTarget;
+                  target.style.transform = 'scale(1)';
+                }}
+                onMouseLeave={(e) => {
+                  const target = e.currentTarget;
+                  target.style.transform = 'scale(1)';
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    transition: 'transform 0.15s ease',
+                  }}
+                >
+                  {item.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content with Slide Animation */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16, position: 'relative' }}>
+        <div
+          key={activeTab}
+          className="tab-content-enter"
+          style={{ width: '100%' }}
+        >
+          {activeTab === 'global' && renderGlobal()}
+          {activeTab === 'vertebrae' && (
+            <MotionContainer>
+              {renderVertebrae()}
+            </MotionContainer>
+          )}
+          {activeTab === 'discs' && (
+            <MotionContainer>
+              {renderDiscs()}
+            </MotionContainer>
+          )}
+        </div>
+      </div>
+
       <style>{`
-        .custom-tabs .ant-tabs-content {
-            height: 100%;
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            position: relative;
+        .tab-content-enter {
+          animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .custom-tabs .ant-tabs-content-holder {
-            position: relative;
-        }
-        .custom-tabs .ant-tabs-tabpane {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .custom-tabs .ant-tabs-nav {
-            margin: 0 !important;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.3) !important;
-        }
-        .custom-tabs .ant-tabs-nav-list {
-            width: 100%;
-            display: flex;
-        }
-        .custom-tabs .ant-tabs-nav .ant-tabs-tab {
-            border-radius: 8px 8px 0 0;
-            border: none;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(8px);
-            flex: 1;
-            text-align: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        .custom-tabs .ant-tabs-nav .ant-tabs-tab:hover {
-            background: rgba(255, 255, 255, 0.4) !important;
-            backdrop-filter: blur(12px);
-        }
-        .custom-tabs .ant-tabs-nav .ant-tabs-tab-active {
-            background: rgba(255, 255, 255, 0.85) !important;
-            backdrop-filter: blur(15px);
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        .custom-tabs .ant-tabs-nav .ant-tabs-tab::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-        .custom-tabs .ant-tabs-nav .ant-tabs-tab:hover::before {
-            left: 100%;
-        }
-        .custom-tabs .ant-tabs-ink-bar {
-            display: none;
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
       `}</style>
     </div>
