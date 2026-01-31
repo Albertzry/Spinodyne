@@ -1,0 +1,30 @@
+{
+  "project_name": "Spinodyne",
+  "backend": {
+    "host": "0.0.0.0",
+    "port": 25306
+  },
+  "frontend": {
+    "host": "0.0.0.0",
+    "port": 25916
+  },
+  "postgres": {
+    "host": "localhost",
+    "port": 5432,
+    "user": "postgres",
+    "password": "password123",
+    "database": "spinodyne"
+  },
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 25698,
+    "db": 0
+  },
+  "minio": {
+    "endpoint": "localhost:25957",
+    "access_key": "minioadmin",
+    "secret_key": "minioadmin",
+    "bucket": "spinodyne",
+    "secure": false
+  }
+}
