@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Typography, Table, Tag, Space, Button, Popconfirm, message, Tooltip, Card, Input } from 'antd';
 import { Eye, Trash2, Loader2, RefreshCw, FileText, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
 
@@ -19,6 +20,7 @@ const Records: React.FC = () => {
   const [data, setData] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const { t } = useTranslation();
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -29,7 +31,7 @@ const Records: React.FC = () => {
       setData(Array.isArray(result) ? result : result.items || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      message.error('Failed to load records');
+      message.error(t('recordsPage.loadError'));
     } finally {
       setLoading(false);
     }
@@ -55,28 +57,28 @@ const Records: React.FC = () => {
 
       if (!response.ok) throw new Error('Failed to delete task');
 
-      message.success('Record deleted successfully');
+      message.success(t('recordsPage.deleteSuccess'));
       fetchTasks();
     } catch (error) {
       console.error('Error deleting task:', error);
-      message.error('Failed to delete record');
+      message.error(t('recordsPage.deleteError'));
     }
   };
 
   const columns = [
     {
-      title: 'Patient Details',
+      title: t('recordsPage.patientDetails'),
       key: 'patient',
       sorter: (a: Task, b: Task) => (a.patient_name || '').localeCompare(b.patient_name || ''),
       render: (_: any, record: Task) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontWeight: 600, color: '#1E293B' }}>{record.patient_name || 'N/A'}</span>
-          <span style={{ fontSize: 12, color: '#64748B' }}>ID: {record.patient_id}</span>
+          <span style={{ fontSize: 12, color: '#64748B' }}>{t('recordsPage.id')}: {record.patient_id}</span>
         </div>
       ),
     },
     {
-      title: 'Study Date',
+      title: t('recordsPage.studyDate'),
       dataIndex: 'created_at',
       key: 'created_at',
       sorter: (a: Task, b: Task) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
@@ -86,7 +88,7 @@ const Records: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: t('recordsPage.status'),
       dataIndex: 'status',
       key: 'status',
       sorter: (a: Task, b: Task) => a.status.localeCompare(b.status),
@@ -98,7 +100,7 @@ const Records: React.FC = () => {
         switch (status) {
           case 'success':
             color = 'success';
-            text = 'COMPLETED';
+            text = t('recordsPage.completed');
             break;
           case 'processing':
             color = 'processing';
@@ -121,35 +123,35 @@ const Records: React.FC = () => {
       },
     },
     {
-      title: 'Actions',
+      title: t('recordsPage.actions'),
       key: 'actions',
       align: 'right' as const,
       render: (_: any, record: Task) => (
         <Space size="small">
-          <Tooltip title="View Detailed Result">
+          <Tooltip title={t('recordsPage.viewResult')}>
             <Link to={`/result/${record.id}`}>
-              <Button 
-                type="text" 
-                shape="circle" 
-                icon={<Eye size={18} />} 
+              <Button
+                type="text"
+                shape="circle"
+                icon={<Eye size={18} />}
                 style={{ color: '#006AFE' }}
               />
             </Link>
           </Tooltip>
-          
+
           <Popconfirm
-            title="Delete this record?"
-            description="All associated medical data will be purged."
+            title={t('recordsPage.deleteConfirmTitle')}
+            description={t('recordsPage.deleteConfirmDesc')}
             onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
+            okText={t('recordsPage.delete')}
+            cancelText={t('recordsPage.cancel')}
             okButtonProps={{ danger: true }}
           >
-            <Button 
-              type="text" 
-              shape="circle" 
-              danger 
-              icon={<Trash2 size={18} />} 
+            <Button
+              type="text"
+              shape="circle"
+              danger
+              icon={<Trash2 size={18} />}
             />
           </Popconfirm>
         </Space>
@@ -174,50 +176,50 @@ const Records: React.FC = () => {
     <PageTransition>
       <div className="glass-panel" style={{ padding: '40px', background: 'rgba(255, 255, 255, 0.8)', minHeight: 'calc(100vh - 128px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-            <Space size={12}>
-                <div style={{ width: 40, height: 40, background: '#EFF6FF', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FileText size={20} color="#006AFE" />
-                </div>
-                <Title level={2} style={{ margin: 0 }}>Patient Records</Title>
-            </Space>
-            <Space size={12}>
-                <Input
-                    placeholder="Search by name or ID..."
-                    prefix={<Search size={16} style={{ color: '#94a3b8' }} />}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    allowClear
-                    style={{ 
-                        width: 280,
-                        borderRadius: 8
-                    }}
-                />
-                <Button 
-                    icon={<RefreshCw size={16} />} 
-                    onClick={fetchTasks} 
-                    loading={loading}
-                    className="ant-btn-primary" // Apply brand gradient
-                    type="primary"
-                >
-                    Sync Data
-                </Button>
-            </Space>
+          <Space size={12}>
+            <div style={{ width: 40, height: 40, background: '#EFF6FF', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <FileText size={20} color="#006AFE" />
+            </div>
+            <Title level={2} style={{ margin: 0 }}>{t('recordsPage.title')}</Title>
+          </Space>
+          <Space size={12}>
+            <Input
+              placeholder={t('recordsPage.searchPlaceholder')}
+              prefix={<Search size={16} style={{ color: '#94a3b8' }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+              style={{
+                width: 280,
+                borderRadius: 8
+              }}
+            />
+            <Button
+              icon={<RefreshCw size={16} />}
+              onClick={fetchTasks}
+              loading={loading}
+              className="ant-btn-primary" // Apply brand gradient
+              type="primary"
+            >
+              {t('recordsPage.syncData')}
+            </Button>
+          </Space>
         </div>
-        
-        <Table 
-            columns={columns} 
-            dataSource={filteredData} 
-            rowKey="id"
-            loading={loading}
-            pagination={{ 
-                pageSize: 10,
-                showSizeChanger: false,
-                position: ['bottomCenter']
-            }}
-            style={{ background: 'transparent' }}
-            className="aero-table"
+
+        <Table
+          columns={columns}
+          dataSource={filteredData}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: false,
+            position: ['bottomCenter']
+          }}
+          style={{ background: 'transparent' }}
+          className="aero-table"
         />
-        
+
         <style>{`
             @keyframes spin {
                 from { transform: rotate(0deg); }

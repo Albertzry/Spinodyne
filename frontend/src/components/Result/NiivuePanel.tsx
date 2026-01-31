@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Niivue } from '@niivue/niivue';
 import { Checkbox, Card, Typography, Space } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -11,6 +12,7 @@ interface NiivuePanelProps {
 }
 
 const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldhMaskUrl }) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nvRef = useRef<Niivue | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,14 +36,14 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
     const nv = new Niivue({
       backColor: [0, 0, 0, 1], // Strict Black background
       show3Dcrosshair: true,
-      loadingText: 'Preparing 3D Volume...',
+      loadingText: t('niivue.preparing'),
     });
 
     nv.attachToCanvas(canvasRef.current);
-    
+
     // Immediately set to 3D render mode to prevent 2D slice view from showing
     nv.setSliceType(nv.sliceTypeRender);
-    
+
     nvRef.current = nv;
 
     // Prepare volumes list
@@ -89,18 +91,18 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
     });
 
     return () => {
-        // Cleanup Niivue instance
-        if (nvRef.current) {
-          try {
-            // Clear volumes and detach canvas
-            if (nvRef.current.volumes) {
-              nvRef.current.volumes = [];
-            }
-            nvRef.current = null;
-          } catch (error) {
-            console.error('Error cleaning up Niivue:', error);
+      // Cleanup Niivue instance
+      if (nvRef.current) {
+        try {
+          // Clear volumes and detach canvas
+          if (nvRef.current.volumes) {
+            nvRef.current.volumes = [];
           }
+          nvRef.current = null;
+        } catch (error) {
+          console.error('Error cleaning up Niivue:', error);
         }
+      }
     };
   }, [rawUrl, structureMaskUrl, ldhMaskUrl]);
 
@@ -114,7 +116,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
 
     try {
       let currentIdx = 0;
-      
+
       // Raw Volume
       if (nv.volumes[currentIdx]) {
         nv.setOpacity(currentIdx++, showRaw ? RAW_OPACITY : 0);
@@ -129,7 +131,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
       if (ldhMaskUrl && nv.volumes[currentIdx]) {
         nv.setOpacity(currentIdx++, showLDH ? LDH_OPACITY : 0);
       }
-      
+
       nv.drawScene();
     } catch (error) {
       console.error('Error setting opacity:', error);
@@ -172,11 +174,11 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 500, background: '#000', borderRadius: 16, overflow: 'hidden' }}>
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         style={{ width: '100%', height: '100%', outline: 'none' }}
       />
-      
+
       {/* 加载遮罩 - 确保在加载完成前保持黑屏 */}
       {!isLoaded && (
         <div
@@ -194,11 +196,11 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
           }}
         >
           <Text style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 14 }}>
-            Loading 3D Volume...
+            {t('niivue.loading')}
           </Text>
         </div>
       )}
-      
+
       {/* 右上角触发区域 */}
       {isLoaded && (
         <div
@@ -214,18 +216,18 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
           }}
         />
       )}
-      
+
       {/* 3D Control Overlay */}
       {isLoaded && (
-        <Card 
+        <Card
           size="small"
           variant="borderless"
           onMouseEnter={handleMouseEnterControls}
           onMouseLeave={handleMouseLeaveControls}
-          style={{ 
-            position: 'absolute', 
-            top: 20, 
-            right: 20, 
+          style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
             width: 200,
             background: 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(12px)',
@@ -236,41 +238,41 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
             transform: showControls ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.95)',
             pointerEvents: showControls ? 'auto' : 'none'
           }}
-          title={<span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>3D Controls</span>}
+          title={<span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{t('niivue.controls')}</span>}
         >
-            <Space direction="vertical" style={{ width: '100%' }} size={10}>
-                <Checkbox 
-                    checked={showRaw} 
-                    onChange={(e) => setShowRaw(e.target.checked)}
-                >
-                    <Text style={{ fontSize: 13 }}>Raw MRI</Text>
-                </Checkbox>
-                
-                {structureMaskUrl && (
-                    <Checkbox 
-                        checked={showStructure} 
-                        onChange={(e) => setShowStructure(e.target.checked)}
-                    >
-                        <Text style={{ fontSize: 13 }}>Structure</Text>
-                    </Checkbox>
-                )}
-                
-                {ldhMaskUrl && (
-                    <Checkbox 
-                        checked={showLDH} 
-                        onChange={(e) => setShowLDH(e.target.checked)}
-                    >
-                        <Text style={{ fontSize: 13 }}>Herniation</Text>
-                    </Checkbox>
-                )}
-                
-                <div style={{ marginTop: 8, borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: 2 }}>
-                   <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic' }}>
-                     * Drag to rotate volume<br/>
-                     * Scroll to zoom
-                   </Text>
-                </div>
-            </Space>
+          <Space direction="vertical" style={{ width: '100%' }} size={10}>
+            <Checkbox
+              checked={showRaw}
+              onChange={(e) => setShowRaw(e.target.checked)}
+            >
+              <Text style={{ fontSize: 13 }}>{t('niivue.rawMri')}</Text>
+            </Checkbox>
+
+            {structureMaskUrl && (
+              <Checkbox
+                checked={showStructure}
+                onChange={(e) => setShowStructure(e.target.checked)}
+              >
+                <Text style={{ fontSize: 13 }}>{t('niivue.structure')}</Text>
+              </Checkbox>
+            )}
+
+            {ldhMaskUrl && (
+              <Checkbox
+                checked={showLDH}
+                onChange={(e) => setShowLDH(e.target.checked)}
+              >
+                <Text style={{ fontSize: 13 }}>{t('niivue.herniation')}</Text>
+              </Checkbox>
+            )}
+
+            <div style={{ marginTop: 8, borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: 2 }}>
+              <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic' }}>
+                {t('niivue.dragToRotate')}<br />
+                {t('niivue.scrollToZoom')}
+              </Text>
+            </div>
+          </Space>
         </Card>
       )}
     </div>

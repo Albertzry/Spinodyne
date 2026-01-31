@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Layout, Menu, Button } from 'antd';
 import { Upload as UploadIcon, FileText, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const { Sider, Content } = Layout;
 
@@ -13,6 +15,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
@@ -32,44 +35,44 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           zIndex: 100,
         }}
       >
-        <div style={{ 
-          height: 64, 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           borderBottom: '1px solid rgba(0, 106, 254, 0.05)'
         }}>
           {collapsed ? (
-            <div style={{ 
-                width: 36, 
-                height: 36, 
-                background: 'var(--brand-gradient)', 
-                borderRadius: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0, 106, 254, 0.2)'
+            <div style={{
+              width: 36,
+              height: 36,
+              background: 'var(--brand-gradient)',
+              borderRadius: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0, 106, 254, 0.2)'
             }}>
-                <Activity size={20} color="white" />
+              <Activity size={20} color="white" />
             </div>
           ) : (
-             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                 <div style={{ 
-                    width: 28, 
-                    height: 28, 
-                    background: 'var(--brand-gradient)', 
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    <Activity size={16} color="white" />
-                </div>
-                <span style={{ fontWeight: 700, fontSize: 18, color: '#1E293B', letterSpacing: '-0.02em' }}>Spinodyne</span>
-             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                background: 'var(--brand-gradient)',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Activity size={16} color="white" />
+              </div>
+              <span style={{ fontWeight: 700, fontSize: 18, color: '#1E293B', letterSpacing: '-0.02em' }}>Spinodyne</span>
+            </div>
           )}
         </div>
-        
+
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
@@ -78,42 +81,43 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             {
               key: '/inference',
               icon: <UploadIcon size={20} />,
-              label: 'Inference',
+              label: t('inference'),
               onClick: () => navigate('/inference'),
             },
             {
               key: '/records',
               icon: <FileText size={20} />,
-              label: 'Records',
+              label: t('records'),
               onClick: () => navigate('/records'),
             },
           ]}
         />
-        
-        <div style={{ position: 'absolute', bottom: 20, width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Button 
-                type="text" 
-                icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />} 
-                onClick={() => setCollapsed(!collapsed)}
-                style={{ color: '#94A3B8' }}
-            />
+
+        <div style={{ position: 'absolute', bottom: 20, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          {!collapsed && <LanguageSwitcher />}
+          <Button
+            type="text"
+            icon={collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            onClick={() => setCollapsed(!collapsed)}
+            style={{ color: '#94A3B8' }}
+          />
         </div>
       </Sider>
-      
+
       <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', background: 'transparent' }}>
-        <Content style={{ 
-            padding: '32px', 
-            margin: 0, 
-            minHeight: '100vh', 
-            display: 'flex',
-            flexDirection: 'column',
-            maxWidth: 1600, 
-            width: '100%',
-            alignSelf: 'center'
+        <Content style={{
+          padding: '32px',
+          margin: 0,
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: 1600,
+          width: '100%',
+          alignSelf: 'center'
         }}>
-            <div style={{ flex: 1, width: '100%' }}>
-                {children}
-            </div>
+          <div style={{ flex: 1, width: '100%' }}>
+            {children}
+          </div>
         </Content>
       </Layout>
     </Layout>

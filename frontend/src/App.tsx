@@ -1,5 +1,8 @@
 import React from 'react';
 import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
+import { useTranslation } from 'react-i18next';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import MainLayout from './layouts/MainLayout';
@@ -24,8 +27,10 @@ const AnimatedRoutes: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const { i18n } = useTranslation();
+
   return (
-    <ConfigProvider theme={theme}>
+    <ConfigProvider theme={theme} locale={i18n.language === 'zh' ? zhCN : enUS}>
       <Router>
         <MainLayout>
           <AnimatedRoutes />

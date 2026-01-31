@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs, Card, List, Typography, Row, Col, Image, Tooltip, Empty, Statistic, Space, Divider } from 'antd';
 import { AlignVerticalJustifyCenter, Ruler, Activity, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const { Text, Title } = Typography;
 
@@ -76,25 +77,25 @@ const MetricValue = ({ value, unit, size = 'medium' }: { value: number | undefin
 
 const PreviewThumbnail = ({ url, label, height = 80 }: { url?: string; label: string; height?: number }) => (
   <div style={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
-    <div style={{ 
-        height, 
-        background: '#f8fafc', 
-        borderRadius: 6, 
-        border: '1px solid #f1f5f9',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+    <div style={{
+      height,
+      background: '#f8fafc',
+      borderRadius: 6,
+      border: '1px solid #f1f5f9',
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     }}>
-        <Image
-          height="100%"
-          src={url}
-          fallback="https://placehold.co/120x80?text=No+Preview"
-          style={{ objectFit: 'contain' }}
-          preview={{
-            mask: <div style={{ fontSize: 10 }}>View</div>,
-          }}
-        />
+      <Image
+        height="100%"
+        src={url}
+        fallback="https://placehold.co/120x80?text=No+Preview"
+        style={{ objectFit: 'contain' }}
+        preview={{
+          mask: <div style={{ fontSize: 10 }}>View</div>,
+        }}
+      />
     </div>
     <div style={{ marginTop: 4 }}>
       <Text type="secondary" style={{ fontSize: 9, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
@@ -107,49 +108,50 @@ const PreviewThumbnail = ({ url, label, height = 80 }: { url?: string; label: st
 // --- Main Component ---
 
 const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }) => {
-  
+  const { t } = useTranslation();
+
   const renderVertebrae = () => (
     <List
       dataSource={vertebrae}
       renderItem={(item) => (
         <List.Item style={{ padding: '8px 0' }}>
-          <Card 
-            size="small" 
-            variant="borderless" 
+          <Card
+            size="small"
+            variant="borderless"
             hoverable
             style={{ width: '100%', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={{ 
-                    width: 28, height: 28, background: '#0f172a', color: 'white', 
+                  <div style={{
+                    width: 28, height: 28, background: '#0f172a', color: 'white',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: 13, marginRight: 8
                   }}>
                     {item.level}
                   </div>
-                  <Text strong>Vertebra</Text>
+                  <Text strong>{t('dataPanel.vertebra')}</Text>
                 </div>
                 <Row gutter={[8, 12]}>
                   <Col span={12}>
-                    <MetricLabel label="VH Ant" />
+                    <MetricLabel label={t('dataPanel.vhAnt')} />
                     <MetricValue value={item.vh_anterior} unit="mm" />
                   </Col>
                   <Col span={12}>
-                    <MetricLabel label="VH Post" />
+                    <MetricLabel label={t('dataPanel.vhPost')} />
                     <MetricValue value={item.vh_posterior} unit="mm" />
                   </Col>
                   <Col span={24}>
-                    <MetricLabel label="AP Diameter" />
+                    <MetricLabel label={t('dataPanel.apDiameter')} />
                     <MetricValue value={item.ap_diameter} unit="mm" />
                   </Col>
                 </Row>
               </Col>
               <Col span={14}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <PreviewThumbnail url={item.preview_url_vh} label="Sagittal (VH)" />
-                  <PreviewThumbnail url={item.preview_url_ap} label="Axial (AP)" />
+                  <PreviewThumbnail url={item.preview_url_vh} label={t('dataPanel.sagittal') + " (VH)"} />
+                  <PreviewThumbnail url={item.preview_url_ap} label={t('dataPanel.axial') + " (AP)"} />
                 </div>
               </Col>
             </Row>
@@ -164,72 +166,72 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
       dataSource={discs}
       renderItem={(item) => (
         <List.Item style={{ padding: '8px 0' }}>
-          <Card 
-            size="small" 
-            variant="borderless" 
+          <Card
+            size="small"
+            variant="borderless"
             hoverable
             style={{ width: '100%', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
           >
             <Row gutter={16} align="middle">
               <Col span={10}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                  <div style={{ 
-                    width: 50, height: 28, background: '#334155', color: 'white', 
+                  <div style={{
+                    width: 50, height: 28, background: '#334155', color: 'white',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: 11, marginRight: 8
                   }}>
                     {item.level}
                   </div>
-                  <Text strong>Disc</Text>
+                  <Text strong>{t('dataPanel.disc')}</Text>
                 </div>
-                
+
                 {/* Main Metrics */}
                 <Row gutter={[8, 8]}>
                   <Col span={12}>
-                    <MetricLabel label="DH" tooltip="Disc Height" />
+                    <MetricLabel label={t('dataPanel.dh')} tooltip={t('dataPanel.dhTooltip')} />
                     <MetricValue value={item.dh} unit="mm" />
                   </Col>
                   <Col span={12}>
-                    <MetricLabel label="DHI" tooltip="Disc Height Index" />
+                    <MetricLabel label={t('dataPanel.dhi')} tooltip={t('dataPanel.dhiTooltip')} />
                     <MetricValue value={item.dhi} />
                   </Col>
                   <Col span={12}>
-                    <MetricLabel label="HDR" tooltip="Height-to-Depth Ratio" />
+                    <MetricLabel label={t('dataPanel.hdr')} tooltip={t('dataPanel.hdrTooltip')} />
                     <MetricValue value={item.hdr} />
                   </Col>
                   <Col span={12}>
-                    <MetricLabel label="DIA" tooltip="Disc Inclination Angle" />
+                    <MetricLabel label={t('dataPanel.dia')} tooltip={t('dataPanel.diaTooltip')} />
                     <MetricValue value={item.dia} unit="°" />
                   </Col>
                 </Row>
 
                 <Divider style={{ margin: '8px 0' }} />
-                
+
                 {/* Scan Heights Sub-section */}
                 <div style={{ marginBottom: 4 }}>
-                    <Text type="secondary" style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Scan Heights (mm)
-                    </Text>
+                  <Text type="secondary" style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {t('dataPanel.scanHeights')}
+                  </Text>
                 </div>
                 <Row gutter={8}>
-                    <Col span={8}>
-                        <MetricLabel label="A" />
-                        <MetricValue value={item.scan_height_a} size="small" />
-                    </Col>
-                    <Col span={8}>
-                        <MetricLabel label="M" />
-                        <MetricValue value={item.scan_height_m} size="small" />
-                    </Col>
-                    <Col span={8}>
-                        <MetricLabel label="P" />
-                        <MetricValue value={item.scan_height_p} size="small" />
-                    </Col>
+                  <Col span={8}>
+                    <MetricLabel label={t('dataPanel.scanHeightA')} />
+                    <MetricValue value={item.scan_height_a} size="small" />
+                  </Col>
+                  <Col span={8}>
+                    <MetricLabel label={t('dataPanel.scanHeightM')} />
+                    <MetricValue value={item.scan_height_m} size="small" />
+                  </Col>
+                  <Col span={8}>
+                    <MetricLabel label={t('dataPanel.scanHeightP')} />
+                    <MetricValue value={item.scan_height_p} size="small" />
+                  </Col>
                 </Row>
               </Col>
               <Col span={14}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <PreviewThumbnail url={item.preview_url_dm} label="Measurement (DM)" />
-                  <PreviewThumbnail url={item.preview_url_dia} label="Angle (DIA)" />
+                  <PreviewThumbnail url={item.preview_url_dm} label={t('dataPanel.measurement') + " (DM)"} />
+                  <PreviewThumbnail url={item.preview_url_dia} label={t('dataPanel.angle') + " (DIA)"} />
                 </div>
               </Col>
             </Row>
@@ -241,31 +243,31 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
 
   const renderGlobal = () => {
     if (!globalMetrics) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
-    
+
     const herniationMetrics = [
-      { label: 'PD', fullName: 'Protrusion Distance', value: globalMetrics.pd, unit: 'mm' },
-      { label: 'PA', fullName: 'Protrusion Area', value: globalMetrics.pa, unit: 'mm²' },
-      { label: 'PAR', fullName: 'Protrusion Area Ratio', value: globalMetrics.par, unit: '' },
-      { label: 'PLR', fullName: 'Protrusion Length Ratio', value: globalMetrics.plr, unit: '' },
+      { label: t('dataPanel.pd'), fullName: t('dataPanel.pdFull'), value: globalMetrics.pd, unit: 'mm' },
+      { label: t('dataPanel.pa'), fullName: t('dataPanel.paFull'), value: globalMetrics.pa, unit: 'mm²' },
+      { label: t('dataPanel.par'), fullName: t('dataPanel.parFull'), value: globalMetrics.par, unit: '' },
+      { label: t('dataPanel.plr'), fullName: t('dataPanel.plrFull'), value: globalMetrics.plr, unit: '' },
     ];
 
     const spinalMetrics = [
-      { label: 'Lumbar Lordosis', key: 'll', value: globalMetrics.ll, url: globalMetrics.preview_url_ll },
-      { label: 'Sacral Slope', key: 'ss', value: globalMetrics.ss, url: globalMetrics.preview_url_ss },
-      { label: 'Lumbosacral Angle', key: 'lsa', value: globalMetrics.lsa, url: globalMetrics.preview_url_lsa },
+      { label: t('dataPanel.ll'), key: 'll', value: globalMetrics.ll, url: globalMetrics.preview_url_ll },
+      { label: t('dataPanel.ss'), key: 'ss', value: globalMetrics.ss, url: globalMetrics.preview_url_ss },
+      { label: t('dataPanel.lsa'), key: 'lsa', value: globalMetrics.lsa, url: globalMetrics.preview_url_lsa },
     ];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '8px 0' }}>
-        
+
         {/* Top Section: Herniation Severity */}
         <div>
           <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
-            Herniation Severity Index
+            {t('dataPanel.herniationSeverity')}
           </Title>
-          
-          <Card 
-            variant="borderless" 
+
+          <Card
+            variant="borderless"
             style={{ background: '#f8fafc', borderRadius: 16 }}
             bodyStyle={{ padding: 12 }}
           >
@@ -276,11 +278,11 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                   <Row gutter={[8, 8]} style={{ flex: 1, height: '100%' }}>
                     {herniationMetrics.map((m) => (
                       <Col span={12} key={m.label} style={{ display: 'flex' }}>
-                        <Card 
+                        <Card
                           size="small"
-                          style={{ 
-                            background: 'white', 
-                            borderRadius: 12, 
+                          style={{
+                            background: 'white',
+                            borderRadius: 12,
                             border: '1px solid #e2e8f0',
                             width: '100%',
                             display: 'flex',
@@ -296,17 +298,17 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                             </Text>
                           </Tooltip>
                           <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                            <Statistic 
-                              value={m.value ?? '-'} 
+                            <Statistic
+                              value={m.value ?? '-'}
                               precision={m.value !== null && m.value !== undefined ? 2 : 0}
                               suffix={m.value !== null && m.value !== undefined ? m.unit : ''}
-                              valueStyle={{ 
-                                color: '#0f172a', 
-                                fontWeight: 700, 
+                              valueStyle={{
+                                color: '#0f172a',
+                                fontWeight: 700,
                                 fontSize: 22,
                                 lineHeight: 1.2,
                                 textAlign: 'center'
-                              }} 
+                              }}
                             />
                           </div>
                         </Card>
@@ -318,14 +320,14 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
 
               {/* Right: Vertical Image - 缩小宽度 */}
               <Col span={8}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   height: '100%',
                   minHeight: 240
                 }}>
-                  <div style={{ 
+                  <div style={{
                     height: '100%',
                     maxHeight: 240,
                     width: '100%',
@@ -340,11 +342,11 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                     {globalMetrics.preview_url_herniation ? (
                       <Image
                         src={globalMetrics.preview_url_herniation}
-                        style={{ 
+                        style={{
                           height: '100%',
                           maxHeight: 240,
                           width: '100%',
-                          objectFit: 'contain' 
+                          objectFit: 'contain'
                         }}
                         preview={{
                           mask: <div style={{ fontSize: 12 }}>View Full Size</div>,
@@ -352,7 +354,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
                       />
                     ) : (
                       <div style={{ padding: 40, textAlign: 'center' }}>
-                        <Text type="secondary">No herniation summary available</Text>
+                        <Text type="secondary">{t('dataPanel.noHerniation')}</Text>
                       </div>
                     )}
                   </div>
@@ -365,15 +367,15 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
         {/* Bottom Section: Spinal Alignment */}
         <div>
           <Title level={5} style={{ marginBottom: 8, color: '#0f172a' }}>
-            Spinal Alignment
+            {t('dataPanel.spinalAlignment')}
           </Title>
-          
+
           <Row gutter={[12, 12]}>
             {spinalMetrics.map((m) => (
               <Col span={8} key={m.key}>
-                <Card 
-                  size="small" 
-                  variant="borderless" 
+                <Card
+                  size="small"
+                  variant="borderless"
                   style={{ background: '#f8fafc', borderRadius: 16, height: '100%' }}
                   bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', height: '100%' }}
                 >
@@ -386,20 +388,20 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
 
                   {/* Aligned Value Area */}
                   <div style={{ margin: '8px 0' }}>
-                    <Statistic 
-                      value={m.value} 
-                      precision={1} 
-                      suffix="°" 
-                      valueStyle={{ color: '#0f172a', fontWeight: 700, fontSize: 24 }} 
+                    <Statistic
+                      value={m.value}
+                      precision={1}
+                      suffix="°"
+                      valueStyle={{ color: '#0f172a', fontWeight: 700, fontSize: 24 }}
                     />
                   </div>
 
                   {/* Aligned Image Area */}
                   <div style={{ flex: 1, marginTop: 'auto' }}>
-                    <PreviewThumbnail 
-                      url={m.url} 
-                      label={`${m.label} View`} 
-                      height={100} 
+                    <PreviewThumbnail
+                      url={m.url}
+                      label={`${m.label} ${t('dataPanel.view')}`}
+                      height={100}
                     />
                   </div>
                 </Card>
@@ -416,7 +418,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
       key: 'global',
       label: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Activity size={16} /> Global
+          <Activity size={16} /> {t('dataPanel.tabs.global')}
         </span>
       ),
       children: renderGlobal(),
@@ -425,7 +427,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
       key: 'vertebrae',
       label: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <AlignVerticalJustifyCenter size={16} /> Vertebrae
+          <AlignVerticalJustifyCenter size={16} /> {t('dataPanel.tabs.vertebrae')}
         </span>
       ),
       children: renderVertebrae(),
@@ -434,7 +436,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
       key: 'discs',
       label: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Ruler size={16} /> Discs
+          <Ruler size={16} /> {t('dataPanel.tabs.discs')}
         </span>
       ),
       children: renderDiscs(),
@@ -443,9 +445,9 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
 
   return (
     <div className="glass-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 16, overflow: 'hidden' }}>
-      <Tabs 
-        defaultActiveKey="global" 
-        items={tabItems} 
+      <Tabs
+        defaultActiveKey="global"
+        items={tabItems}
         type="card"
         tabBarStyle={{ margin: 0, background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(10px)', padding: '8px 8px 0 8px' }}
         style={{ flex: 1, overflow: 'hidden' }}
