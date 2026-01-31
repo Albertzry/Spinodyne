@@ -44,9 +44,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           top: 0,
           bottom: 0,
           zIndex: 100,
-          background: 'rgba(255, 255, 255, 0.8)',
+          background: 'rgba(255, 255, 255, 0.65)',
           backdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(0, 106, 254, 0.1)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(255, 255, 255, 0.6)',
+          boxShadow: '4px 0 24px rgba(0, 106, 254, 0.04)',
           display: 'flex',
           flexDirection: 'column'
         }}

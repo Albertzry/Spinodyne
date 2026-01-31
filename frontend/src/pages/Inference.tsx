@@ -96,7 +96,6 @@ const Inference: React.FC = () => {
             width: '100%',
             maxWidth: 640,
             padding: '48px',
-            background: 'rgba(255, 255, 255, 0.8)',
           }}
         >
           <MotionContainer>
@@ -200,9 +199,11 @@ const Inference: React.FC = () => {
                     loading={loading}
                     block
                     style={{
-                      height: 54,
-                      fontSize: 16,
+                      height: 68,
+                      fontSize: 17,
                       fontWeight: 600,
+                      padding: '10px 32px',
+                      lineHeight: 1.2,
                     }}
                   >
                     {loading ? t('inferencePage.processing') : t('inferencePage.initialize')}

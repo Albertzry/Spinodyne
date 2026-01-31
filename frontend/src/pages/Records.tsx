@@ -182,7 +182,7 @@ const Records: React.FC = () => {
 
   return (
     <PageTransition>
-      <MotionCard className="glass-panel" noHoverLift style={{ padding: '40px', background: 'rgba(255, 255, 255, 0.8)', minHeight: 'calc(100vh - 128px)' }}>
+      <MotionCard className="glass-panel" noHoverLift style={{ padding: '40px', minHeight: 'calc(100vh - 128px)' }}>
         <MotionContainer>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
             <Space size={12}>
