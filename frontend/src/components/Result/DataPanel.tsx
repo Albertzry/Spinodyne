@@ -139,7 +139,9 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               <Col span={10}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
                   <div style={{
-                    width: 28, height: 28, background: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#0f172a', color: isDarkMode ? '#E2E8F0' : 'white',
+                    width: 28, height: 28,
+                    background: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 106, 254, 0.08)',
+                    color: isDarkMode ? '#E2E8F0' : '#006AFE',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: 13, marginRight: 8
                   }}>
@@ -196,7 +198,9 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
               <Col span={10}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                   <div style={{
-                    width: 50, height: 28, background: isDarkMode ? 'rgba(0, 106, 254, 0.15)' : '#334155', color: isDarkMode ? '#60A5FA' : 'white',
+                    width: 50, height: 28,
+                    background: isDarkMode ? 'rgba(0, 106, 254, 0.15)' : 'rgba(0, 106, 254, 0.08)',
+                    color: isDarkMode ? '#60A5FA' : '#006AFE',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: 11, marginRight: 8
                   }}>

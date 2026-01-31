@@ -206,6 +206,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div style={{ flex: 1, width: '100%' }}>
             {children}
           </div>
+
+          <div style={{
+            marginTop: 48,
+            textAlign: 'center',
+            paddingTop: 24,
+            borderTop: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)'
+          }}>
+            <span style={{ color: subTextColor, fontSize: 13 }}>
+              Copyright © {new Date().getFullYear()} <a href="https://github.com/Albertzry" target="_blank" rel="noopener noreferrer" style={{ color: subTextColor, textDecoration: 'none', fontWeight: 500, transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#006AFE'} onMouseOut={(e) => e.currentTarget.style.color = subTextColor}>Albertzry</a>. All rights reserved.
+            </span>
+          </div>
         </Content>
       </motion.div>
     </Layout>

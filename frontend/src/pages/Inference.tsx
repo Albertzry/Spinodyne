@@ -90,34 +90,34 @@ const Inference: React.FC = () => {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: 'calc(100vh - 128px)',
-        padding: '24px'
+        padding: '0px'
       }}>
         <MotionCard
           className="glass-panel"
           noHoverLift
           style={{
             width: '100%',
-            maxWidth: 1200,
-            padding: '48px',
+            maxWidth: 1000,
+            padding: '32px 48px',
           }}
         >
           <MotionContainer delayChildren={0} staggerChildren={0.04}>
             <MotionItem>
-              <div style={{ textAlign: 'center', marginBottom: 40 }}>
+              <div style={{ textAlign: 'center', marginBottom: 24 }}>
                 <div style={{
-                  width: 64, height: 64,
+                  width: 56, height: 56,
                   background: 'var(--brand-gradient)',
-                  borderRadius: 16,
+                  borderRadius: 14,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: 20,
+                  marginBottom: 12,
                   boxShadow: '0 8px 24px rgba(0, 106, 254, 0.2)'
                 }}>
-                  <FileUp size={32} color="white" />
+                  <FileUp size={28} color="white" />
                 </div>
-                <Title level={2} style={{ marginBottom: 8 }}>{t('inferencePage.title')}</Title>
-                <Text type="secondary" style={{ fontSize: 15 }}>
+                <Title level={3} style={{ marginBottom: 4 }}>{t('inferencePage.title')}</Title>
+                <Text type="secondary" style={{ fontSize: 14 }}>
                   {t('inferencePage.subtitle')}
                 </Text>
               </div>
@@ -178,7 +178,7 @@ const Inference: React.FC = () => {
                     background: isDarkMode ? 'rgba(15, 23, 42, 0.8)' : '#F8FAFC',
                     border: isDarkMode ? `2px dashed ${isDarkMode ? '#334155' : '#E2E8F0'}` : '2px dashed #E2E8F0',
                     borderRadius: 16,
-                    padding: '24px'
+                    padding: '16px'
                   }}>
                     <p className="ant-upload-drag-icon">
                       <UploadCloud size={48} color={token.colorPrimary} strokeWidth={1.5} />
@@ -194,7 +194,7 @@ const Inference: React.FC = () => {
               </MotionItem>
 
               <MotionItem>
-                <Form.Item style={{ marginTop: 40, marginBottom: 0 }}>
+                <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
                   <MotionButton
                     type="primary"
                     htmlType="submit"
@@ -202,10 +202,10 @@ const Inference: React.FC = () => {
                     loading={loading}
                     block
                     style={{
-                      height: 68,
-                      fontSize: 17,
+                      height: 56,
+                      fontSize: 16,
                       fontWeight: 600,
-                      padding: '15px 32px',
+                      padding: '12px 32px',
                       lineHeight: 1.2,
                     }}
                   >
