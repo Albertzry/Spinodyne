@@ -213,9 +213,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             paddingTop: 24,
             borderTop: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)'
           }}>
-            <span style={{ color: subTextColor, fontSize: 13 }}>
-              Copyright © {new Date().getFullYear()} <a href="https://github.com/Albertzry" target="_blank" rel="noopener noreferrer" style={{ color: subTextColor, textDecoration: 'none', fontWeight: 500, transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#006AFE'} onMouseOut={(e) => e.currentTarget.style.color = subTextColor}>Albertzry</a>. All rights reserved.
-            </span>
+            <div style={{ color: subTextColor, fontSize: 13, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 8px' }}>
+              <span>Copyright © {new Date().getFullYear()} <a href="https://github.com/Albertzry" target="_blank" rel="noopener noreferrer" style={{ color: subTextColor, textDecoration: 'none', fontWeight: 500, transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#006AFE'} onMouseOut={(e) => e.currentTarget.style.color = subTextColor}>Albertzry</a>.</span>
+              <span>Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer" style={{ color: subTextColor, textDecoration: 'underline', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#006AFE'} onMouseOut={(e) => e.currentTarget.style.color = subTextColor}>CC BY-NC 4.0</a>.</span>
+            </div>
           </div>
         </Content>
       </motion.div>
