@@ -275,7 +275,7 @@ const ResultDashboard: React.FC = () => {
           {/* Left Panel: Processing Animation */}
           <Col xs={24} lg={12} style={{ height: 600, display: 'flex', flexDirection: 'column' }}>
             <MotionContainer delayChildren={0.2} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <MotionCard className="glass-panel" style={{
+              <MotionCard className="glass-panel" noHoverLift style={{
                 flex: 1,
                 borderRadius: 16,
                 padding: 30,
@@ -284,9 +284,6 @@ const ResultDashboard: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.6)',
-                border: '1px solid rgba(15, 23, 42, 0.1)',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
               }}>
                 <div style={{
                   textAlign: 'center',
@@ -356,13 +353,12 @@ const ResultDashboard: React.FC = () => {
           {/* Right Panel: Skeletons */}
           <Col xs={24} lg={12} style={{ height: 600 }}>
             <MotionContainer delayChildren={0.4} style={{ height: '100%' }}>
-              <MotionCard className="glass-panel" style={{
+              <MotionCard className="glass-panel" noHoverLift style={{
                 height: '100%',
                 borderRadius: 16,
                 padding: 24,
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(255, 255, 255, 0.8)',
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}>

@@ -59,16 +59,17 @@ MotionCard.displayName = 'MotionCard';
 interface MotionContainerProps extends HTMLMotionProps<'div'> {
     children: React.ReactNode;
     delayChildren?: number;
+    staggerChildren?: number;
 }
 
 export const MotionContainer = forwardRef<HTMLDivElement, MotionContainerProps>(
-    ({ children, delayChildren = 0.1, ...props }, ref) => {
+    ({ children, delayChildren = 0.1, staggerChildren = 0.1, ...props }, ref) => {
         const containerVariants = {
             hidden: { opacity: 0 },
             show: {
                 opacity: 1,
                 transition: {
-                    staggerChildren: 0.1,
+                    staggerChildren: staggerChildren,
                     delayChildren: delayChildren,
                 },
             },

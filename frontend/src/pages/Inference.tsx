@@ -94,11 +94,11 @@ const Inference: React.FC = () => {
           noHoverLift
           style={{
             width: '100%',
-            maxWidth: 640,
+            maxWidth: 1200,
             padding: '48px',
           }}
         >
-          <MotionContainer>
+          <MotionContainer delayChildren={0} staggerChildren={0.04}>
             <MotionItem>
               <div style={{ textAlign: 'center', marginBottom: 40 }}>
                 <div style={{
@@ -202,7 +202,7 @@ const Inference: React.FC = () => {
                       height: 68,
                       fontSize: 17,
                       fontWeight: 600,
-                      padding: '10px 32px',
+                      padding: '15px 32px',
                       lineHeight: 1.2,
                     }}
                   >
