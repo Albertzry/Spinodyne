@@ -107,6 +107,7 @@
             "view": "View",
             "viewFullSize": "View Full Size",
             "noHerniation": "No herniation summary available",
+            "filterLevels": "Filter by Level...",
             "tabs": {
                 "global": "Global",
                 "vertebrae": "Vertebrae",

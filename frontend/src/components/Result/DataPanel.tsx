@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Card, List, Typography, Row, Col, Image, Tooltip, Empty, Statistic, Space, Divider } from 'antd';
-import { AlignVerticalJustifyCenter, Ruler, Activity, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, List, Typography, Row, Col, Image, Tooltip, Empty, Statistic, Space, Divider, Select } from 'antd';
+import { AlignVerticalJustifyCenter, Ruler, Activity, Info, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 // Note: Using CSS transitions instead of framer-motion for tab animations to avoid page navigation conflicts
 import { MotionContainer, MotionItem } from '../MotionComponents';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const { Text, Title } = Typography;
 
@@ -118,9 +119,30 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
   const { isDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState('global');
 
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+
+  // Clear selection when tab changes
+  useEffect(() => {
+    setSelectedLevels([]);
+  }, [activeTab]);
+
+  const filteredVertebrae = selectedLevels.length > 0
+    ? vertebrae.filter(v => selectedLevels.includes(v.level))
+    : vertebrae;
+
+  const filteredDiscs = selectedLevels.length > 0
+    ? discs.filter(d => selectedLevels.includes(d.level))
+    : discs;
+
+  const currentOptions = activeTab === 'vertebrae'
+    ? vertebrae.map(v => ({ value: v.level, label: v.level }))
+    : activeTab === 'discs'
+      ? discs.map(d => ({ value: d.level, label: d.level }))
+      : [];
+
   const renderVertebrae = () => (
     <List
-      dataSource={vertebrae}
+      dataSource={filteredVertebrae}
       renderItem={(item, index) => (
         <MotionItem key={`${item.level}-${index}`} style={{ padding: '8px 0' }}>
           <Card
@@ -183,7 +205,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
 
   const renderDiscs = () => (
     <List
-      dataSource={discs}
+      dataSource={filteredDiscs}
       renderItem={(item, index) => (
         <MotionItem key={`${item.level}-${index}`} style={{ padding: '8px 0' }}>
           <Card
@@ -565,6 +587,52 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
         </div>
       </div>
 
+      {/* Filter Bar with Glassmorphism and Animation */}
+      <AnimatePresence>
+        {(activeTab === 'vertebrae' || activeTab === 'discs') && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+            animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
+            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden', padding: '0 16px' }}
+          >
+            <div style={{
+              background: isDarkMode ? 'rgba(30, 41, 59, 0.15)' : 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: 12,
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)',
+              padding: '4px 8px',
+              display: 'flex',
+              alignItems: 'center',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
+            }}>
+              <Filter size={16} style={{ margin: '0 8px', color: isDarkMode ? '#94A3B8' : '#64748B' }} />
+              <Select
+                mode="multiple"
+                variant="borderless"
+                placeholder={t('dataPanel.filterLevels') || "Filter by Level..."}
+                style={{ width: '100%' }}
+                maxTagCount="responsive"
+                value={selectedLevels}
+                onChange={setSelectedLevels}
+                options={currentOptions}
+                allowClear
+                popupClassName={isDarkMode ? 'dark-select-dropdown' : ''}
+                dropdownStyle={{
+                  background: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+                  backdropFilter: 'blur(16px)',
+                  border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 106, 254, 0.1)',
+                  borderRadius: 12,
+                  boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2)',
+                  padding: 6
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Tab Content with Slide Animation */}
       <div style={{ flex: 1, overflowY: 'auto', padding: 16, position: 'relative' }}>
         <div
@@ -601,7 +669,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
           }
         }
       `}</style>
-    </div>
+    </div >
   );
 };
 

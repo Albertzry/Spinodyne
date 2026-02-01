@@ -107,6 +107,7 @@
             "view": "查看",
             "viewFullSize": "查看原图",
             "noHerniation": "无突出摘要可用",
+            "filterLevels": "筛选层级...",
             "tabs": {
                 "global": "全局指标",
                 "vertebrae": "椎骨",
