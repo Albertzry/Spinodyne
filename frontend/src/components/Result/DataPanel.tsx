@@ -4,7 +4,6 @@ import { AlignVerticalJustifyCenter, Ruler, Activity, Info, Filter } from 'lucid
 import { useTranslation } from 'react-i18next';
 // Note: Using CSS transitions instead of framer-motion for tab animations to avoid page navigation conflicts
 import { MotionContainer, MotionItem } from '../MotionComponents';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const { Text, Title } = Typography;
 
@@ -587,54 +586,75 @@ const DataPanel: React.FC<DataPanelProps> = ({ vertebrae, discs, globalMetrics }
         </div>
       </div>
 
-      {/* Filter Bar with Glassmorphism and Animation */}
-      <AnimatePresence>
-        {(activeTab === 'vertebrae' || activeTab === 'discs') && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden', padding: '0 16px' }}
-          >
-            <div style={{
-              background: isDarkMode ? 'rgba(30, 41, 59, 0.15)' : 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(12px)',
-              borderRadius: 12,
-              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.08)',
-              padding: '4px 8px',
-              display: 'flex',
-              alignItems: 'center',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
-            }}>
-              <Filter size={16} style={{ margin: '0 8px', color: isDarkMode ? '#94A3B8' : '#64748B' }} />
-              <Select
-                mode="multiple"
-                variant="borderless"
-                placeholder={t('dataPanel.filterLevels') || "Filter by Level..."}
-                style={{ width: '100%' }}
-                maxTagCount="responsive"
-                value={selectedLevels}
-                onChange={setSelectedLevels}
-                options={currentOptions}
-                allowClear
-                popupClassName={isDarkMode ? 'dark-select-dropdown' : ''}
-                dropdownStyle={{
-                  background: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(16px)',
-                  border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 106, 254, 0.1)',
-                  borderRadius: 12,
-                  boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2)',
-                  padding: 6
-                }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Filter Bar with Glassmorphism - Always visible when on vertebrae/discs tabs */}
+      {/* Filter Bar with Glassmorphism - Floating over content */}
+      {(activeTab === 'vertebrae' || activeTab === 'discs') && (
+        <div style={{
+          position: 'absolute',
+          top: 57, // Height of tab header
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          padding: '6px 16px 14px 16px',
+        }}>
+          {/* Background Glass Strip for the Filter Area */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.55)',
+            backdropFilter: 'blur(8px)',
+            mask: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+            WebkitMask: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+            pointerEvents: 'none',
+            zIndex: -1
+          }} />
+
+          <div style={{
+            background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: 12,
+            border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 106, 254, 0.05)',
+            padding: '4px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)'
+          }}>
+            <Filter size={16} style={{ margin: '0 8px', color: isDarkMode ? '#94A3B8' : '#64748B' }} />
+            <Select
+              mode="multiple"
+              variant="borderless"
+              placeholder={t('dataPanel.filterLevels') || "Filter by Level..."}
+              style={{ width: '100%' }}
+              maxTagCount="responsive"
+              value={selectedLevels}
+              onChange={setSelectedLevels}
+              options={currentOptions}
+              allowClear
+              popupClassName={isDarkMode ? 'dark-select-dropdown' : ''}
+              dropdownStyle={{
+                background: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(16px)',
+                border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 106, 254, 0.1)',
+                borderRadius: 12,
+                boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2)',
+                padding: 6
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Tab Content with Slide Animation */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: 16, position: 'relative' }}>
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: 16,
+        paddingTop: (activeTab === 'vertebrae' || activeTab === 'discs') ? 60 : 16, // Top padding to avoid hiding content under filter
+        position: 'relative'
+      }}>
         <div
           key={activeTab}
           className="tab-content-enter"

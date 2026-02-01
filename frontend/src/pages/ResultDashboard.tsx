@@ -102,8 +102,8 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
   return (
     <MotionContainer style={{ paddingBottom: 40 }}>
       {/* Header Section */}
-      <MotionItem style={{ marginBottom: 24 }}>
-        <Title level={3} style={{ marginBottom: 16, color: textColor }}>{t('resultPage.title')}</Title>
+      <MotionItem style={{ marginBottom: 12 }}>
+        <Title level={3} style={{ marginBottom: 8, color: textColor }}>{t('resultPage.title')}</Title>
         <Descriptions
           bordered
           size="small"
@@ -117,7 +117,7 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
         />
       </MotionItem>
 
-      <Divider style={{ margin: '24px 0' }} />
+      <Divider style={{ margin: '12px 0' }} />
 
       {/* Main Split Layout (50/50) */}
       <Row gutter={[24, 24]}>
@@ -261,8 +261,8 @@ const ResultDashboard: React.FC = () => {
         {/* Header Section */}
         {taskInfo && (
           <MotionContainer>
-            <MotionItem style={{ marginBottom: 24 }}>
-              <Title level={3} style={{ marginBottom: 16, color: textColor }}>{t('resultPage.title')}</Title>
+            <MotionItem style={{ marginBottom: 12 }}>
+              <Title level={3} style={{ marginBottom: 8, color: textColor }}>{t('resultPage.title')}</Title>
               <Descriptions
                 bordered
                 size="small"
@@ -275,7 +275,7 @@ const ResultDashboard: React.FC = () => {
                 style={{ background: descBg, borderRadius: 8, overflow: 'hidden' }}
               />
             </MotionItem>
-            <Divider style={{ margin: '24px 0' }} />
+            <Divider style={{ margin: '12px 0' }} />
           </MotionContainer>
         )}
 

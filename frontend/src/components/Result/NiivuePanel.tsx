@@ -232,7 +232,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
             top: 20,
             right: 20,
             width: 200,
-            background: isDarkMode ? 'rgba(30, 41, 59, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+            background: isDarkMode ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.6)',
             backdropFilter: 'blur(12px)',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
             zIndex: 11,
