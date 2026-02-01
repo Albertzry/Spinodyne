@@ -100,7 +100,7 @@ const SuccessView: React.FC<{ taskId: string }> = ({ taskId }) => {
   };
 
   return (
-    <MotionContainer style={{ paddingBottom: 40 }}>
+    <MotionContainer staggerChildren={0.15} delayChildren={0.1} style={{ paddingBottom: 40 }}>
       {/* Header Section */}
       <MotionItem style={{ marginBottom: 12 }}>
         <Title level={3} style={{ marginBottom: 8, color: textColor }}>{t('resultPage.title')}</Title>

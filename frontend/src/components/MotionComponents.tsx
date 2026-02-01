@@ -38,11 +38,11 @@ export const MotionCard = forwardRef<HTMLDivElement, MotionCardProps>(
         return (
             <motion.div
                 ref={ref}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 whileHover={!noHoverLift ? { y: -5, boxShadow: '0 10px 30px -10px rgba(0,0,0,0.1)' } : undefined}
-                transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                 className={className}
                 style={style}
                 {...props}
@@ -96,14 +96,15 @@ MotionContainer.displayName = 'MotionContainer';
 export const MotionItem = forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(
     ({ children, ...props }, ref) => {
         const itemVariants = {
-            hidden: { opacity: 0, y: 20 },
+            hidden: { opacity: 0, y: 30 },
             show: {
                 opacity: 1,
                 y: 0,
                 transition: {
                     type: 'spring',
-                    stiffness: 260,
-                    damping: 20
+                    stiffness: 100,
+                    damping: 15,
+                    mass: 0.8
                 }
             },
         };
