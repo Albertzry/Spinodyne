@@ -48,7 +48,18 @@
             "cancel": "Cancel",
             "deleteSuccess": "Record deleted successfully",
             "deleteError": "Failed to delete record",
-            "loadError": "Failed to load records"
+            "selectMaxTwo": "Please select a maximum of 2 records.",
+            "selectTwoToCompare": "Please select exactly 2 records to compare.",
+            "compare": "Compare"
+        },
+        "comparison": {
+            "title": "Comparison Analysis",
+            "fetchError": "Failed to load comparison data",
+            "error": "Data not found",
+            "previous": "Previous",
+            "current": "Current",
+            "metric": "Metric",
+            "change": "Change"
         },
         "resultPage": {
             "title": "Clinical Analysis Result",

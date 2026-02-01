@@ -23,7 +23,7 @@ interface Task {
   created_at: string;
 }
 
-interface AnalysisResult {
+export interface AnalysisResult {
   task_id: string;
   status: string;
   task_info?: {

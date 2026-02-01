@@ -48,7 +48,18 @@
             "cancel": "取消",
             "deleteSuccess": "记录删除成功",
             "deleteError": "删除记录失败",
-            "loadError": "加载记录失败"
+            "selectMaxTwo": "请最多选择两条记录。",
+            "selectTwoToCompare": "请选择两条记录进行对比。",
+            "compare": "对比"
+        },
+        "comparison": {
+            "title": "对比分析",
+            "fetchError": "加载对比数据失败",
+            "error": "数据未找到",
+            "previous": "前次",
+            "current": "本次",
+            "metric": "指标",
+            "change": "变化"
         },
         "resultPage": {
             "title": "临床分析结果",

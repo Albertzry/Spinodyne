@@ -9,6 +9,7 @@ import MainLayout from './layouts/MainLayout';
 import Inference from './pages/Inference';
 import Records from './pages/Records';
 import ResultDashboard from './pages/ResultDashboard';
+import ComparisonDashboard from './pages/ComparisonDashboard';
 import appTheme from './theme/themeConfig';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
@@ -21,6 +22,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/inference" element={<Inference />} />
         <Route path="/records" element={<Records />} />
         <Route path="/result/:id" element={<ResultDashboard />} />
+        <Route path="/compare/:oldId/:newId" element={<ComparisonDashboard />} />
         <Route path="*" element={<Navigate to="/inference" replace />} />
       </Routes>
     </AnimatePresence>

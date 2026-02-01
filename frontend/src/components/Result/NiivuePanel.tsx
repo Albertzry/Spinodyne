@@ -7,25 +7,59 @@ import { useTheme } from '../../context/ThemeContext';
 
 const { Text } = Typography;
 
+export interface LayerState {
+  showRaw: boolean;
+  showStructure: boolean;
+  showLDH: boolean;
+}
+
 interface NiivuePanelProps {
   rawUrl: string;
   structureMaskUrl?: string;
   ldhMaskUrl?: string;
+  onNvLoaded?: (nv: Niivue) => void;
+  // Optional controlled state
+  layerState?: LayerState;
+  onLayerChange?: (key: keyof LayerState, value: boolean) => void;
 }
 
-const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldhMaskUrl }) => {
+const NiivuePanel: React.FC<NiivuePanelProps> = ({
+  rawUrl,
+  structureMaskUrl,
+  ldhMaskUrl,
+  onNvLoaded,
+  layerState,
+  onLayerChange
+}) => {
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nvRef = useRef<Niivue | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // State for toggles
-  const [showRaw, setShowRaw] = useState(true);
-  const [showStructure, setShowStructure] = useState(true);
-  const [showLDH, setShowLDH] = useState(true);
+  // Internal state for uncontrolled mode
+  const [internalLayers, setInternalLayers] = useState<LayerState>({
+    showRaw: true,
+    showStructure: true,
+    showLDH: true
+  });
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [showControls, setShowControls] = useState(false);
+
+  // Determine effective state (Controlled vs Internal)
+  const isControlled = layerState !== undefined;
+  const showRaw = isControlled ? layerState.showRaw : internalLayers.showRaw;
+  const showStructure = isControlled ? layerState.showStructure : internalLayers.showStructure;
+  const showLDH = isControlled ? layerState.showLDH : internalLayers.showLDH;
+
+  const handleLayerToggle = (key: keyof LayerState, value: boolean) => {
+    if (isControlled && onLayerChange) {
+      onLayerChange(key, value);
+    } else {
+      setInternalLayers(prev => ({ ...prev, [key]: value }));
+    }
+  };
 
   // Optimized opacities for 3D Volume Rendering
   const RAW_OPACITY = 1;
@@ -85,6 +119,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
           // Ensure we're in 3D render mode
           nv.setSliceType(nv.sliceTypeRender);
           setIsLoaded(true);
+          if (onNvLoaded) onNvLoaded(nv);
         }
       }, 100);
     }).catch((error) => {
@@ -247,7 +282,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
           <Space direction="vertical" style={{ width: '100%' }} size={10}>
             <Checkbox
               checked={showRaw}
-              onChange={(e) => setShowRaw(e.target.checked)}
+              onChange={(e) => handleLayerToggle('showRaw', e.target.checked)}
             >
               <Text style={{ fontSize: 13, color: isDarkMode ? '#E2E8F0' : undefined }}>{t('niivue.rawMri')}</Text>
             </Checkbox>
@@ -255,7 +290,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
             {structureMaskUrl && (
               <Checkbox
                 checked={showStructure}
-                onChange={(e) => setShowStructure(e.target.checked)}
+                onChange={(e) => handleLayerToggle('showStructure', e.target.checked)}
               >
                 <Text style={{ fontSize: 13, color: isDarkMode ? '#E2E8F0' : undefined }}>{t('niivue.structure')}</Text>
               </Checkbox>
@@ -264,7 +299,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({ rawUrl, structureMaskUrl, ldh
             {ldhMaskUrl && (
               <Checkbox
                 checked={showLDH}
-                onChange={(e) => setShowLDH(e.target.checked)}
+                onChange={(e) => handleLayerToggle('showLDH', e.target.checked)}
               >
                 <Text style={{ fontSize: 13, color: isDarkMode ? '#E2E8F0' : undefined }}>{t('niivue.herniation')}</Text>
               </Checkbox>

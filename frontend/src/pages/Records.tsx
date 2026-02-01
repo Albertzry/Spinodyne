@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Typography, Table, Tag, Space, Popconfirm, message, Tooltip, Input } from 'antd';
-import { Eye, Trash2, Loader2, RefreshCw, FileText, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Eye, Trash2, Loader2, RefreshCw, FileText, Search, ArrowRightLeft } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import PageTransition from '../components/PageTransition';
@@ -26,6 +26,37 @@ const Records: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    if (newSelectedRowKeys.length > 2) {
+      message.warning(t('recordsPage.selectMaxTwo'));
+      return;
+    }
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const handleCompare = () => {
+    if (selectedRowKeys.length !== 2) {
+      message.error(t('recordsPage.selectTwoToCompare'));
+      return;
+    }
+    const [id1, id2] = selectedRowKeys;
+    // Sort by date ideally, but let's just pass them. Dashboard can sort or user can swap.
+    // Actually, usually we want old -> new. 
+    // Let's find the objects to check dates? 
+    // For now, just navigate, clean and simple.
+    navigate(`/compare/${id1}/${id2}`);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    getCheckboxProps: (record: Task) => ({
+      disabled: record.status !== 'success', // Disable comparison for non-success tasks
+    }),
+  };
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -232,10 +263,28 @@ const Records: React.FC = () => {
               >
                 {t('recordsPage.syncData')}
               </MotionButton>
+              <MotionButton
+                icon={<ArrowRightLeft size={16} />}
+                onClick={handleCompare}
+                className="ant-btn-primary"
+                type="primary"
+                style={{
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', // distinct green color for compare
+                  borderWidth: 0,
+                  borderRadius: 8,
+                  fontSize: 13,
+                  padding: '7px 20px',
+                  height: 'auto',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                {t('recordsPage.compare', 'Compare')}
+              </MotionButton>
             </Space>
           </div>
 
           <Table
+            rowSelection={rowSelection}
             columns={columns}
             dataSource={filteredData}
             rowKey="id"
@@ -251,7 +300,7 @@ const Records: React.FC = () => {
             }}
             style={{ background: 'transparent' }}
             className="aero-table"
-            components={{
+            components={selectedRowKeys.length === 0 ? {
               body: {
                 row: ({ children, index, ...props }: any) => {
                   // Ensure we use a valid index. Default to 0 if undefined.
@@ -277,7 +326,7 @@ const Records: React.FC = () => {
                   );
                 },
               },
-            }}
+            } : undefined}
           />
 
           <style>{`
