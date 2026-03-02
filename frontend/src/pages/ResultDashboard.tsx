@@ -222,14 +222,16 @@ const ResultDashboard: React.FC = () => {
             status="error"
             title={t('resultPage.analysisFailed')}
             subTitle={task?.error_message || error || t('resultPage.unexpectedError')}
-            extra={[
-              <MotionButton type="primary" key="retry" onClick={() => window.location.reload()}>
-                {t('resultPage.retry')}
-              </MotionButton>,
-              <MotionButton key="back" onClick={() => navigate('/inference')}>
-                {t('resultPage.backToUpload')}
-              </MotionButton>,
-            ]}
+            extra={
+              <div style={{ display: 'flex', gap: '40px', justifyContent: 'center', marginTop: '40px', marginBottom: '20px' }}>
+                <MotionButton type="primary" key="retry" size="large" onClick={() => window.location.reload()} style={{ padding: '16px 48px', fontSize: '18px', height: 'auto', borderRadius: '8px' }}>
+                  {t('resultPage.retry')}
+                </MotionButton>
+                <MotionButton key="back" size="large" onClick={() => navigate('/inference')} style={{ padding: '16px 48px', fontSize: '18px', height: 'auto', borderRadius: '8px' }}>
+                  {t('resultPage.backToUpload')}
+                </MotionButton>
+              </div>
+            }
           />
         </div>
       </PageTransition>
