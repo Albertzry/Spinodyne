@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.tasks_router import router as tasks_router
 from .core.config import settings
+from .core.storage import init_storage
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -13,5 +14,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+def startup_event():
+    init_storage()
 
 app.include_router(tasks_router, prefix="/api")
