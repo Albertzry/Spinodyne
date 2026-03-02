@@ -17,6 +17,7 @@ class Task(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     patient_id: uuid.UUID = Field(foreign_key="patient.id")
     status: str = Field(default="pending", description="Task status: pending, processing, success, failed")
+    error_message: Optional[str] = Field(default=None, description="Error message if task fails")
     study_date: date = Field(default_factory=date.today)
     raw_scan_key: str = Field(description="MinIO object key for the .nii.gz file")
     

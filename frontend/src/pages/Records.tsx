@@ -18,6 +18,7 @@ interface Task {
   patient_id: string;
   status: 'pending' | 'processing' | 'success' | 'failed';
   created_at: string;
+  study_date?: string;
 }
 
 const Records: React.FC = () => {
@@ -115,13 +116,20 @@ const Records: React.FC = () => {
     },
     {
       title: t('recordsPage.studyDate'),
-      dataIndex: 'created_at',
-      key: 'created_at',
-      sorter: (a: Task, b: Task) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
+      dataIndex: 'study_date',
+      key: 'study_date',
+      sorter: (a: Task, b: Task) => {
+        const dateA = a.study_date ? dayjs(a.study_date).unix() : (a.created_at ? dayjs(a.created_at).unix() : 0);
+        const dateB = b.study_date ? dayjs(b.study_date).unix() : (b.created_at ? dayjs(b.created_at).unix() : 0);
+        return dateA - dateB;
+      },
       defaultSortOrder: 'descend' as const,
-      render: (date: string) => (
-        <Text style={{ color: isDarkMode ? '#CBD5E1' : '#475569' }}>{dayjs(date).format('YYYY-MM-DD HH:mm')}</Text>
-      ),
+      render: (date: string, record: Task) => {
+        const displayDate = date || record.created_at;
+        if (!displayDate) return <Text style={{ color: isDarkMode ? '#CBD5E1' : '#475569' }}>-</Text>;
+        const formatStr = date ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm';
+        return <Text style={{ color: isDarkMode ? '#CBD5E1' : '#475569' }}>{dayjs(displayDate).format(formatStr)}</Text>;
+      },
     },
     {
       title: t('recordsPage.status'),

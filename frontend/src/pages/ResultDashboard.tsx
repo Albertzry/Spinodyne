@@ -254,7 +254,7 @@ const ResultDashboard: React.FC = () => {
     id: task.id,
     patient_name: task.patient_name || 'Unknown',
     patient_id_external: task.patient_id || 'N/A',
-    study_date: task.study_date || task.created_at ? dayjs(task.created_at).format('YYYY-MM-DD') : 'N/A'
+    study_date: task.study_date ? dayjs(task.study_date).format('YYYY-MM-DD') : (task.created_at ? dayjs(task.created_at).format('YYYY-MM-DD') : 'N/A')
   } : null;
 
   return (
