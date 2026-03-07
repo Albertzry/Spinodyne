@@ -149,7 +149,6 @@ uvicorn app.main:app --host 0.0.0.0 --port 25285 --reload
 
 ```bash
 cd backend
->>>>>>> 094e75f9ea304dda9350b5461022beea910de6f3
 celery -A app.worker.celery_app worker --loglevel=info
 ```
 
