@@ -141,10 +141,6 @@ python init_db.py
 ### 7.3 Start Backend API
 
 ```bash
-<<<<<<< HEAD
-# 后端（端口等来自 config.json）
-uvicorn app.main:app --host 0.0.0.0 --port 25546 --reload 
-=======
 cd backend
 uvicorn app.main:app --host 0.0.0.0 --port 25285 --reload
 ```
