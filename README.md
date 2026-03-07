@@ -94,7 +94,7 @@ Make sure your environment has the following:
 - Conda (for the `tss` inference environment)
 - An installed and accessible TotalSpineSeg-v2 project (not included in this repository)
 
-> Note: The TotalSpineSeg-v2 path is determined by backend worker configuration. If your deployment path differs, update the inference script paths in `/home/runner/work/Spinodyne/Spinodyne/backend/app/worker/tasks.py` (or refactor to env/config-based path management).
+> Note: The TotalSpineSeg-v2 path is determined by backend worker configuration. If your deployment path differs, update the inference script paths in `backend/app/worker/tasks.py` (or refactor to env/config-based path management).
 
 ---
 
@@ -111,7 +111,7 @@ Key configuration entries:
 - `redis.{host,port,db}`
 - `minio.{endpoint,access_key,secret_key,bucket,secure}`
 
-Backend overrides can be set in `/home/runner/work/Spinodyne/Spinodyne/backend/.env` (see `/home/runner/work/Spinodyne/Spinodyne/backend/.env.example`).
+Backend overrides can be set in `backend/.env` (see `backend/.env.example`).
 
 ---
 
@@ -248,7 +248,7 @@ For automated test and static-check entry points, refer to the current `package.
 
 4. **Frontend cannot reach backend**
    - Check frontend/backend ports in `config.json`
-   - Check Vite proxy config (`/home/runner/work/Spinodyne/Spinodyne/frontend/vite.config.ts`)
+   - Check Vite proxy config (`frontend/vite.config.ts`)
 
 ---
 
