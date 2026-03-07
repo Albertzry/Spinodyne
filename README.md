@@ -49,8 +49,8 @@ Spinodyne 是一个面向**脊柱影像智能分析**的全栈平台：上传 `.
 1. 上传原始影像到 MinIO，创建 Task（状态 `pending`）
 2. Celery Worker 拉起任务（状态 `processing`）
 3. 在 `tss` conda 环境执行：
-   - `/root/TotalSpineSeg-v2/scripts/infer_ldh.py`
-   - `/root/TotalSpineSeg-v2/calculate.py`
+   - 推理脚本：`infer_ldh.py`
+   - 计算脚本：`calculate.py`
 4. 解析结果并写入数据库，上传衍生文件到 MinIO
 5. 任务完成后状态更新为 `success`（异常则 `failed`）
 
@@ -92,9 +92,9 @@ Spinodyne/
 - Redis
 - MinIO
 - Conda（用于运行 `tss` 推理环境）
-- 已安装并可访问 `/root/TotalSpineSeg-v2`（本仓库不包含该推理工程）
+- 已安装并可访问 TotalSpineSeg-v2（本仓库不包含该推理工程）
 
-> 注意：若 `tss` 环境或 `TotalSpineSeg-v2` 路径不可用，任务会在推理阶段失败。
+> 注意： TotalSpineSeg-v2 路径由后端 Worker 配置决定；如你的部署路径不同，请同步调整 `backend/app/worker/tasks.py` 中的推理脚本路径（也可按需改造成环境变量/配置项）。
 
 ---
 
@@ -120,7 +120,8 @@ Spinodyne/
 ### 7.1 启动基础服务
 
 ```bash
-cd /home/runner/work/Spinodyne/Spinodyne
+# 进入仓库根目录（Git 仓库下可自动解析）
+cd "$(git rev-parse --show-toplevel)"
 bash start_services.sh
 ```
 
@@ -128,33 +129,33 @@ bash start_services.sh
 
 - PostgreSQL
 - Redis
-- MinIO（日志默认写入 `/var/log/minio.log`）
+- MinIO（脚本默认将日志写入 `/var/log/minio.log`，若权限受限请按部署环境调整）
 
 ### 7.2 初始化数据库
 
 ```bash
-cd /home/runner/work/Spinodyne/Spinodyne/backend
+cd backend
 python init_db.py
 ```
 
 ### 7.3 启动后端 API
 
 ```bash
-cd /home/runner/work/Spinodyne/Spinodyne/backend
+cd backend
 uvicorn app.main:app --host 0.0.0.0 --port 25285 --reload
 ```
 
 ### 7.4 启动 Celery Worker
 
 ```bash
-cd /home/runner/work/Spinodyne/Spinodyne/backend
+cd backend
 celery -A app.worker.celery_app worker --loglevel=info
 ```
 
 ### 7.5 启动前端
 
 ```bash
-cd /home/runner/work/Spinodyne/Spinodyne/frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -226,7 +227,7 @@ npm run dev
 - 前端构建：`npm run build`
 - 前端预览：`npm run preview`
 
-目前仓库未提供独立的自动化测试脚本（未检测到 pytest/vitest/jest 等测试入口）。
+自动化测试与静态检查入口请以仓库当前的 `package.json`、后端工具配置及 CI 工作流为准。
 
 ---
 
@@ -238,7 +239,7 @@ npm run dev
 
 2. **任务直接失败（failed）**
    - 检查 `tss` conda 环境是否存在
-   - 检查 `/root/TotalSpineSeg-v2` 路径及脚本是否可执行
+   - 检查当前配置/代码中的 TotalSpineSeg-v2 脚本路径及可执行性
    - 查看 Worker 日志中的 subprocess 报错
 
 3. **前端看不到结果图像**
