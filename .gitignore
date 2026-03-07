@@ -20,3 +20,9 @@ dist/
 
 # Data
 backend/data/
+
+# Docker build staging (created by prepare_docker_build.sh)
+tss_env/
+model_weights/
+TotalSpineSeg-v2/
+spinodyne.tar.gz

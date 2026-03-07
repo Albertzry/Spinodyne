@@ -13,7 +13,7 @@ bash start_services.sh
 
 ```bash
 # 后端（端口等来自 config.json）
-uvicorn app.main:app --host 0.0.0.0 --port 25285 --reload 
+uvicorn app.main:app --host 0.0.0.0 --port 25546 --reload 
 celery -A app.worker.celery_app worker --loglevel=info
 # 前端（端口与 API 代理来自 config.json）
 cd frontend && npm run dev
