@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Typography, Table, Tag, Space, Popconfirm, message, Tooltip, Input } from 'antd';
+import { Typography, Table, Tag, Space, Popconfirm, message, Input } from 'antd';
 import { Eye, Trash2, Loader2, RefreshCw, FileText, Search, ArrowRightLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -175,19 +175,28 @@ const Records: React.FC = () => {
       align: 'right' as const,
       render: (_: any, record: Task) => (
         <Space size="small">
-          <Tooltip title={t('recordsPage.viewResult')}>
-            <span style={{ display: 'inline-block' }}>
-              <Link to={`/result/${record.id}`}>
-                <MotionButton
-                  type="text"
-                  shape="circle"
-                  icon={<Eye size={18} />}
-                  style={{ color: '#006AFE' }}
-                  motionProps={{ whileHover: { scale: 1.1 }, whileTap: { scale: 0.9 } }}
-                />
-              </Link>
-            </span>
-          </Tooltip>
+          <span style={{ display: 'inline-block' }}>
+            <Link to={`/result/${record.id}`}>
+              <MotionButton
+                type="primary"
+                icon={<Eye size={16} />}
+                style={{
+                  borderRadius: 8,
+                  padding: '6px 16px',
+                  height: 'auto',
+                  background: 'linear-gradient(135deg, #006AFE 0%, #0047AB 100%)',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(0, 106, 254, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}
+              >
+                {t('recordsPage.viewResult')}
+              </MotionButton>
+            </Link>
+          </span>
 
           <Popconfirm
             title={t('recordsPage.deleteConfirmTitle')}
@@ -361,6 +370,36 @@ const Records: React.FC = () => {
             }
             .aero-table .ant-table-tbody > tr:last-child > td {
               border-bottom: none !important;
+            }
+            /* Make checkboxes larger */
+            .aero-table .ant-checkbox-inner {
+              width: 20px !important;
+              height: 20px !important;
+              border-radius: 4px !important;
+            }
+            .aero-table .ant-checkbox-checked .ant-checkbox-inner,
+            .aero-table .ant-checkbox-indeterminate .ant-checkbox-inner {
+              width: 20px !important;
+              height: 20px !important;
+              border-radius: 4px !important;
+              background-color: #006AFE !important;
+              border-color: #006AFE !important;
+            }
+            .aero-table .ant-checkbox-checked .ant-checkbox-inner::after {
+              width: 5px !important;
+              height: 10px !important;
+              top: 48% !important;
+              left: 28% !important;
+              transform: rotate(45deg) scale(1) translate(-50%, -50%) !important;
+            }
+            .aero-table .ant-checkbox-indeterminate .ant-checkbox-inner::after {
+              width: 12px !important;
+              height: 3px !important;
+              top: 50% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+              background-color: #fff !important;
+              border: none !important;
             }
         `}</style>
           {/* Removing MotionContainer wrapper since we are animating rows individually now, or keeping it for header staggered entance */}
