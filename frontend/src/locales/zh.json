@@ -120,15 +120,18 @@
             "noHerniation": "无突出摘要可用",
             "filterLevels": "筛选层级...",
             "tabs": {
-                "global": "全局指标",
-                "vertebrae": "椎骨",
-                "discs": "椎间盘"
+                "global": "生理参数",
+                "vertebrae": "椎体参数",
+                "discs": "椎间盘参数"
             }
         },
         "niivue": {
             "preparing": "正在准备 3D 体积...",
             "loading": "正在加载 3D 体积...",
             "controls": "3D 控制",
+            "viewMode": "视图模式",
+            "3dVolume": "3D 体积",
+            "3dSlice": "3维剖面",
             "rawMri": "MRI 原图",
             "structure": "结构",
             "herniation": "突出",

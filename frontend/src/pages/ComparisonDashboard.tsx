@@ -48,10 +48,11 @@ const ComparisonDashboard: React.FC = () => {
     const [layerState, setLayerState] = useState<LayerState>({
         showRaw: true,
         showStructure: true,
-        showLDH: true
+        showLDH: true,
+        viewMode: 'render'
     });
 
-    const handleLayerChange = (key: keyof LayerState, value: boolean) => {
+    const handleLayerChange = (key: keyof LayerState, value: any) => {
         setLayerState(prev => ({ ...prev, [key]: value }));
     };
 
@@ -92,14 +93,36 @@ const ComparisonDashboard: React.FC = () => {
         if (type === 'left') oldNvRef.current = nv;
         else newNvRef.current = nv;
 
-        // Try to sync if both ready
+        // Enable broadcast sync only if currently in 3D volume (render) mode
         if (oldNvRef.current && newNvRef.current) {
-            // Bi-directional broadcast
-            oldNvRef.current.broadcastTo(newNvRef.current);
-            newNvRef.current.broadcastTo(oldNvRef.current);
-            console.log("3D Views Synchronized");
+            if (layerState.viewMode === 'render') {
+                oldNvRef.current.broadcastTo(newNvRef.current);
+                newNvRef.current.broadcastTo(oldNvRef.current);
+                console.log("3D Views Synchronized (Render Mode)");
+            } else {
+                console.log("3D Views Loaded (Multiplanar - No Action Sync)");
+            }
         }
     };
+
+    // Toggle broadcast sync on/off when viewMode changes
+    useEffect(() => {
+        const nvOld = oldNvRef.current;
+        const nvNew = newNvRef.current;
+        if (!nvOld || !nvNew) return;
+
+        if (layerState.viewMode === 'render') {
+            // Enable bi-directional broadcast for drag/zoom sync in 3D volume mode
+            nvOld.broadcastTo(nvNew);
+            nvNew.broadcastTo(nvOld);
+            console.log("Broadcast Sync Enabled (Render Mode)");
+        } else {
+            // Disable broadcast sync in multiplanar mode
+            (nvOld as any).otherNV = null;
+            (nvNew as any).otherNV = null;
+            console.log("Broadcast Sync Disabled (Multiplanar Mode)");
+        }
+    }, [layerState.viewMode]);
 
     const handleSwap = () => {
         setIsSwapped(!isSwapped);

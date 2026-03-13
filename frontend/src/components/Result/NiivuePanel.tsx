@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Niivue } from '@niivue/niivue';
-import { Checkbox, Card, Typography, Space } from 'antd';
+import { Checkbox, Card, Typography, Space, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -11,6 +11,7 @@ export interface LayerState {
   showRaw: boolean;
   showStructure: boolean;
   showLDH: boolean;
+  viewMode?: 'render' | 'multiplanar';
 }
 
 interface NiivuePanelProps {
@@ -20,7 +21,7 @@ interface NiivuePanelProps {
   onNvLoaded?: (nv: Niivue) => void;
   // Optional controlled state
   layerState?: LayerState;
-  onLayerChange?: (key: keyof LayerState, value: boolean) => void;
+  onLayerChange?: (key: keyof LayerState, value: any) => void;
 }
 
 const NiivuePanel: React.FC<NiivuePanelProps> = ({
@@ -41,7 +42,8 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
   const [internalLayers, setInternalLayers] = useState<LayerState>({
     showRaw: true,
     showStructure: true,
-    showLDH: true
+    showLDH: true,
+    viewMode: 'render'
   });
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -52,8 +54,9 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
   const showRaw = isControlled ? layerState.showRaw : internalLayers.showRaw;
   const showStructure = isControlled ? layerState.showStructure : internalLayers.showStructure;
   const showLDH = isControlled ? layerState.showLDH : internalLayers.showLDH;
+  const viewMode = (isControlled && layerState.viewMode) ? layerState.viewMode : internalLayers.viewMode || 'render';
 
-  const handleLayerToggle = (key: keyof LayerState, value: boolean) => {
+  const handleLayerToggle = (key: keyof LayerState, value: any) => {
     if (isControlled && onLayerChange) {
       onLayerChange(key, value);
     } else {
@@ -143,6 +146,17 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
       }
     };
   }, [rawUrl, structureMaskUrl, ldhMaskUrl]);
+
+  // Handle view mode change
+  useEffect(() => {
+    if (nvRef.current && isLoaded) {
+      if (viewMode === 'render') {
+        nvRef.current.setSliceType(nvRef.current.sliceTypeRender);
+      } else {
+        nvRef.current.setSliceType(nvRef.current.sliceTypeMultiplanar);
+      }
+    }
+  }, [viewMode, isLoaded]);
 
   // Effect to handle visibility toggles via opacity
   useEffect(() => {
@@ -280,6 +294,21 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
           title={<span style={{ fontSize: 13, fontWeight: 700, color: isDarkMode ? '#F1F5F9' : '#0f172a' }}>{t('niivue.controls')}</span>}
         >
           <Space direction="vertical" style={{ width: '100%' }} size={10}>
+            <div style={{ paddingBottom: 8, borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)' }}>
+              <Text style={{ fontSize: 12, color: isDarkMode ? '#94A3B8' : '#64748b', display: 'block', marginBottom: 6 }}>{t('niivue.viewMode', '视图模式')}</Text>
+              <Radio.Group 
+                value={viewMode} 
+                onChange={(e) => handleLayerToggle('viewMode', e.target.value)}
+                size="small"
+                optionType="button"
+                buttonStyle="solid"
+                style={{ display: 'flex' }}
+              >
+                <Radio.Button value="render" style={{ flex: 1, textAlign: 'center', padding: '0 4px', fontSize: 12 }}>{t('niivue.3dVolume', '3D体积')}</Radio.Button>
+                <Radio.Button value="multiplanar" style={{ flex: 1, textAlign: 'center', padding: '0 4px', fontSize: 12 }}>{t('niivue.3dSlice', '3维剖面')}</Radio.Button>
+              </Radio.Group>
+            </div>
+
             <Checkbox
               checked={showRaw}
               onChange={(e) => handleLayerToggle('showRaw', e.target.checked)}

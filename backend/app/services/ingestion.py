@@ -107,10 +107,10 @@ def ingest_task_results(task_id: str, result_dir: Path):
                 d_res = DiscResult(
                     task_id=task_uuid,
                     level=disc.get("level"),
-                    dh=dm.get("dh_mm", 0.0),
-                    dhi=dm.get("dhi", 0.0),
-                    hdr=dm.get("hdr", 0.0),
-                    dia=dia.get("dia_deg", 0.0),
+                    dh=dm.get("dh_mm") if dm.get("dh_mm") is not None else 0.0,
+                    dhi=dm.get("dhi") if dm.get("dhi") is not None else 0.0,
+                    hdr=dm.get("hdr") if dm.get("hdr") is not None else 0.0,
+                    dia=dia.get("dia_deg") if dia.get("dia_deg") is not None else 0.0,
                     agl=0.0, # AGL might be moved or removed in new schema, defaulting to 0
                     status="success",
                     scan_height_a=scan_heights.get("A"),
