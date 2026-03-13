@@ -117,9 +117,10 @@ const ComparisonDashboard: React.FC = () => {
             nvNew.broadcastTo(nvOld);
             console.log("Broadcast Sync Enabled (Render Mode)");
         } else {
-            // Disable broadcast sync in multiplanar mode
-            (nvOld as any).otherNV = null;
-            (nvNew as any).otherNV = null;
+            // broadcastTo(null) internally does otherNV = [null] which doesn't truly disable sync.
+            // We must directly set otherNV to an empty array [] to break the broadcast loop.
+            (nvOld as any).otherNV = [];
+            (nvNew as any).otherNV = [];
             console.log("Broadcast Sync Disabled (Multiplanar Mode)");
         }
     }, [layerState.viewMode]);
