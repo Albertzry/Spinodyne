@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Layout, Button } from 'antd';
 import { Upload as UploadIcon, FileText, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import ThemeSwitcher from '../components/ThemeSwitcher';
+import FontSizeSwitcher from '../components/FontSizeSwitcher';
 import { useTheme } from '../context/ThemeContext';
 
 const { Content } = Layout;
@@ -16,6 +17,8 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [showFontSlider, setShowFontSlider] = useState(false);
+  const fontSliderTimeoutRef = useRef<number | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -177,10 +180,55 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 animate={{ opacity: 1, y: 0, scale: 1, height: 'auto' }}
                 exit={{ opacity: 0, y: 10, scale: 0.9, height: 0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                style={{ display: 'flex', gap: 8, overflow: 'hidden', transformOrigin: 'bottom' }}
+                style={{ display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden', transformOrigin: 'bottom', width: '100%' }}
               >
-                <LanguageSwitcher />
-                <ThemeSwitcher />
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  <LanguageSwitcher />
+                  <ThemeSwitcher />
+                </div>
+
+                {/* Font Size — hover-reveal area */}
+                <div
+                  onMouseEnter={() => setShowFontSlider(true)}
+                  onMouseLeave={() => {
+                    fontSliderTimeoutRef.current = window.setTimeout(() => setShowFontSlider(false), 300);
+                  }}
+                  style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                >
+                  {/* Collapsed trigger */}
+                  <div style={{ 
+                    height: showFontSlider ? 0 : 26, 
+                    opacity: showFontSlider ? 0 : 1, 
+                    overflow: 'hidden', 
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: subTextColor,
+                    cursor: 'default'
+                  }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.03em' }}>Aa</span>
+                  </div>
+
+                  {/* Expanded slider */}
+                  <div 
+                    style={{ 
+                      height: showFontSlider ? 36 : 0, 
+                      opacity: showFontSlider ? 1 : 0, 
+                      overflow: 'hidden', 
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                      width: '100%' 
+                    }}
+                    onMouseEnter={() => {
+                      if (fontSliderTimeoutRef.current) {
+                        clearTimeout(fontSliderTimeoutRef.current);
+                        fontSliderTimeoutRef.current = null;
+                      }
+                    }}
+                  >
+                    <FontSizeSwitcher />
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

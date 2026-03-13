@@ -8,6 +8,7 @@
         "lightMode": "浅色模式",
         "switchToLightMode": "切换到浅色模式",
         "switchToDarkMode": "切换到深色模式",
+        "fontSize": "字体大小",
         "inferencePage": {
             "title": "新建脊柱分析",
             "subtitle": "输入患者详情并上传 MRI 数据 (.nii.gz)",

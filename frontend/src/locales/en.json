@@ -8,6 +8,7 @@
         "lightMode": "Light Mode",
         "switchToLightMode": "Switch to Light Mode",
         "switchToDarkMode": "Switch to Dark Mode",
+        "fontSize": "Font Size",
         "inferencePage": {
             "title": "New Spine Analysis",
             "subtitle": "Enter patient details and upload MRI data (.nii.gz)",

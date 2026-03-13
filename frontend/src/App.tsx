@@ -31,13 +31,14 @@ const AnimatedRoutes: React.FC = () => {
 
 const AppInner: React.FC = () => {
   const { i18n } = useTranslation();
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, fontScale } = useTheme();
 
   const currentTheme = {
     ...appTheme,
     algorithm: isDarkMode ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
     token: {
       ...appTheme.token,
+      fontSize: Math.round(14 * fontScale),
       // Override basic tokens for dark mode for better contrast
       colorTextBase: isDarkMode ? '#E2E8F0' : '#475569',
       colorTextHeading: isDarkMode ? '#F1F5F9' : '#1E293B',
