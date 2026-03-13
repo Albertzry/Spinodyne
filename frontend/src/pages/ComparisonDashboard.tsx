@@ -112,16 +112,34 @@ const ComparisonDashboard: React.FC = () => {
         if (!nvOld || !nvNew) return;
 
         if (layerState.viewMode === 'render') {
+            // Restore original sync methods if we overrode them
+            if ((nvOld as any)._origSync) {
+                nvOld.sync = (nvOld as any)._origSync;
+                delete (nvOld as any)._origSync;
+            }
+            if ((nvNew as any)._origSync) {
+                nvNew.sync = (nvNew as any)._origSync;
+                delete (nvNew as any)._origSync;
+            }
             // Enable bi-directional broadcast for drag/zoom sync in 3D volume mode
             nvOld.broadcastTo(nvNew);
             nvNew.broadcastTo(nvOld);
             console.log("Broadcast Sync Enabled (Render Mode)");
         } else {
-            // broadcastTo(null) internally does otherNV = [null] which doesn't truly disable sync.
-            // We must directly set otherNV to an empty array [] to break the broadcast loop.
+            // NUCLEAR option: completely disable sync in multiplanar mode.
+            // 1) Clear otherNV arrays
             (nvOld as any).otherNV = [];
             (nvNew as any).otherNV = [];
-            console.log("Broadcast Sync Disabled (Multiplanar Mode)");
+            // 2) Reset syncOpts to all-false so even if otherNV leaks, nothing syncs
+            const falseSyncOpts = { "3d": false, "2d": false, zoomPan: false, cal_min: false, cal_max: false, clipPlane: false, gamma: false, sliceType: false, crosshair: false };
+            (nvOld as any).syncOpts = { ...falseSyncOpts };
+            (nvNew as any).syncOpts = { ...falseSyncOpts };
+            // 3) Override the sync method itself to be a no-op
+            if (!(nvOld as any)._origSync) (nvOld as any)._origSync = nvOld.sync.bind(nvOld);
+            if (!(nvNew as any)._origSync) (nvNew as any)._origSync = nvNew.sync.bind(nvNew);
+            nvOld.sync = () => {};
+            nvNew.sync = () => {};
+            console.log("Broadcast Sync Fully Disabled (Multiplanar Mode)");
         }
     }, [layerState.viewMode]);
 
