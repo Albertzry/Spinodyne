@@ -1,4 +1,8 @@
+import glob
 import os
+import shutil
+import subprocess
+import tempfile
 import uuid
 from datetime import date
 from typing import Optional, List
@@ -233,6 +237,126 @@ def upload_task(
         "raw_scan_key": task.raw_scan_key,
         "status": task.status,
     }
+
+
+@router.post("/upload-dicom")
+def upload_dicom_task(
+    files: List[UploadFile] = File(...),
+    patient_name: Optional[str] = Form(None),
+    name: Optional[str] = Form(None),
+    patient_id_external: Optional[str] = Form(None),
+    patient_id: Optional[str] = Form(None),
+    study_date: Optional[date] = Form(None),
+    session: Session = Depends(get_session),
+):
+    """
+    Accept a batch of DICOM (.dcm) files, convert them to NIfTI (.nii.gz)
+    using dcm2niix, then proceed with the standard inference pipeline.
+    """
+    patient_name = patient_name or name
+    patient_id_external = patient_id_external or patient_id
+
+    if not files or len(files) == 0:
+        raise HTTPException(status_code=400, detail="No DICOM files uploaded.")
+    if not patient_name or not patient_id_external:
+        raise HTTPException(status_code=400, detail="Missing patient_name or patient_id_external.")
+
+    # Create a temp directory for DICOM files
+    dcm_dir = tempfile.mkdtemp(prefix="spinodyne_dcm_")
+    nifti_dir = tempfile.mkdtemp(prefix="spinodyne_nifti_")
+
+    try:
+        # Save all uploaded DICOM files to the temp directory
+        total_size = 0
+        for f in files:
+            # Use the original filename, but ensure it's safe
+            fname = os.path.basename(f.filename) if f.filename else f"dicom_{uuid.uuid4().hex[:8]}"
+            fpath = os.path.join(dcm_dir, fname)
+            content = f.file.read()
+            total_size += len(content)
+            if total_size > MAX_UPLOAD_SIZE:
+                raise HTTPException(status_code=413, detail="Total upload exceeds 500MB limit.")
+            with open(fpath, "wb") as out:
+                out.write(content)
+
+        # Run dcm2niix to convert DICOM -> NIfTI
+        cmd = [
+            "dcm2niix",
+            "-z", "y",       # gzip compress
+            "-f", "raw",     # output filename pattern
+            "-o", nifti_dir, # output directory
+            dcm_dir,         # input directory
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        if result.returncode != 0:
+            raise HTTPException(
+                status_code=500,
+                detail=f"DICOM to NIfTI conversion failed: {result.stderr}"
+            )
+
+        # Find the generated .nii.gz file
+        nifti_files = glob.glob(os.path.join(nifti_dir, "*.nii.gz"))
+        if not nifti_files:
+            # Try uncompressed .nii as fallback
+            nifti_files = glob.glob(os.path.join(nifti_dir, "*.nii"))
+        if not nifti_files:
+            raise HTTPException(
+                status_code=500,
+                detail="Conversion produced no NIfTI output. Please verify the DICOM files."
+            )
+
+        # Use the first (or only) generated file
+        nifti_path = nifti_files[0]
+
+        # Create patient record
+        patient = session.exec(
+            select(Patient).where(Patient.external_id == patient_id_external)
+        ).first()
+        if not patient:
+            patient = Patient(external_id=patient_id_external, name=patient_name)
+            session.add(patient)
+            session.commit()
+            session.refresh(patient)
+
+        task_id = uuid.uuid4()
+        object_name = f"tasks/{task_id}/raw.nii.gz"
+
+        # Upload the converted NIfTI file to MinIO
+        with open(nifti_path, "rb") as nf:
+            storage.upload_file(
+                nf,
+                object_name,
+                content_type="application/gzip",
+            )
+
+        task = Task(
+            id=task_id,
+            patient_id=patient.id,
+            status="pending",
+            study_date=study_date or date.today(),
+            raw_scan_key=object_name,
+        )
+        session.add(task)
+        session.commit()
+        session.refresh(task)
+
+        run_inference.delay(str(task.id))
+
+        return {
+            "task_id": str(task.id),
+            "patient_id": str(patient.id),
+            "raw_scan_key": task.raw_scan_key,
+            "status": task.status,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DICOM processing error: {str(e)}")
+    finally:
+        # Clean up temp directories
+        shutil.rmtree(dcm_dir, ignore_errors=True)
+        shutil.rmtree(nifti_dir, ignore_errors=True)
 
 
 def _delete_task(task_id: uuid.UUID, session: Session):

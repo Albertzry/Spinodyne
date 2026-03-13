@@ -11,7 +11,7 @@
         "fontSize": "Font Size",
         "inferencePage": {
             "title": "New Spine Analysis",
-            "subtitle": "Enter patient details and upload MRI data (.nii.gz)",
+            "subtitle": "Enter patient details and upload MRI data (.nii.gz or DICOM)",
             "patientName": "Patient Name",
             "patientNameRequired": "Patient name is required",
             "patientNamePlaceholder": "Full Name",
@@ -20,7 +20,7 @@
             "patientIdPlaceholder": "Case Number",
             "studyDate": "Study Date",
             "studyDateRequired": "Date is required",
-            "mriData": "MRI Data (.nii.gz)",
+            "mriData": "MRI Data",
             "mriDataRequired": "MRI file is required",
             "uploadText": "Click or drag file to this area to upload",
             "uploadHint": "Support for medical NIfTI volumes (.nii.gz)",
@@ -30,7 +30,17 @@
             "uploadFailed": "Upload failed",
             "success": "Inference task created successfully",
             "errorConnection": "Failed to create task. Please check your connection.",
-            "invalidFile": "{{fileName}} is not a valid .nii.gz file"
+            "invalidFile": "{{fileName}} is not a valid .nii.gz file",
+            "modeNifti": "NIfTI File (.nii.gz)",
+            "modeDicom": "DICOM Folder",
+            "selectDicomFolder": "Click to select DICOM folder",
+            "dicomHint": "Select a folder containing DICOM (.dcm) image series",
+            "dicomRequired": "Please select a DICOM folder",
+            "noDicomFiles": "No DICOM files found in the selected folder",
+            "noDicomFilesError": "Please select a folder containing DICOM files",
+            "dicomFilesSelected": "{{count}} DICOM files selected",
+            "dicomFilesReady": "{{count}} DICOM files ready",
+            "clickToReselect": "Click to select a different folder"
         },
         "recordsPage": {
             "title": "Patient Records",

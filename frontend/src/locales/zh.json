@@ -11,7 +11,7 @@
         "fontSize": "字体大小",
         "inferencePage": {
             "title": "新建脊柱分析",
-            "subtitle": "输入患者详情并上传 MRI 数据 (.nii.gz)",
+            "subtitle": "输入患者详情并上传 MRI 数据 (.nii.gz 或 DICOM)",
             "patientName": "患者姓名",
             "patientNameRequired": "请输入患者姓名",
             "patientNamePlaceholder": "全名",
@@ -20,7 +20,7 @@
             "patientIdPlaceholder": "病历号",
             "studyDate": "检查日期",
             "studyDateRequired": "请选择日期",
-            "mriData": "MRI 数据 (.nii.gz)",
+            "mriData": "MRI 数据",
             "mriDataRequired": "请上传 MRI 文件",
             "uploadText": "点击或拖拽文件到此区域上传",
             "uploadHint": "支持医疗 NIfTI 影像 (.nii.gz)",
@@ -30,7 +30,17 @@
             "uploadFailed": "上传失败",
             "success": "推理任务创建成功",
             "errorConnection": "创建任务失败，请检查网络连接。",
-            "invalidFile": "{{fileName}} 不是有效的 .nii.gz 文件"
+            "invalidFile": "{{fileName}} 不是有效的 .nii.gz 文件",
+            "modeNifti": "NIfTI 文件 (.nii.gz)",
+            "modeDicom": "DICOM 文件夹",
+            "selectDicomFolder": "点击选择 DICOM 文件夹",
+            "dicomHint": "选择包含 DICOM (.dcm) 影像序列的文件夹",
+            "dicomRequired": "请选择 DICOM 文件夹",
+            "noDicomFiles": "所选文件夹中未找到 DICOM 文件",
+            "noDicomFilesError": "请选择包含 DICOM 文件的文件夹",
+            "dicomFilesSelected": "已选择 {{count}} 个 DICOM 文件",
+            "dicomFilesReady": "{{count}} 个 DICOM 文件已就绪",
+            "clickToReselect": "点击重新选择文件夹"
         },
         "recordsPage": {
             "title": "患者记录",
