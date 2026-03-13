@@ -148,13 +148,16 @@ const Records: React.FC = () => {
             break;
           case 'processing':
             color = 'processing';
+            text = t('recordsPage.processing');
             icon = <Loader2 className="spin" size={14} style={{ marginRight: 6, animation: 'spin 1.5s linear infinite' }} />;
             break;
           case 'pending':
             color = 'warning';
+            text = t('recordsPage.pending');
             break;
           case 'failed':
             color = 'error';
+            text = t('recordsPage.failed');
             break;
         }
 
