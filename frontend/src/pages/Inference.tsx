@@ -9,7 +9,6 @@ import {
   theme,
   Row,
   Col,
-  Segmented,
   Badge,
 } from 'antd';
 import { UploadCloud, FileUp, FolderUp, X, FileImage } from 'lucide-react';
@@ -39,6 +38,29 @@ const Inference: React.FC = () => {
   const [uploadMode, setUploadMode] = useState<UploadMode>('nifti');
   const [dicomFiles, setDicomFiles] = useState<File[]>([]);
   const folderInputRef = useRef<HTMLInputElement>(null);
+
+  const tabItems = [
+    {
+      key: 'nifti' as const,
+      label: (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FileUp size={16} />
+          <span>{t('inferencePage.modeNifti')}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'dicom' as const,
+      label: (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FolderUp size={16} />
+          <span>{t('inferencePage.modeDicom')}</span>
+        </span>
+      ),
+    },
+  ];
+
+  const activeTabIndex = tabItems.findIndex(item => item.key === uploadMode);
 
   const handleFolderSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -264,34 +286,58 @@ const Inference: React.FC = () => {
               <MotionItem>
                 <Form.Item
                   label={<Text strong>{t('inferencePage.mriData')}</Text>}
-                  style={{ marginBottom: 8 }}
+                  style={{ marginBottom: 24 }}
                 >
-                  <Segmented
-                    value={uploadMode}
-                    onChange={handleModeChange}
-                    options={[
-                      {
-                        label: (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 4px' }}>
-                            <FileUp size={16} />
-                            <span>{t('inferencePage.modeNifti')}</span>
+                  <div style={{
+                    background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.3)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '6px',
+                    borderRadius: '14px',
+                    position: 'relative',
+                    border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 106, 254, 0.12)',
+                  }}>
+                    <div style={{ display: 'flex', gap: 4, position: 'relative', height: 40 }}>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: `calc(${activeTabIndex} * (100% + 4px) / ${tabItems.length})`,
+                          width: `calc((100% - ${(tabItems.length - 1) * 4}px) / ${tabItems.length})`,
+                          height: '100%',
+                          background: isDarkMode ? 'rgba(30, 41, 59, 0.8)' : '#FFFFFF',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 12px rgba(0, 106, 254, 0.12)',
+                          border: '1px solid rgba(0, 106, 254, 0.2)',
+                          transition: 'left 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                          zIndex: 1,
+                          pointerEvents: 'none'
+                        }}
+                      />
+                      {tabItems.map((item) => {
+                        const isActive = uploadMode === item.key;
+                        return (
+                          <div
+                            key={item.key}
+                            onClick={() => handleModeChange(item.key)}
+                            style={{
+                              flex: 1,
+                              height: '100%',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: isActive ? '#006AFE' : '#64748B',
+                              fontWeight: isActive ? 600 : 500,
+                              transition: 'color 0.3s ease',
+                              zIndex: 2,
+                            }}
+                          >
+                            {item.label}
                           </div>
-                        ),
-                        value: 'nifti',
-                      },
-                      {
-                        label: (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 4px' }}>
-                            <FolderUp size={16} />
-                            <span>{t('inferencePage.modeDicom')}</span>
-                          </div>
-                        ),
-                        value: 'dicom',
-                      },
-                    ]}
-                    block
-                    style={{ marginBottom: 12 }}
-                  />
+                        );
+                      })}
+                    </div>
+                  </div>
                 </Form.Item>
               </MotionItem>
 
@@ -318,7 +364,7 @@ const Inference: React.FC = () => {
                         By passing clicks conditionally, we can invoke the DICOM folder selector 
                         without triggering AntD's internal file selector mechanism. 
                     */}
-                    <div 
+                    <div
                       onClick={(e) => {
                         if (uploadMode === 'dicom') {
                           e.stopPropagation();
@@ -354,7 +400,7 @@ const Inference: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
                             transition={{ duration: 0.2, ease: 'easeOut' }}
-                            style={{ width: '100%', position: 'absolute', top: '50%', left: 0, marginTop: '-55px' }}
+                            style={{ width: '100%', position: 'absolute', top: '50%', left: 0, marginTop: '-72px' }}
                           >
                             <p className="ant-upload-drag-icon" style={{ marginBottom: 16 }}>
                               <UploadCloud size={48} color={token.colorPrimary} strokeWidth={1.5} style={{ margin: '0 auto' }} />
@@ -373,7 +419,7 @@ const Inference: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
                             transition={{ duration: 0.2, ease: 'easeOut' }}
-                            style={{ width: '100%', position: 'absolute', top: '50%', left: 0, marginTop: '-55px' }}
+                            style={{ width: '100%', position: 'absolute', top: '50%', left: 0, marginTop: '-72px' }}
                           >
                             <div style={{ marginBottom: 16 }}>
                               <Badge count={dicomFiles.length} style={{ backgroundColor: token.colorPrimary }}>
@@ -426,7 +472,7 @@ const Inference: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
                             transition={{ duration: 0.2, ease: 'easeOut' }}
-                            style={{ width: '100%', position: 'absolute', top: '50%', left: 0, marginTop: '-55px' }}
+                            style={{ width: '100%', position: 'absolute', top: '50%', left: 0, marginTop: '-72px' }}
                           >
                             <p className="ant-upload-drag-icon" style={{ marginBottom: 16 }}>
                               <FolderUp size={48} color={token.colorPrimary} strokeWidth={1.5} style={{ margin: '0 auto' }} />

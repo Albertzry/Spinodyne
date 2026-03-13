@@ -71,6 +71,8 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
 
   useEffect(() => {
     if (!canvasRef.current) return;
+    
+    let isMounted = true;
 
     // Initialize Niivue with 3D Background settings
     const nv = new Niivue({
@@ -118,6 +120,7 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
     nv.loadVolumes(volumes).then(() => {
       // Wait a bit to ensure volumes are fully initialized
       setTimeout(() => {
+        if (!isMounted) return;
         if (nv.volumes && nv.volumes.length > 0) {
           // Ensure we're in 3D render mode
           nv.setSliceType(nv.sliceTypeRender);
@@ -127,15 +130,21 @@ const NiivuePanel: React.FC<NiivuePanelProps> = ({
       }, 100);
     }).catch((error) => {
       console.error('Error loading volumes:', error);
+      if (!isMounted) return;
       // Still set loaded to true to prevent infinite loading state
       setIsLoaded(true);
     });
 
     return () => {
+      isMounted = false;
       // Cleanup Niivue instance
       if (nvRef.current) {
         try {
-          // Clear volumes and detach canvas
+          // Properly clean up Niivue event handlers to prevent ghost instances
+          if (typeof (nvRef.current as any).cleanup === 'function') {
+            (nvRef.current as any).cleanup();
+          }
+          // Clear volumes
           if (nvRef.current.volumes) {
             nvRef.current.volumes = [];
           }

@@ -170,3 +170,13 @@ td,
   display: none !important;
   /* Often cleaner to just hide arrow in glassmorphism designs */
 }
+/* Inference Page Segmented Control Blue Border */
+.mode-segmented .ant-segmented-thumb {
+  border: 1px solid var(--brand-primary) !important;
+  box-shadow: 0 4px 12px rgba(0, 106, 254, 0.15) !important;
+}
+
+.mode-segmented .ant-segmented-item-selected {
+  color: var(--brand-primary) !important;
+  font-weight: 500;
+}
