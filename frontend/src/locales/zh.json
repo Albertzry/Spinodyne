@@ -59,8 +59,8 @@
             "title": "对比分析",
             "fetchError": "加载对比数据失败",
             "error": "数据未找到",
-            "previous": "前次",
-            "current": "本次",
+            "previous": "首诊",
+            "current": "复诊",
             "metric": "指标",
             "change": "变化"
         },

@@ -59,8 +59,8 @@
             "title": "Comparison Analysis",
             "fetchError": "Failed to load comparison data",
             "error": "Data not found",
-            "previous": "Previous",
-            "current": "Current",
+            "previous": "Initial",
+            "current": "Follow-up",
             "metric": "Metric",
             "change": "Change"
         },

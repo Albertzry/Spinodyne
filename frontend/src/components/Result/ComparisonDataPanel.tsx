@@ -65,14 +65,14 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
             render: (text: string) => <Text strong>{text}</Text>
         },
         {
-            title: t('comparison.previous', 'Previous'),
+            title: t('comparison.previous', 'Initial'),
             dataIndex: 'oldVal',
             key: 'oldVal',
             align: 'center' as const,
             render: (val: number, record: any) => <Text>{val?.toFixed(2) ?? '-'} <Text type="secondary" style={{ fontSize: 10 }}>{record.unit}</Text></Text>
         },
         {
-            title: t('comparison.current', 'Current'),
+            title: t('comparison.current', 'Follow-up'),
             dataIndex: 'newVal',
             key: 'newVal',
             align: 'center' as const,
@@ -91,12 +91,19 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
         const gNew = newData.global_metrics || {} as GlobalMetric;
 
         return [
-            { key: 'pd', label: t('dataPanel.pd', 'Herniation Depth'), oldVal: gOld.pd, newVal: gNew.pd, unit: 'mm', inverse: false },
-            { key: 'pa', label: t('dataPanel.pa', 'Herniation Area'), oldVal: gOld.pa, newVal: gNew.pa, unit: 'mm²', inverse: false },
-            { key: 'par', label: t('dataPanel.par', 'PAR'), oldVal: gOld.par, newVal: gNew.par, unit: '', inverse: false },
             { key: 'll', label: t('dataPanel.ll', 'Lumbar Lordosis'), oldVal: gOld.ll, newVal: gNew.ll, unit: '°', inverse: true },
             { key: 'ss', label: t('dataPanel.ss', 'Sacral Slope'), oldVal: gOld.ss, newVal: gNew.ss, unit: '°', inverse: true },
             { key: 'lsa', label: t('dataPanel.lsa', 'LSA'), oldVal: gOld.lsa, newVal: gNew.lsa, unit: '°', inverse: true },
+        ];
+    };
+
+    const getHerniationDataSource = () => {
+        const gOld = oldData.global_metrics || {} as GlobalMetric;
+        const gNew = newData.global_metrics || {} as GlobalMetric;
+        return [
+            { key: 'pd', label: t('dataPanel.pdFull', 'Protrusion Distance'), oldVal: gOld.pd, newVal: gNew.pd, unit: 'mm', inverse: false },
+            { key: 'pa', label: t('dataPanel.paFull', 'Protrusion Area'), oldVal: gOld.pa, newVal: gNew.pa, unit: 'mm²', inverse: false },
+            { key: 'par', label: t('dataPanel.parFull', 'Protrusion Area Ratio'), oldVal: gOld.par, newVal: gNew.par, unit: '', inverse: false },
         ];
     };
 
@@ -158,8 +165,8 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
                                     dataSource={dataSource}
                                     columns={[
                                         { title: t('comparison.metric', 'Metric'), dataIndex: 'label', key: 'label' },
-                                        { title: t('comparison.previous', 'Previous'), dataIndex: 'oldVal', align: 'center', render: (v: number, r: any) => v !== undefined && v !== null ? (<span><Text>{v.toFixed(2)}</Text> <Text type="secondary" style={{ fontSize: 10 }}>{r.unit}</Text></span>) : '-' },
-                                        { title: t('comparison.current', 'Current'), dataIndex: 'newVal', align: 'center', render: (v: number, r: any) => v !== undefined && v !== null ? (<span><Text>{v.toFixed(2)}</Text> <Text type="secondary" style={{ fontSize: 10 }}>{r.unit}</Text></span>) : '-' },
+                                        { title: t('comparison.previous', 'Initial'), dataIndex: 'oldVal', align: 'center', render: (v: number, r: any) => v !== undefined && v !== null ? (<span><Text>{v.toFixed(2)}</Text> <Text type="secondary" style={{ fontSize: 10 }}>{r.unit}</Text></span>) : '-' },
+                                        { title: t('comparison.current', 'Follow-up'), dataIndex: 'newVal', align: 'center', render: (v: number, r: any) => v !== undefined && v !== null ? (<span><Text>{v.toFixed(2)}</Text> <Text type="secondary" style={{ fontSize: 10 }}>{r.unit}</Text></span>) : '-' },
                                         { title: t('comparison.change', 'Change'), key: 'diff', align: 'center', render: (_: any, r: any) => <MetricDiff oldVal={r.oldVal} newVal={r.newVal} inverseLogic={r.inverse} /> }
                                     ]}
                                     pagination={false}
@@ -244,7 +251,7 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
                 </div>
             </div>
 
-            {/* Filter Bar */}
+            {/* Filter Bar + Herniation Summary (discs tab) */}
             {(activeTab === 'vertebrae' || activeTab === 'discs') && (
                 <div style={{
                     position: 'absolute',
@@ -252,7 +259,7 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
                     left: 0,
                     right: 0,
                     zIndex: 10,
-                    padding: '6px 16px 14px 16px',
+                    padding: activeTab === 'discs' ? '6px 16px 6px 16px' : '6px 16px 14px 16px',
                 }}>
                     <div style={{
                         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
@@ -263,6 +270,58 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
                         pointerEvents: 'none',
                         zIndex: -1
                     }} />
+
+                    {/* Herniation summary — only in discs tab */}
+                    {activeTab === 'discs' && (
+                        <div style={{ marginBottom: 8 }}>
+                            <Row gutter={8}>
+                                {getHerniationDataSource().map(item => {
+                                    const hasData = item.oldVal !== undefined && item.oldVal !== null
+                                        && item.newVal !== undefined && item.newVal !== null;
+                                    return (
+                                        <Col key={item.key} span={8}>
+                                            <div style={{
+                                                background: isDarkMode ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255,255,255,0.8)',
+                                                border: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,106,254,0.1)',
+                                                borderRadius: 10,
+                                                padding: '8px 12px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: 4,
+                                            }}>
+                                                {/* Label */}
+                                                <Text style={{ fontSize: 11, color: isDarkMode ? '#94A3B8' : '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                                    {item.label}
+                                                </Text>
+                                                {/* Values row */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
+                                                    <div style={{ textAlign: 'center', flex: 1 }}>
+                                                        <div style={{ fontSize: 10, color: isDarkMode ? '#64748B' : '#94A3B8', marginBottom: 1 }}>{t('comparison.previous', 'Init')}</div>
+                                                        <Text style={{ fontSize: 13, fontWeight: 600, color: isDarkMode ? '#CBD5E1' : '#475569' }}>
+                                                            {hasData ? (item.oldVal as number).toFixed(2) : '-'}
+                                                            {hasData && item.unit && <Text type="secondary" style={{ fontSize: 10, marginLeft: 1 }}>{item.unit}</Text>}
+                                                        </Text>
+                                                    </div>
+                                                    <div style={{ color: isDarkMode ? '#475569' : '#CBD5E1' }}>→</div>
+                                                    <div style={{ textAlign: 'center', flex: 1 }}>
+                                                        <div style={{ fontSize: 10, color: isDarkMode ? '#64748B' : '#94A3B8', marginBottom: 1 }}>{t('comparison.current', 'F/U')}</div>
+                                                        <Text style={{ fontSize: 13, fontWeight: 600, color: isDarkMode ? '#F1F5F9' : '#1E293B' }}>
+                                                            {hasData ? (item.newVal as number).toFixed(2) : '-'}
+                                                            {hasData && item.unit && <Text type="secondary" style={{ fontSize: 10, marginLeft: 1 }}>{item.unit}</Text>}
+                                                        </Text>
+                                                    </div>
+                                                    <div style={{ borderLeft: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`, paddingLeft: 8, textAlign: 'center', flex: 1 }}>
+                                                        <div style={{ fontSize: 10, color: isDarkMode ? '#64748B' : '#94A3B8', marginBottom: 1 }}>{t('comparison.change', 'Δ')}</div>
+                                                        <MetricDiff oldVal={item.oldVal} newVal={item.newVal} inverseLogic={item.inverse} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    );
+                                })}
+                            </Row>
+                        </div>
+                    )}
 
                     <div style={{
                         background: isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.5)',
@@ -303,7 +362,7 @@ const ComparisonDataPanel: React.FC<ComparisonDataPanelProps> = ({ oldData, newD
             <div style={{
                 flex: 1,
                 padding: 16,
-                paddingTop: (activeTab === 'vertebrae' || activeTab === 'discs') ? 60 : 16,
+                paddingTop: activeTab === 'discs' ? 148 : (activeTab === 'vertebrae' ? 60 : 16),
                 position: 'relative'
             }}>
                 <div key={activeTab} className="tab-content-enter">

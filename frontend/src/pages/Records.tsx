@@ -44,11 +44,22 @@ const Records: React.FC = () => {
       return;
     }
     const [id1, id2] = selectedRowKeys;
-    // Sort by date ideally, but let's just pass them. Dashboard can sort or user can swap.
-    // Actually, usually we want old -> new. 
-    // Let's find the objects to check dates? 
-    // For now, just navigate, clean and simple.
-    navigate(`/compare/${id1}/${id2}`);
+    const task1 = data.find(t => t.id === id1);
+    const task2 = data.find(t => t.id === id2);
+
+    if (task1 && task2) {
+      const time1 = task1.study_date ? dayjs(task1.study_date).valueOf() : dayjs(task1.created_at).valueOf();
+      const time2 = task2.study_date ? dayjs(task2.study_date).valueOf() : dayjs(task2.created_at).valueOf();
+      
+      // Navigate with older record first (Initial), newer second (Follow-up)
+      if (time1 > time2) {
+        navigate(`/compare/${id2}/${id1}`);
+      } else {
+        navigate(`/compare/${id1}/${id2}`);
+      }
+    } else {
+      navigate(`/compare/${id1}/${id2}`);
+    }
   };
 
   const rowSelection = {
