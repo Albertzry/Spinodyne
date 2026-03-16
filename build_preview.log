@@ -1,6 +1,0 @@
-#0 building with "default" instance using docker driver
-
-#1 [internal] load build definition from Dockerfile
-#1 transferring dockerfile: 5.69kB done
-#1 DONE 0.1s
-ERROR: failed to solve: failed to read dockerfile: failed to mount /var/lib/docker/tmp/buildkit-mount1292138377: [{Type:bind Source:/var/lib/docker/vfs/dir/m3v8d1maebqsliphh88qlqjjt Target: Options:[rbind ro]}]: permission denied
