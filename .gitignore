@@ -21,6 +21,9 @@ dist/
 # Data
 backend/data/
 
+# Model weights (release separately)
+model/weights/
+
 # Docker build staging (created by prepare_docker_build.sh)
 tss_env/
 model_weights/

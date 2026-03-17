@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import uuid
+from pathlib import Path
 from celery.utils.log import get_task_logger
 from .celery_app import celery_app
 from ..core import storage
@@ -11,6 +12,10 @@ from ..db.session import Session, engine
 logger = get_task_logger(__name__)
 
 from ..services.ingestion import process_and_ingest_results
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_MODEL_DIR = _PROJECT_ROOT / "model"
+_WEIGHTS_DIR = _MODEL_DIR / "weights"
 
 def _run_conda_command(cmd: list, task_id: str, step_name: str, env: dict):
     logger.info(f"[{task_id}] RUN {step_name}: {' '.join(cmd)}")
@@ -25,18 +30,18 @@ def run_inference_pipeline(task_id: str, task_temp_dir: str):
     Execute the two-stage AI inference pipeline inside the tss conda environment.
     """
     env = os.environ.copy()
-    env["TOTALSPINESEG_DATA"] = "/opt/data/private/data_sum"
+    env["TOTALSPINESEG_DATA"] = str(_WEIGHTS_DIR)
 
     cmd_infer = [
         "conda", "run", "-n", "tss", "python",
-        "/root/TotalSpineSeg-v2/scripts/infer_ldh.py",
+        str(_MODEL_DIR / "scripts" / "infer_ldh.py"),
         task_temp_dir,
     ]
     _run_conda_command(cmd_infer, task_id, "infer_ldh", env)
 
     cmd_calc = [
         "conda", "run", "-n", "tss", "python",
-        "/root/TotalSpineSeg-v2/calculate.py",
+        str(_MODEL_DIR / "calculate.py"),
         task_temp_dir,
     ]
     _run_conda_command(cmd_calc, task_id, "calculate", env)
@@ -47,7 +52,7 @@ def run_inference(self, task_id: str):
     Main inference task for AI processing.
     """
     # Create a dedicated temp directory for this task
-    base_temp_dir = "/root/Spinodyne/backend/data/uploads"
+    base_temp_dir = str(_PROJECT_ROOT / "backend" / "data" / "uploads")
     task_temp_dir = os.path.join(base_temp_dir, str(task_id))
     os.makedirs(task_temp_dir, exist_ok=True)
     

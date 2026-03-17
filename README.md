@@ -142,7 +142,7 @@ python init_db.py
 
 ```bash
 cd backend
-uvicorn app.main:app --host 0.0.0.0 --port 25580 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 25025 --reload
 ```
 
 ### 7.4 Start Celery Worker
