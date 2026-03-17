@@ -102,7 +102,11 @@ Large weight files are **not tracked by git**. They are expected under `model/we
 
 ### 6.1 Download + extract into this repo
 
-After downloading `nnUNet.tar.gz` from the GitHub Release:
+Download `nnUNet.tar.gz` from the weights release:
+
+- [Albertzry/Spinodyne `weights` release](https://github.com/Albertzry/Spinodyne/releases/tag/weights)
+
+Then extract it into this repo:
 
 ```bash
 # from repo root
