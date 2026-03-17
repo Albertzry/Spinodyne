@@ -20,6 +20,8 @@ dist/
 
 # Data
 backend/data/
+backend/logs/
+backend/run/
 
 # Model weights (release separately)
 model/weights/
