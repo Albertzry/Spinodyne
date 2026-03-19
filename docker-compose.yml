@@ -1,3 +1,5 @@
+name: spinodyne
+
 services:
   postgres:
     image: spinodyne-postgres:v0.1.0-beta.1
@@ -45,6 +47,11 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -66,12 +73,17 @@ services:
       redis:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./config.json:/app/config.json:ro
     ports:
       - "25025:25025"
     command: ["api"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:25025/docs"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
 
   celery_worker:
     image: spinodyne-backend:v0.1.0-beta.1
@@ -90,9 +102,9 @@ services:
       redis:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
       backend:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./config.json:/app/config.json:ro
     command: ["worker"]
@@ -107,7 +119,7 @@ services:
     restart: unless-stopped
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "25595:80"
 

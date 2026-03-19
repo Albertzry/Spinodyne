@@ -1,4 +1,5 @@
 import json
+import mimetypes
 import os
 import uuid
 from glob import glob
@@ -15,6 +16,13 @@ def _find_first_nii(directory: str) -> Optional[str]:
         return None
     matches = sorted(glob(os.path.join(directory, "*.nii.gz")))
     return matches[0] if matches else None
+
+
+def _content_type_for_path(path: Path) -> str:
+    if str(path).endswith(".nii.gz"):
+        return "application/gzip"
+    media_type, _ = mimetypes.guess_type(str(path))
+    return media_type or "application/octet-stream"
 
 def process_and_ingest_results(task_id: str, local_task_dir: str):
     """
@@ -144,7 +152,7 @@ def ingest_task_results(task_id: str, result_dir: Path):
             if raw_local.exists():
                 raw_key = f"tasks/{task_id}/3d/raw.nii.gz"
                 with open(raw_local, "rb") as f:
-                    storage.upload_file(f, raw_key)
+                    storage.upload_file(f, raw_key, content_type=_content_type_for_path(raw_local))
                 task.raw_scan_key = raw_key
 
             struct_mask_dir = result_dir / "infer_output" / "step2_output"
@@ -152,14 +160,14 @@ def ingest_task_results(task_id: str, result_dir: Path):
             if struct_mask_local:
                 struct_key = f"tasks/{task_id}/3d/structure.nii.gz"
                 with open(struct_mask_local, "rb") as f:
-                    storage.upload_file(f, struct_key)
+                    storage.upload_file(f, struct_key, content_type=_content_type_for_path(Path(struct_mask_local)))
 
             ldh_mask_dir = result_dir / "infer_output" / "ldh_output"
             ldh_mask_local = _find_first_nii(str(ldh_mask_dir))
             if ldh_mask_local:
                 ldh_key = f"tasks/{task_id}/3d/ldh.nii.gz"
                 with open(ldh_mask_local, "rb") as f:
-                    storage.upload_file(f, ldh_key)
+                    storage.upload_file(f, ldh_key, content_type=_content_type_for_path(Path(ldh_mask_local)))
 
             # 3. Upload Preview Images (Thumbnails)
             preview_dir = result_dir / "result" / "previews"
@@ -172,7 +180,7 @@ def ingest_task_results(task_id: str, result_dir: Path):
                         minio_key = f"tasks/{task_id}/previews/{relative_path}"
 
                         with open(local_path, "rb") as f:
-                            storage.upload_file(f, minio_key)
+                            storage.upload_file(f, minio_key, content_type=_content_type_for_path(local_path))
                         result_files_keys.append(minio_key)
 
             # Update Task metadata
