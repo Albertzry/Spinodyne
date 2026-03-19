@@ -10,8 +10,8 @@ i18n
             en,
             zh
         },
-        lng: 'en', // default language
-        fallbackLng: 'en',
+        lng: 'zh', // default language
+        fallbackLng: 'zh',
         interpolation: {
             escapeValue: false // react already safes from xss
         }

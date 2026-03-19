@@ -137,7 +137,20 @@ and then run inference in the `tss` conda environment.
 
 ## 7. Prerequisites
 
-Make sure your environment has the following:
+### 7.1 Dockerized Deployment (Recommended)
+
+- Docker Desktop / Docker Engine
+- Docker Compose v2
+- Model weights extracted to `model/weights/` (see Section 6)
+
+For GPU servers (for example RTX 4090), additionally install:
+
+- NVIDIA Driver
+- `nvidia-container-toolkit`
+
+### 7.2 Native Deployment (Legacy)
+
+Make sure your environment has the following (only if you do not use Docker):
 
 - Python 3.x (backend)
 - Node.js + npm (frontend)
@@ -167,7 +180,49 @@ Backend overrides can be set in `backend/.env` (see `backend/.env.example`).
 
 ---
 
-## 9. Deployment Notes (Shared Server / Multi-Host)
+## 9. Docker Deployment (Primary)
+
+### 9.1 Start Full Stack with Docker Compose
+
+```bash
+docker compose -p spinodyne up -d --build
+```
+
+After startup:
+
+- Frontend: `http://localhost:25595`
+- Backend API docs: `http://localhost:25025/docs`
+- MinIO Console: `http://localhost:9001`
+
+### 9.2 Concurrency Tuning (Inference Throughput)
+
+`docker-compose.yml` now defaults to:
+
+- `TSS_MAX_WORKERS=4`
+- `TSS_MAX_WORKERS_NNUNET=2`
+
+These defaults are better suited for x86 servers with stronger CPU/GPU.  
+On Mac (especially Apple Silicon + Docker virtualization), lower values are often more stable.
+
+Override at runtime as needed:
+
+```bash
+TSS_MAX_WORKERS=6 TSS_MAX_WORKERS_NNUNET=3 docker compose -p spinodyne up -d
+```
+
+### 9.3 GPU Server Launch (RTX 4090 Class)
+
+Use a host with NVIDIA runtime enabled, then start with the same compose command.  
+This project image is built on CUDA runtime, and inference will use GPU when the host runtime is available.
+
+### 9.4 Notes
+
+- Frontend default language is Chinese (`zh`), and users can switch language in the UI.
+- `celery_worker` startup now clears stale `/app/backend/data/uploads/*` leftovers to reduce disk growth after abnormal exits.
+
+---
+
+## 10. Native Deployment Notes (Shared Server / Multi-Host)
 
 This repository includes `start_services.sh` mainly for a **shared / containerized server** workflow where you may need to **restart infrastructure services on each deployment**.
 
@@ -212,9 +267,9 @@ Use `bash start_services.sh` only when **you are responsible for starting** thes
 
 ---
 
-## 9. Local Startup (Recommended Order)
+## 11. Native Local Startup (Recommended Order)
 
-### 9.1 Start Infrastructure Services
+### 11.1 Start Infrastructure Services
 
 ```bash
 # Enter repository root (auto-resolve inside a Git repository)
@@ -228,14 +283,14 @@ This script reads Redis/MinIO ports from `config.json` and starts:
 - Redis
 - MinIO (default script log path is `/var/log/minio.log`; adjust for your deployment permissions if needed)
 
-### 9.2 Initialize Database
+### 11.2 Initialize Database
 
 ```bash
 cd backend
 python init_db.py
 ```
 
-### 9.3 Start Backend API + Celery Worker (Production-like)
+### 11.3 Start Backend API + Celery Worker (Production-like)
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
@@ -252,7 +307,7 @@ PID files are written to:
 - `backend/run/uvicorn.pid`
 - `backend/run/celery.pid`
 
-### 9.4 Start Celery Worker
+### 11.4 Start Celery Worker
 
 Celery worker is already started by `start_backend.sh start`.
 
@@ -264,7 +319,7 @@ bash start_backend.sh restart
 bash start_backend.sh stop
 ```
 
-### 9.5 Start Frontend
+### 11.5 Start Frontend
 
 ```bash
 cd frontend
@@ -274,7 +329,7 @@ npm run dev
 
 ---
 
-## 10. Main API (`/api/tasks`)
+## 12. Main API (`/api/tasks`)
 
 The backend mounts `tasks_router` in `app/main.py` with prefix `/api`.
 
@@ -312,7 +367,7 @@ The backend mounts `tasks_router` in `app/main.py` with prefix `/api`.
 
 ---
 
-## 11. Data Models (Key Fields)
+## 13. Data Models (Key Fields)
 
 - **Patient**: `external_id`, `name`
 - **Task**: `status`, `study_date`, `raw_scan_key`, `result_files`, `error_message`
@@ -322,7 +377,7 @@ The backend mounts `tasks_router` in `app/main.py` with prefix `/api`.
 
 ---
 
-## 12. Frontend Pages
+## 14. Frontend Pages
 
 - `/inference`: upload and task processing entry
 - `/records`: patient/task record list
@@ -331,7 +386,7 @@ The backend mounts `tasks_router` in `app/main.py` with prefix `/api`.
 
 ---
 
-## 13. Development and Validation
+## 15. Development and Validation
 
 Available commands in this repository:
 
@@ -343,7 +398,7 @@ For automated test and static-check entry points, refer to the current `package.
 
 ---
 
-## 14. Troubleshooting
+## 16. Troubleshooting
 
 1. **Task does not progress after upload**
    - Check whether Celery worker is running
@@ -364,6 +419,6 @@ For automated test and static-check entry points, refer to the current `package.
 
 ---
 
-## 15. License
+## 17. License
 
 This repository includes a `LICENSE` file (CC BY-NC 4.0).

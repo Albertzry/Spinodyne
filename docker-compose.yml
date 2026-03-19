@@ -64,8 +64,8 @@ services:
     environment:
       CONFIG_FILE: /app/config.json
       TOTALSPINESEG_DATA: /app/model/weights
-      TSS_MAX_WORKERS: "2"
-      TSS_MAX_WORKERS_NNUNET: "1"
+      TSS_MAX_WORKERS: "${TSS_MAX_WORKERS:-4}"
+      TSS_MAX_WORKERS_NNUNET: "${TSS_MAX_WORKERS_NNUNET:-2}"
     shm_size: "8gb"
     depends_on:
       postgres:
@@ -93,8 +93,8 @@ services:
     environment:
       CONFIG_FILE: /app/config.json
       TOTALSPINESEG_DATA: /app/model/weights
-      TSS_MAX_WORKERS: "2"
-      TSS_MAX_WORKERS_NNUNET: "1"
+      TSS_MAX_WORKERS: "${TSS_MAX_WORKERS:-4}"
+      TSS_MAX_WORKERS_NNUNET: "${TSS_MAX_WORKERS_NNUNET:-2}"
       RUN_DB_INIT: "0"
     shm_size: "8gb"
     depends_on:

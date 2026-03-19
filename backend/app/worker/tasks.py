@@ -18,8 +18,8 @@ _MODEL_DIR = _PROJECT_ROOT / "model"
 _WEIGHTS_DIR = _MODEL_DIR / "weights"
 _TSS_PYTHON = "/opt/conda/envs/tss/bin/python"
 _STEP_TIMEOUT_SECONDS = 60 * 60  # 1 hour
-_TSS_MAX_WORKERS = int(os.getenv("TSS_MAX_WORKERS", "2"))
-_TSS_MAX_WORKERS_NNUNET = int(os.getenv("TSS_MAX_WORKERS_NNUNET", "1"))
+_TSS_MAX_WORKERS = int(os.getenv("TSS_MAX_WORKERS", "4"))
+_TSS_MAX_WORKERS_NNUNET = int(os.getenv("TSS_MAX_WORKERS_NNUNET", "2"))
 
 def _run_conda_command(cmd: list, task_id: str, step_name: str, env: dict):
     logger.info(f"[{task_id}] RUN {step_name}: {' '.join(cmd)}")
