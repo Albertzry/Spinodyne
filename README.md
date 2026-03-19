@@ -2,6 +2,9 @@
 
 Spinodyne is a full-stack platform for **intelligent spinal imaging analysis**. After uploading a `.nii.gz` scan, the system runs an asynchronous AI pipeline for segmentation and quantitative analysis, then presents 3D images plus vertebral/disc/global metrics in the frontend, with support for patient records and result comparison.
 
+> Dockerized deployment and production-oriented container tuning are maintained in the `docker` branch.  
+> If you plan to deploy with Docker Compose (PostgreSQL + Redis + MinIO + backend + worker + frontend), please use `docker` branch docs and compose files first.
+
 ---
 
 ## 1. Project Purpose and Positioning
