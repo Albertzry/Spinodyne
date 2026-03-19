@@ -1,14 +1,12 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { existsSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const configPath = path.resolve(__dirname, '../config.json')
-const projectConfig = existsSync(configPath)
-  ? JSON.parse(readFileSync(configPath, 'utf-8'))
-  : {}
+const projectConfig = JSON.parse(readFileSync(configPath, 'utf-8'))
 
 const backendPort = projectConfig.backend?.port ?? 25306
 const frontendPort = projectConfig.frontend?.port ?? 25916

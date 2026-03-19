@@ -1,5 +1,4 @@
 import glob
-import mimetypes
 import os
 import shutil
 import subprocess
@@ -9,9 +8,7 @@ from datetime import date
 from typing import Optional, List
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import StreamingResponse
-from starlette.background import BackgroundTask
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session, select, delete
 
 from ..core import storage
@@ -25,13 +22,6 @@ from .schemas import TaskResultResponse, VertebraResultResponse, DiscResultRespo
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
-
-
-def _guess_media_type(key: str) -> str:
-    if key.endswith(".nii.gz") or key.endswith(".nii"):
-        return "application/octet-stream"
-    media, _ = mimetypes.guess_type(key)
-    return media or "application/octet-stream"
 
 
 @router.get("")
@@ -67,7 +57,7 @@ def get_task(task_id: uuid.UUID, session: Session = Depends(get_session)):
 
 
 @router.get("/{task_id}/result", response_model=TaskResultResponse)
-def get_task_result(task_id: uuid.UUID, request: Request, session: Session = Depends(get_session)):
+def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session)):
     task = session.get(Task, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -182,24 +172,6 @@ def get_task_result(task_id: uuid.UUID, request: Request, session: Session = Dep
         discs=discs,
         global_metrics=global_res,
         all_previews=all_previews
-    )
-
-
-@router.get("/{task_id}/file", name="get_task_file")
-def get_task_file(task_id: uuid.UUID, key: str, session: Session = Depends(get_session)):
-    task = session.get(Task, task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    # only allow access to files scoped to this task
-    if not key.startswith(f"tasks/{task_id}/"):
-        raise HTTPException(status_code=403, detail="Forbidden file path")
-
-    obj = storage.get_object_stream(key)
-    return StreamingResponse(
-        obj,
-        media_type=_guess_media_type(key),
-        background=BackgroundTask(obj.close),
     )
 
 

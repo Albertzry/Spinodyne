@@ -67,7 +67,6 @@ class Settings(BaseSettings):
     POSTGRES_URL: str = _postgres_url()
     REDIS_URL: str = _redis_url()
     MINIO_ENDPOINT: str = _config.get("minio", {}).get("endpoint", "localhost:25957")
-    MINIO_PUBLIC_ENDPOINT: str = _config.get("minio", {}).get("public_endpoint", "")
     MINIO_PROXY_PREFIX: str = _config.get("minio", {}).get("proxy_prefix", "/minio")
     MINIO_PUBLIC_READ: bool = _config.get("minio", {}).get("public_read", True)
     MINIO_ACCESS_KEY: str = _config.get("minio", {}).get("access_key", "minioadmin")
