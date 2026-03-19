@@ -59,13 +59,17 @@ services:
       dockerfile: backend/Dockerfile
     image: spinodyne-backend:v0.1.0-beta.1
     platform: linux/amd64
+    gpus: all
     container_name: spinodyne_backend
     restart: unless-stopped
     environment:
       CONFIG_FILE: /app/config.json
       TOTALSPINESEG_DATA: /app/model/weights
-      TSS_MAX_WORKERS: "${TSS_MAX_WORKERS:-4}"
+      TSS_MAX_WORKERS: "${TSS_MAX_WORKERS:-12}"
       TSS_MAX_WORKERS_NNUNET: "${TSS_MAX_WORKERS_NNUNET:-2}"
+      TOTALSPINESEG_DEVICE: "cuda"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
     shm_size: "8gb"
     depends_on:
       postgres:
@@ -88,13 +92,17 @@ services:
   celery_worker:
     image: spinodyne-backend:v0.1.0-beta.1
     platform: linux/amd64
+    gpus: all
     container_name: spinodyne_celery_worker
     restart: unless-stopped
     environment:
       CONFIG_FILE: /app/config.json
       TOTALSPINESEG_DATA: /app/model/weights
-      TSS_MAX_WORKERS: "${TSS_MAX_WORKERS:-4}"
+      TSS_MAX_WORKERS: "${TSS_MAX_WORKERS:-12}"
       TSS_MAX_WORKERS_NNUNET: "${TSS_MAX_WORKERS_NNUNET:-2}"
+      TOTALSPINESEG_DEVICE: "cuda"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       RUN_DB_INIT: "0"
     shm_size: "8gb"
     depends_on:

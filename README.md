@@ -198,7 +198,7 @@ After startup:
 
 `docker-compose.yml` now defaults to:
 
-- `TSS_MAX_WORKERS=4`
+- `TSS_MAX_WORKERS=12`
 - `TSS_MAX_WORKERS_NNUNET=2`
 
 These defaults are better suited for x86 servers with stronger CPU/GPU.  
@@ -213,7 +213,8 @@ TSS_MAX_WORKERS=6 TSS_MAX_WORKERS_NNUNET=3 docker compose -p spinodyne up -d
 ### 9.3 GPU Server Launch (RTX 4090 Class)
 
 Use a host with NVIDIA runtime enabled, then start with the same compose command.  
-This project image is built on CUDA runtime, and inference will use GPU when the host runtime is available.
+This project image is built on CUDA runtime, and inference will use GPU when the host runtime is available.  
+In `docker_gpu` branch, `docker-compose.yml` already includes `gpus: all` and `TOTALSPINESEG_DEVICE=cuda` for `backend` and `celery_worker`.
 
 ### 9.4 Notes
 
