@@ -16,13 +16,26 @@ from ..services.ingestion import process_and_ingest_results
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _MODEL_DIR = _PROJECT_ROOT / "model"
 _WEIGHTS_DIR = _MODEL_DIR / "weights"
+_TSS_PYTHON = "/opt/conda/envs/tss/bin/python"
+_STEP_TIMEOUT_SECONDS = 60 * 60  # 1 hour
+_TSS_MAX_WORKERS = int(os.getenv("TSS_MAX_WORKERS", "2"))
+_TSS_MAX_WORKERS_NNUNET = int(os.getenv("TSS_MAX_WORKERS_NNUNET", "1"))
 
 def _run_conda_command(cmd: list, task_id: str, step_name: str, env: dict):
     logger.info(f"[{task_id}] RUN {step_name}: {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    try:
+        result = subprocess.run(
+            cmd,
+            env=env,
+            timeout=_STEP_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as e:
+        logger.error(f"[{task_id}] {step_name} TIMEOUT after {_STEP_TIMEOUT_SECONDS}s")
+        raise RuntimeError(f"{step_name} timeout")
+
     if result.returncode != 0:
         logger.error(f"[{task_id}] {step_name} FAILED (code {result.returncode})")
-        raise RuntimeError(f"{step_name} failed")
+        raise RuntimeError(f"{step_name} failed (code {result.returncode})")
     logger.info(f"[{task_id}] {step_name} SUCCESS")
 
 def run_inference_pipeline(task_id: str, task_temp_dir: str):
@@ -33,17 +46,17 @@ def run_inference_pipeline(task_id: str, task_temp_dir: str):
     env["TOTALSPINESEG_DATA"] = str(_WEIGHTS_DIR)
 
     cmd_infer = [
-        "conda", "run", "-n", "tss", "python",
+        _TSS_PYTHON,
         str(_MODEL_DIR / "scripts" / "infer_ldh.py"),
         task_temp_dir,
+        "--max-workers",
+        str(_TSS_MAX_WORKERS),
+        "--max-workers-nnunet",
+        str(_TSS_MAX_WORKERS_NNUNET),
     ]
     _run_conda_command(cmd_infer, task_id, "infer_ldh", env)
 
-    cmd_calc = [
-        "conda", "run", "-n", "tss", "python",
-        str(_MODEL_DIR / "calculate.py"),
-        task_temp_dir,
-    ]
+    cmd_calc = [_TSS_PYTHON, str(_MODEL_DIR / "calculate.py"), task_temp_dir]
     _run_conda_command(cmd_calc, task_id, "calculate", env)
 
 @celery_app.task(name="app.worker.tasks.run_inference", bind=True)

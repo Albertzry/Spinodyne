@@ -5,6 +5,7 @@ from glob import glob
 from typing import Optional
 from pathlib import Path
 from sqlmodel import Session
+from sqlalchemy import delete
 from ..db.session import engine
 from ..models.task import Task, VertebraResult, DiscResult, GlobalMetric
 from ..core import storage
@@ -46,30 +47,48 @@ def ingest_task_results(task_id: str, result_dir: Path):
             with open(report_path, "r") as f:
                 report_data = json.load(f)
 
-            # Ingest Global Metrics
-            gm = report_data.get("global_metrics", {})
-            if gm and gm.get("status") == "ok":
-                
-                ll = gm.get("ll_deg")
-                ss = gm.get("ss_deg")
-                lsa = gm.get("lsa_deg")
-                
-                # Extract herniation severity metrics
-                pd = gm.get("pd_mm")
-                pa = gm.get("pa_mm2")
-                par = gm.get("par")
-                plr = gm.get("plr")
-                
-                # Create new GlobalMetric with proper None handling
+            def _to_float(value):
+                try:
+                    if value is None:
+                        return None
+                    return float(value)
+                except (TypeError, ValueError):
+                    return None
+
+            # Ingest Global Metrics.
+            # Do not hard-require gm.status == "ok": calculate.py may emit "partial" while still providing valid values.
+            gm = report_data.get("global_metrics", {}) or {}
+            angles = report_data.get("angles", {}) or {}
+
+            ll = _to_float(gm.get("ll_deg"))
+            ss = _to_float(gm.get("ss_deg"))
+            lsa = _to_float(gm.get("lsa_deg"))
+            pd = _to_float(gm.get("pd_mm"))
+            pa = _to_float(gm.get("pa_mm2"))
+            par = _to_float(gm.get("par"))
+            plr = _to_float(gm.get("plr"))
+
+            # Fallback from angles block if global_metrics fields are absent.
+            if ll is None:
+                ll = _to_float(angles.get("lumbar_lordosis_LL_deg"))
+            if ss is None:
+                ss = _to_float(angles.get("sacral_slope_SS_deg"))
+            if lsa is None:
+                lsa = _to_float(angles.get("lumbosacral_angle_LSA_deg"))
+
+            has_any_global_value = any(v is not None for v in (ll, ss, lsa, pd, pa, par, plr))
+            if has_any_global_value:
+                # Keep only one row per task to avoid stale/duplicate readings on reruns.
+                session.exec(delete(GlobalMetric).where(GlobalMetric.task_id == task_uuid))
                 g_metric = GlobalMetric(
                     task_id=task_uuid,
                     ll=ll if ll is not None else 0.0,
                     ss=ss if ss is not None else 0.0,
                     lsa=lsa if lsa is not None else 0.0,
-                    pd=pd if pd is not None else 0.0,
-                    pa=pa if pa is not None else 0.0,
-                    par=par if par is not None else 0.0,
-                    plr=plr if plr is not None else 0.0,
+                    pd=pd,
+                    pa=pa,
+                    par=par,
+                    plr=plr,
                 )
                 session.add(g_metric)
 
@@ -97,8 +116,9 @@ def ingest_task_results(task_id: str, result_dir: Path):
                 dm = disc.get("dm", {})
                 dia = disc.get("dia", {})
                 
-                # Check status inside dm as per new schema
-                if dm.get("status") != "ok":
+                dm_ok = isinstance(dm, dict) and dm.get("status") == "ok"
+                dia_ok = isinstance(dia, dict) and dia.get("status") == "ok"
+                if not (dm_ok or dia_ok):
                     continue
                 
                 # Extract detailed scan line heights

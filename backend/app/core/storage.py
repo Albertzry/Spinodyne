@@ -1,7 +1,9 @@
 import io
+import json
 import os
 import tempfile
 from datetime import timedelta
+from urllib.parse import urlparse, urlunparse
 from minio import Minio
 from minio.error import S3Error
 from .config import settings
@@ -22,6 +24,22 @@ def init_storage():
             print(f"Bucket '{settings.MINIO_BUCKET}' created successfully.")
         else:
             print(f"Bucket '{settings.MINIO_BUCKET}' already exists.")
+
+        if settings.MINIO_PUBLIC_READ:
+            # Allow anonymous read-only object access for frontend direct fetch via Nginx proxy.
+            policy = {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {"AWS": ["*"]},
+                        "Action": ["s3:GetObject"],
+                        "Resource": [f"arn:aws:s3:::{settings.MINIO_BUCKET}/*"],
+                    }
+                ],
+            }
+            minio_client.set_bucket_policy(settings.MINIO_BUCKET, json.dumps(policy))
+            print(f"Bucket '{settings.MINIO_BUCKET}' policy set to public read.")
     except S3Error as e:
         print(f"Error initializing storage: {e}")
 
@@ -59,11 +77,23 @@ def upload_file(file_data, object_name: str, content_type: str = "application/oc
 def get_presigned_url(object_name: str, expires: timedelta = timedelta(hours=1)):
     """Generate a presigned URL for GET request."""
     try:
-        return minio_client.presigned_get_object(
+        url = minio_client.presigned_get_object(
             settings.MINIO_BUCKET,
             object_name,
             expires=expires
         )
+        public_endpoint = (settings.MINIO_PUBLIC_ENDPOINT or "").strip()
+        if public_endpoint:
+            parsed = urlparse(url)
+            if "://" in public_endpoint:
+                target = urlparse(public_endpoint)
+                scheme = target.scheme or parsed.scheme
+                netloc = target.netloc or target.path
+            else:
+                scheme = "https" if settings.MINIO_SECURE else "http"
+                netloc = public_endpoint
+            url = urlunparse((scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))
+        return url
     except S3Error as e:
         print(f"Error generating presigned URL: {e}")
         return None
@@ -94,4 +124,13 @@ def download_to_temp(object_name: str, custom_path: str = None) -> str:
         print(f"Error downloading file: {e}")
         if not custom_path and 'temp_path' in locals() and os.path.exists(temp_path):
             os.remove(temp_path)
+        raise e
+
+
+def get_object_stream(object_name: str):
+    """Return a streaming object for direct proxy download."""
+    try:
+        return minio_client.get_object(settings.MINIO_BUCKET, object_name)
+    except S3Error as e:
+        print(f"Error getting object stream: {e}")
         raise e

@@ -1,4 +1,5 @@
 import glob
+import mimetypes
 import os
 import shutil
 import subprocess
@@ -6,11 +7,15 @@ import tempfile
 import uuid
 from datetime import date
 from typing import Optional, List
+from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import StreamingResponse
+from starlette.background import BackgroundTask
 from sqlmodel import Session, select, delete
 
 from ..core import storage
+from ..core.config import settings
 from ..db.session import get_session
 from ..models.patient import Patient
 from ..models.task import DiscResult, GlobalMetric, Task, VertebraResult
@@ -20,6 +25,13 @@ from .schemas import TaskResultResponse, VertebraResultResponse, DiscResultRespo
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
+
+
+def _guess_media_type(key: str) -> str:
+    if key.endswith(".nii.gz") or key.endswith(".nii"):
+        return "application/octet-stream"
+    media, _ = mimetypes.guess_type(key)
+    return media or "application/octet-stream"
 
 
 @router.get("")
@@ -55,7 +67,7 @@ def get_task(task_id: uuid.UUID, session: Session = Depends(get_session)):
 
 
 @router.get("/{task_id}/result", response_model=TaskResultResponse)
-def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session)):
+def get_task_result(task_id: uuid.UUID, request: Request, session: Session = Depends(get_session)):
     task = session.get(Task, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -63,19 +75,26 @@ def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session))
     if task.status != "success":
         raise HTTPException(status_code=400, detail=f"Task is in {task.status} state")
 
-    # Helper to get presigned URL only if file exists in result_files
+    minio_prefix = settings.MINIO_PROXY_PREFIX.rstrip("/")
+
+    def proxy_url(key: str) -> str:
+        # Direct frontend->nginx->minio object path for better throughput and fewer backend bottlenecks.
+        quoted_key = quote(key, safe="/-_.~")
+        return f"{minio_prefix}/{settings.MINIO_BUCKET}/{quoted_key}"
+
+    # Helper to get proxy URL only if file exists in result_files
     def get_url_if_exists(key: str) -> Optional[str]:
         if key in task.result_files:
-            return storage.get_presigned_url(key)
+            return proxy_url(key)
         return None
 
-    # Generate presigned URLs for 3D files
-    raw_url = storage.get_presigned_url(task.raw_scan_key)
+    # Generate proxy URLs for 3D files
+    raw_url = proxy_url(task.raw_scan_key)
     struct_key = f"tasks/{task_id}/3d/structure.nii.gz"
     ldh_key = f"tasks/{task_id}/3d/ldh.nii.gz"
     
-    struct_url = storage.get_presigned_url(struct_key)
-    ldh_url = storage.get_presigned_url(ldh_key)
+    struct_url = proxy_url(struct_key)
+    ldh_url = proxy_url(ldh_key)
 
     # 1. Map Vertebrae
     vertebrae = []
@@ -140,7 +159,7 @@ def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session))
     all_previews = {}
     for key in task.result_files:
         if "previews/" in key:
-            all_previews[os.path.basename(key)] = storage.get_presigned_url(key)
+            all_previews[os.path.basename(key)] = proxy_url(key)
 
     # Construct Task Info
     task_info = TaskInfoResponse(
@@ -163,6 +182,24 @@ def get_task_result(task_id: uuid.UUID, session: Session = Depends(get_session))
         discs=discs,
         global_metrics=global_res,
         all_previews=all_previews
+    )
+
+
+@router.get("/{task_id}/file", name="get_task_file")
+def get_task_file(task_id: uuid.UUID, key: str, session: Session = Depends(get_session)):
+    task = session.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # only allow access to files scoped to this task
+    if not key.startswith(f"tasks/{task_id}/"):
+        raise HTTPException(status_code=403, detail="Forbidden file path")
+
+    obj = storage.get_object_stream(key)
+    return StreamingResponse(
+        obj,
+        media_type=_guess_media_type(key),
+        background=BackgroundTask(obj.close),
     )
 
 

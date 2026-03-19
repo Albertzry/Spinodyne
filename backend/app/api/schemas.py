@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 import uuid
 from datetime import date
 
@@ -9,8 +9,8 @@ class VertebraResultResponse(BaseModel):
     vh_posterior: float
     ap_diameter: float
     status: str
-    preview_url_vh: Optional[HttpUrl] = None
-    preview_url_ap: Optional[HttpUrl] = None
+    preview_url_vh: Optional[str] = None
+    preview_url_ap: Optional[str] = None
 
 class DiscResultResponse(BaseModel):
     level: str
@@ -22,8 +22,8 @@ class DiscResultResponse(BaseModel):
     scan_height_a: Optional[float] = None
     scan_height_m: Optional[float] = None
     scan_height_p: Optional[float] = None
-    preview_url_dm: Optional[HttpUrl] = None
-    preview_url_dia: Optional[HttpUrl] = None
+    preview_url_dm: Optional[str] = None
+    preview_url_dia: Optional[str] = None
 
 class GlobalMetricResponse(BaseModel):
     ll: float
@@ -33,15 +33,15 @@ class GlobalMetricResponse(BaseModel):
     pa: Optional[float] = None
     par: Optional[float] = None
     plr: Optional[float] = None
-    preview_url_ll: Optional[HttpUrl] = None
-    preview_url_ss: Optional[HttpUrl] = None
-    preview_url_lsa: Optional[HttpUrl] = None
-    preview_url_herniation: Optional[HttpUrl] = None
+    preview_url_ll: Optional[str] = None
+    preview_url_ss: Optional[str] = None
+    preview_url_lsa: Optional[str] = None
+    preview_url_herniation: Optional[str] = None
 
 class ThreeDFilesResponse(BaseModel):
-    raw_url: HttpUrl
-    structure_mask_url: HttpUrl
-    ldh_mask_url: HttpUrl
+    raw_url: str
+    structure_mask_url: str
+    ldh_mask_url: str
 
 class TaskInfoResponse(BaseModel):
     id: uuid.UUID

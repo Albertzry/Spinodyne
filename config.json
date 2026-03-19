@@ -9,19 +9,22 @@
     "port": 25595
   },
   "postgres": {
-    "host": "localhost",
+    "host": "postgres",
     "port": 5432,
     "user": "postgres",
     "password": "password123",
     "database": "spinodyne"
   },
   "redis": {
-    "host": "127.0.0.1",
-    "port": 25698,
+    "host": "redis",
+    "port": 6379,
     "db": 0
   },
   "minio": {
-    "endpoint": "localhost:25998",
+    "endpoint": "minio:9000",
+    "public_endpoint": "",
+    "proxy_prefix": "/minio",
+    "public_read": true,
     "access_key": "minioadmin",
     "secret_key": "minioadmin",
     "bucket": "spinodyne",
